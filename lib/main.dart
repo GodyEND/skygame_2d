@@ -14,11 +14,13 @@ import 'package:skygame_2d/game/simulation.dart';
 import 'package:skygame_2d/game/unit.dart';
 import 'package:skygame_2d/graphics/animations.dart';
 import 'package:skygame_2d/graphics/graphics.dart';
+import 'package:skygame_2d/graphics/unit_animations.dart';
 import 'package:skygame_2d/models/enums.dart';
 import 'package:skygame_2d/models/fx.dart';
 import 'package:skygame_2d/models/release.dart';
 import 'package:skygame_2d/models/unit.dart';
 import 'package:skygame_2d/setup.dart';
+import 'package:skygame_2d/utils.dart/constants.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,10 +30,11 @@ void main() {
 class SkyGame2D extends FlameGame with KeyboardEvents {
   late GameManager game;
 
-  double elapsedTime = 0.0;
+  // double elapsedTime = 0.0;
 
   @override
   Future<void> onLoad() async {
+    Constants.setSCREEN_WIDTH(size.x);
     await setup();
   }
 
@@ -147,10 +150,15 @@ class SkyGame2D extends FlameGame with KeyboardEvents {
   MatchUnit? attacker;
   MatchUnit? defender;
 
+  Function() renderCombatAnimation(double dt, CombatEventResult event,
+          MatchUnit unit, bool isAttacker) =>
+      () => AnimationsManager.animateCombat(dt, event, unit,
+          isAttacker: isAttacker);
+
   void _renderCombat(double dt) {
     switch (game.combatState) {
       case CombatState.attack:
-        if (elapsedTime == 0) {
+        if (attacker == null && defender == null) {
           attacker = game.active;
           defender = MatchHelper.getTarget(game, attacker!);
 
@@ -159,6 +167,9 @@ class SkyGame2D extends FlameGame with KeyboardEvents {
             return;
           }
           game.currentEvent = Simulator.combatEventResult(game);
+          game.currentEvent = CombatEventResult.stagger;
+          AnimationsManager.animateEventText(dt, game.currentEvent);
+
           // Simulate Combat
           Simulator.calculateDamage(game, attacker!, defender!);
           Simulator.setCharge(game, attacker!, defender!);
@@ -169,29 +180,27 @@ class SkyGame2D extends FlameGame with KeyboardEvents {
           attacker!.currentStats.values[StatType.hp] = max(0,
               attacker!.currentStats[StatType.hp] - attacker!.incomingDamage);
 
-          // Prepare Assets
-          AnimationsManager.resetEventText(game.currentEvent);
-          AnimationsManager.prepareCombat(attacker!, defender!);
+          // Fire Combat Animation
+          if (attacker!.position != MatchPosition.defeated &&
+              defender!.position != MatchPosition.defeated) {
+            attacker!.asset.animationListener.value =
+                renderCombatAnimation(dt, game.currentEvent, attacker!, true);
+            defender!.asset.animationListener.value =
+                renderCombatAnimation(dt, game.currentEvent, defender!, false);
+            // Prepare Combat Assets
+            AnimationsManager.prepareCombat(attacker!, defender!);
+          }
         }
 
-        // Render combat
-        if (attacker!.position != MatchPosition.defeated &&
-            defender!.position != MatchPosition.defeated) {
-          AnimationsManager.animateCombat(
-              game.currentEvent, attacker!, defender!, dt);
-        }
-        AnimationsManager.animateEventText(dt, attacker!.asset.animationState);
         // Render Stage
         for (var unit in game.units) {
           unit.render(dt);
         }
-        if (game.state != GameState.combat) {
-          elapsedTime = 10;
-        }
-        // Update Field State
-        elapsedTime += dt;
-        if (elapsedTime > 3) {
-          elapsedTime = 0;
+
+        if ((attacker!.asset.animationState.value == UnitAniState.none ||
+                attacker!.asset.animationState.value == UnitAniState.idle) &&
+            (defender!.asset.animationState.value == UnitAniState.none ||
+                defender!.asset.animationState.value == UnitAniState.idle)) {
           attacker = null;
           defender = null;
           game.updateField(dt);
@@ -205,72 +214,72 @@ class SkyGame2D extends FlameGame with KeyboardEvents {
       case CombatState.fx:
         break;
       case CombatState.swap:
-        if (elapsedTime == 0) {
-          final user = game.active;
-          final lead =
-              game.field[MatchHelper.getPosRef(user.owner, BrawlType.lead)]!;
+        // if (elapsedTime == 0) {
+        final user = game.active;
+        final lead =
+            game.field[MatchHelper.getPosRef(user.owner, BrawlType.lead)]!;
 
-          user.currentStats.values[StatType.storage] =
-              user.currentStats.values[StatType.storage]! -
-                  user.currentCosts[CostType.swap];
+        user.currentStats.values[StatType.storage] =
+            user.currentStats.values[StatType.storage]! -
+                user.currentCosts[CostType.swap];
 
-          AnimationsManager.prepareSwap(user, lead);
-          game.updateFieldForSwap(dt, user, lead);
+        AnimationsManager.prepareSwap(user, lead);
+        game.updateFieldForSwap(dt, user, lead);
 
-          for (var unit in game.units) {
-            unit.render(dt);
-          }
+        for (var unit in game.units) {
+          unit.render(dt);
         }
+        // }
 
-        elapsedTime += dt;
-        if (elapsedTime > 3) {
-          elapsedTime = 0;
+        // elapsedTime += dt;
+        // if (elapsedTime > 3) {
+        //   elapsedTime = 0;
 
-          game.cleanup(dt);
-          // TODO: Update ActionQ
-        }
+        //   game.cleanup(dt);
+        //   // TODO: Update ActionQ
+        // }
         break;
       case CombatState.retreat:
-        if (elapsedTime == 0) {
-          final user = game.active;
-          late MatchUnit newActive;
-          final ll = game
-              .field[MatchHelper.getPosRef(user.owner, BrawlType.leftLink)]!;
-          final rl = game
-              .field[MatchHelper.getPosRef(user.owner, BrawlType.rightLink)]!;
-          switch (user.type) {
-            case BrawlType.lead:
-              newActive = Random().nextInt(2) == 0 ? ll : rl;
-              break;
-            case BrawlType.leftAce:
-              newActive = ll;
-              break;
-            case BrawlType.rightLink:
-              newActive = rl;
-              break;
-            default:
-              return;
-          }
-
-          user.currentStats.values[StatType.storage] =
-              user.currentStats.values[StatType.storage]! -
-                  user.currentCosts[CostType.retreat];
-          AnimationsManager.prepareSwap(user, newActive);
-          game.updateFieldForSwap(dt, user, newActive);
-
-          for (var unit in game.units) {
-            unit.render(dt);
-          }
+        // if (elapsedTime == 0) {
+        final user = game.active;
+        late MatchUnit newActive;
+        final ll =
+            game.field[MatchHelper.getPosRef(user.owner, BrawlType.leftLink)]!;
+        final rl =
+            game.field[MatchHelper.getPosRef(user.owner, BrawlType.rightLink)]!;
+        switch (user.type) {
+          case BrawlType.lead:
+            newActive = Random().nextInt(2) == 0 ? ll : rl;
+            break;
+          case BrawlType.leftAce:
+            newActive = ll;
+            break;
+          case BrawlType.rightLink:
+            newActive = rl;
+            break;
+          default:
+            return;
         }
 
-        elapsedTime += dt;
-        if (elapsedTime > 3) {
-          elapsedTime = 0;
+        user.currentStats.values[StatType.storage] =
+            user.currentStats.values[StatType.storage]! -
+                user.currentCosts[CostType.retreat];
+        AnimationsManager.prepareSwap(user, newActive);
+        game.updateFieldForSwap(dt, user, newActive);
 
-          game.cleanup(dt);
-
-          // TODO: Update ActionQ
+        for (var unit in game.units) {
+          unit.render(dt);
         }
+        // }
+
+        // elapsedTime += dt;
+        // if (elapsedTime > 3) {
+        //   elapsedTime = 0;
+
+        game.cleanup(dt);
+
+        // TODO: Update ActionQ
+        // }
         break;
       default:
         break;

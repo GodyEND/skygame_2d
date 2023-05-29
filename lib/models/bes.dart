@@ -12,7 +12,7 @@ class BES {
           BESType.critResist: cres,
           BESType.lethality: leth,
           BESType.block: block,
-          BESType.knock: knb,
+          BESType.force: knb,
           BESType.blockMastery: bm,
         };
 

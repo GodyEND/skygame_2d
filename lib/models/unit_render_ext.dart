@@ -23,37 +23,37 @@ extension UnitRenderExt on MatchUnit {
 
   void updateAssetVisibility(double dt) {
     if (!MatchHelper.isFrontrow(type)) {
-      asset.healthbar.setOpacity(0);
-      asset.healthbarBG.setOpacity(0);
-      asset.chargebar.setOpacity(0);
+      // asset.healthbar.setOpacity(0);
+      // asset.healthbarBG.setOpacity(0);
+      // asset.chargebar.setOpacity(0);
       textInfo(DAMAGE_TEXT)!.text = '';
       textInfo(CHARGE_TEXT)!.text = '';
-      for (var chargeSeparator in asset.chargeSeparator) {
-        chargeSeparator.setOpacity(0);
-      }
+      // for (var chargeSeparator in asset.chargeSeparator) {
+      //   chargeSeparator.add(RemoveEffect());
+      // }
     } else {
-      asset.healthbar.setOpacity(1);
-      asset.healthbarBG.setOpacity(1);
-      asset.chargebar.setOpacity(1);
+      // asset.healthbar.setOpacity(1);
+      // asset.healthbarBG.setOpacity(1);
+      // asset.chargebar.setOpacity(1);
       textInfo(DAMAGE_TEXT)!.text =
           '${currentStats[StatType.hp]} / ${iStats[StatType.hp]}';
       textInfo(CHARGE_TEXT)!.text = '${currentStats[StatType.storage]}';
       updateHealthBar(dt);
       updateChargeBar(dt);
-      for (var chargeSeparator in asset.chargeSeparator) {
-        chargeSeparator.setOpacity(1);
-      }
+      // for (var chargeSeparator in asset.chargeSeparator) {
+      //   chargeSeparator.setOpacity(1);
+      // }
     }
   }
 
   void updateHealthBar(double dt) {
-    asset.healthbar.width =
-        300 * max(0, currentStats[StatType.hp] / iStats[StatType.hp]);
+    // asset.healthbar.width =
+    //     300 * max(0, currentStats[StatType.hp] / iStats[StatType.hp]);
   }
 
   void updateChargeBar(double dt) {
-    asset.chargebar.width =
-        300 * min(1, currentStats[StatType.storage] / iStats[StatType.storage]);
+    // asset.chargebar.width =
+    //     300 * min(1, currentStats[StatType.storage] / iStats[StatType.storage]);
   }
 
   void updateChargeBarSeparator(double dt) {
@@ -64,25 +64,25 @@ extension UnitRenderExt on MatchUnit {
     }
     var separators = divisions.floor();
     if (divisions.floor() == divisions) separators = max(0, separators - 1);
-    if (asset.chargeSeparator.length > separators) {
-      final diff = asset.chargeSeparator.length - separators;
-      for (int i = 0; i < diff; i++) {
-        game.gameContext.remove(asset.chargeSeparator.last);
-      }
-    } else if (asset.chargeSeparator.length < separators) {
-      final diff = separators - asset.chargeSeparator.length;
-      for (int i = 0; i < diff; i++) {
-        asset.chargeSeparator
-            .add(GraphicsManager.createChargeSeparator(position));
-        game.gameContext.add(asset.chargeSeparator.last);
-      }
-    }
+    // if (asset.chargeSeparator.length > separators) {
+    //   final diff = asset.chargeSeparator.length - separators;
+    //   for (int i = 0; i < diff; i++) {
+    //     game.gameContext.remove(asset.chargeSeparator.last);
+    //   }
+    // } else if (asset.chargeSeparator.length < separators) {
+    //   final diff = separators - asset.chargeSeparator.length;
+    //   for (int i = 0; i < diff; i++) {
+    //     asset.chargeSeparator
+    //         .add(GraphicsManager.createChargeSeparator(position));
+    //     game.gameContext.add(asset.chargeSeparator.last);
+    //   }
+    // }
 
-    for (int i = 0; i < asset.chargeSeparator.length; i++) {
-      final offset = (300 / divisions) * (divisions - divisions.floor());
-      final divBar = ((300 - offset) / divisions.floor());
-      asset.chargeSeparator[i].x = asset.chargebar.position.x +
-          (i + 1) * ((owner == Owner.p1) ? divBar : -divBar);
-    }
+    // for (int i = 0; i < asset.chargeSeparator.length; i++) {
+    //   final offset = (300 / divisions) * (divisions - divisions.floor());
+    //   final divBar = ((300 - offset) / divisions.floor());
+    //   asset.chargeSeparator[i].x = asset.chargebar.position.x +
+    //       (i + 1) * ((owner == Owner.p1) ? divBar : -divBar);
+    // }
   }
 }

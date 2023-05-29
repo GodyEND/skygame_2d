@@ -2,8 +2,7 @@ import 'dart:math';
 import 'package:skygame_2d/game/unit.dart';
 import 'package:skygame_2d/game/game.dart';
 import 'package:skygame_2d/models/enums.dart';
-
-const int BASE_DAMAGE = 150;
+import 'package:skygame_2d/utils.dart/constants.dart';
 
 class Simulator {
   static double elementalFactor(Element attacker, Element defender) {
@@ -81,7 +80,7 @@ class Simulator {
 
     // Check for Block
     final blockChance = defender.currentBES.values[BESType.block]! -
-        defender.currentBES.values[BESType.knock]!;
+        defender.currentBES.values[BESType.force]!;
     if (blockChance > 0) {
       final rng = Random().nextInt(100);
       if (rng < blockChance) {
@@ -93,21 +92,21 @@ class Simulator {
     if (result == CombatEventResult.block && blockMastery > 0) {
       final rng = Random().nextDouble() * 100;
       final staggerChance =
-          max(0, blockMastery - attacker.currentBES[BESType.knock]);
+          max(0, blockMastery - attacker.currentBES[BESType.force]);
       if (rng <= staggerChance) {
         return CombatEventResult.stagger;
       }
     }
 
     // Check for Knockback
-    final knockback = attacker.currentBES.values[BESType.knock]!;
+    final knockback = attacker.currentBES.values[BESType.force]!;
     if (result == CombatEventResult.block && knockback > 0) {
       final rng = Random().nextDouble() * 100;
       final knockbackChance =
           max(0, knockback - attacker.currentBES[BESType.blockMastery]);
 
       if (rng <= knockbackChance) {
-        return CombatEventResult.knockback;
+        return CombatEventResult.overwhelm;
       }
     }
     return result;
@@ -153,10 +152,10 @@ class Simulator {
         break;
       case CombatEventResult.block:
       case CombatEventResult.stagger:
-      case CombatEventResult.knockback:
+      case CombatEventResult.overwhelm:
         final blockMod = (game.currentEvent == CombatEventResult.stagger)
             ? 1.2
-            : (game.currentEvent == CombatEventResult.knockback)
+            : (game.currentEvent == CombatEventResult.overwhelm)
                 ? 1 / 1.2
                 : 1;
         final blockPow =
@@ -210,7 +209,7 @@ class Simulator {
                 .toDouble();
         break;
       case CombatEventResult.block:
-      case CombatEventResult.knockback:
+      case CombatEventResult.overwhelm:
       case CombatEventResult.stagger:
         final chargeA = (attacker.currentStats[StatType.charge] * 0.5).toInt();
         attacker.incomingCharge = chargeA;
@@ -257,7 +256,9 @@ class Simulator {
         ? pow(1.1, attackerCS / attackerS).toDouble()
         : 1;
     final atk = attacker.currentStats[StatType.attack] * storageBonus;
-    final dmg = ((BASE_DAMAGE * atk / defender.currentStats[StatType.defense]) *
+    final dmg = ((Constants.BASE_DAMAGE *
+                atk /
+                defender.currentStats[StatType.defense]) *
             accuracyFactor *
             critFactor *
             blockFactor *
@@ -271,7 +272,7 @@ class Simulator {
       CombatEventResult event, MatchUnit attacker, MatchUnit defender) {
     switch (event) {
       case CombatEventResult.stagger:
-      case CombatEventResult.knockback:
+      case CombatEventResult.overwhelm:
       default:
         break;
     }

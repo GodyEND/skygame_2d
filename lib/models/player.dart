@@ -61,10 +61,11 @@ class Player {
 UnitAssets _addAssets(GameManager game, Unit unit, MatchPosition unitPos) {
   return UnitAssets(
       sprite: GraphicsManager.createUnitSprite(unitPos, unit.image),
-      profile: GraphicsManager.createUnitProfile(unitPos, unit.profile),
-      healthbar: GraphicsManager.createHealthBar(unitPos),
-      healthbarBG: GraphicsManager.createHealthBarBG(unitPos),
-      chargebar: GraphicsManager.createChargeBar(unitPos),
+      // profile: GraphicsManager.createUnitProfile(unitPos, unit.profile),
+      // healthbar: GraphicsManager.createHealthBar(unitPos),
+      // healthbarBG: GraphicsManager.createHealthBarBG(unitPos),
+      // chargebar: GraphicsManager.createChargeBar(unitPos),
+
       infoList: {
         DAMAGE_TEXT: GraphicsManager.createHPHUDText(unitPos),
         CHARGE_TEXT: GraphicsManager.createChargeHUDText(unitPos),

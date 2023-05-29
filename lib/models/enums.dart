@@ -16,7 +16,7 @@ enum BESType {
   critResist,
   lethality,
   block,
-  knock,
+  force,
   blockMastery
 }
 
@@ -60,6 +60,7 @@ enum MatchPosition {
   p1RightLink,
   p1Reserve,
   p1Combatant,
+  p1HitBox,
   p2Lead,
   p2LeftAce,
   p2RightAce,
@@ -67,6 +68,7 @@ enum MatchPosition {
   p2RightLink,
   p2Reserve,
   p2Combatant,
+  p2HitBox,
   none,
   defeated,
 }
@@ -78,7 +80,7 @@ enum CombatEventResult {
   crit,
   lethal,
   block,
-  knockback,
+  overwhelm,
   stagger,
   none,
 }

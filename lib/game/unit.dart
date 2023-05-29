@@ -81,7 +81,7 @@ class MatchUnit extends Equatable {
   void render(double dt) {
     updateAssetVisibility(dt);
     // TODO: listener
-    if (asset.animationState.index > UnitAniState.knockback.index) {
+    if (asset.animationState.value.index > UnitAniState.knockback.index) {
       updateHealthBar(dt);
       updateChargeBar(dt);
       updateChargeBarSeparator(dt);

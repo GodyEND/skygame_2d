@@ -6,6 +6,7 @@ import 'package:skygame_2d/game/helper.dart';
 import 'package:skygame_2d/game/stage.dart';
 import 'package:skygame_2d/models/enums.dart';
 import 'package:skygame_2d/setup.dart';
+import 'package:skygame_2d/utils.dart/constants.dart';
 
 // Keys
 const String SCORE_TEXT = 'score_text';
@@ -25,7 +26,12 @@ class GraphicsManager {
     // Load BGs
     for (int i = 0; i < Sprites.gMaps.length; i++) {
       final newComp = SpriteComponent(
-          size: Vector2(1920, 1080), position: Vector2(0.0, 0.0));
+          size: Vector2(Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT),
+          position: Vector2(
+            Constants.SCREEN_WIDTH * 0.5,
+            Constants.SCREEN_HEIGHT * 0.5,
+          ),
+          anchor: Anchor.center);
       newComp.sprite = Sprite(Sprites.gMaps[i]);
       GameManager.spriteList['$i$PF_BG'] = newComp;
     }
@@ -33,12 +39,11 @@ class GraphicsManager {
     // Load Texts
     GameManager.spriteList[EVENT_TEXT] = TextComponent(
       text: '',
-      position: Vector2(960, 750),
       anchor: Anchor.center,
       textRenderer: TextPaint(
         style: TextStyle(
             fontWeight: FontWeight.w900,
-            fontSize: 45,
+            fontSize: 40,
             inherit: true,
             color: Colors.white,
             shadows: _stroke(Colors.black, 3)),

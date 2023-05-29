@@ -11,6 +11,7 @@ import 'package:skygame_2d/game/helper.dart';
 import 'package:skygame_2d/game/unit.dart';
 import 'package:skygame_2d/graphics/graphics.dart';
 import 'package:skygame_2d/models/enums.dart';
+import 'package:skygame_2d/utils.dart/constants.dart';
 import 'package:skygame_2d/utils.dart/extensions.dart';
 
 class _ActiveQIcon {
@@ -93,43 +94,17 @@ class BrawlQComponent extends PositionComponent {
 
     activeComps =
         List<_ActiveQIcon>.from(orderedComps.where((e) => e != null).toList());
-    for (int i = 0; i < min(renderedUnits.length, 7); i++) {
+    for (int i = 0;
+        i < min(renderedUnits.length, Constants.COMBAT_Q_LENGTH);
+        i++) {
       final currentUnitID = renderedUnits[i].id;
-      final idOcc = renderedUnits
-          // .getRange(0, 7)
-          .where((e) => e.id == currentUnitID)
-          .toList()
-          .length;
-      // final currentOccIndex = renderedUnits
-      //         .getRange(0, i + 1)
-      //         // .toList()
-      //         .where((e) => e.id == currentUnitID)
-      //         .toList()
-      //         .length -
-      //     1;
+      final idOcc =
+          renderedUnits.where((e) => e.id == currentUnitID).toList().length;
       final activeIDOcc =
           activeComps.where((e) => e.id == currentUnitID).toList().length;
 
-      if (activeIDOcc > idOcc) {
-        final diff = activeIDOcc - idOcc;
-        // for (int i = 0; i < diff; i++) {
-        final excessList = activeComps
-            .where((e) => e.id == currentUnitID)
-            .toList()
-            .getRange(0, diff)
-            .toList();
-        for (int i = 0; i < diff; i++) {
-          main.remove(excessList[i].comp);
-        }
-        for (int i = 0; i < diff; i++) {
-          activeComps.remove(excessList[i]);
-        }
-      }
-
       if (activeComps.length > i && activeComps[i].id == currentUnitID) {
         if (activeComps[i].comp.position.x > main.position.x + i * 100) {
-          // print(
-          //     'compos: ${activeComps[i].comp.position.x} vs expect: ${main.position.x + i * 100}');
           activeComps[i].comp.position = main.position + Vector2(i * 100, 50);
         }
         continue;
@@ -143,12 +118,8 @@ class BrawlQComponent extends PositionComponent {
           final removableRange =
               activeComps.getRange(i, activeComps.indexOf(modComp)).toList();
           for (int j = 0; j < removableRange.length; j++) {
-            // if (activeComps[j].id != currentUnitID) {
             removableComps.add(removableRange[j]);
-            // } else {
-            // break;
           }
-          // }
           for (var removable in removableComps) {
             if (main.contains(removable.comp)) {
               main.remove(removable.comp);
@@ -162,10 +133,11 @@ class BrawlQComponent extends PositionComponent {
         _addNewIcon(renderedUnits[i], Vector2(i * 100, 50));
       }
     }
-    if (activeComps.length != 7) {
+    if (activeComps.length != Constants.COMBAT_Q_LENGTH) {
       final currentIDs = activeComps.map<int>((e) => e.id).toList();
       currentIDs.sort();
-      final finalIDs = activeIds.getRange(0, 7).toList();
+      final finalIDs =
+          activeIds.getRange(0, Constants.COMBAT_Q_LENGTH).toList();
       finalIDs.sort();
       int redoCounter = 0;
       for (int i = 0; i < currentIDs.length; i++) {

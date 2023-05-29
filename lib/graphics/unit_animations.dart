@@ -1,12 +1,15 @@
 import 'dart:math';
 
+import 'package:flame/effects.dart';
 import 'package:flame/game.dart';
+import 'package:flame/geometry.dart';
+import 'package:skygame_2d/graphics/animations.dart';
 import 'package:skygame_2d/models/unit_assets.dart';
 import 'package:skygame_2d/game/stage.dart';
 import 'package:skygame_2d/models/enums.dart';
-import 'package:skygame_2d/models/unit_assets_ext.dart';
 
 enum UnitAniState {
+  none,
   idle,
   enterCombat,
   challenge,
@@ -24,6 +27,7 @@ enum UnitAniState {
   knockback,
   exitChallenge,
   exitCombat,
+  end,
 }
 
 extension UnitAssetsAnimationExt on UnitAssets {
@@ -32,48 +36,53 @@ extension UnitAssetsAnimationExt on UnitAssets {
         ? MatchPosition.p1Combatant
         : MatchPosition.p2Combatant;
     sprite.position = Stage.positions[startPos]!;
-    animationState = UnitAniState.challenge;
+    animationState.value = UnitAniState.challenge;
   }
 
-  bool _challenge() {
-    if (unit.owner == Owner.p1 && sprite.x < 910) {
-      sprite.x += 8;
-    } else if (unit.owner == Owner.p2 && sprite.x > 990) {
-      sprite.x -= 8;
-    } else {
-      return true;
-    }
-    return false;
+  void _challenge(double dt, UnitAniState nextState, {Vector2? offset}) {
+    final targetPos = unit.owner == Owner.p1
+        ? Stage.positions[MatchPosition.p1HitBox]!
+        : Stage.positions[MatchPosition.p2HitBox]!;
+    sprite.add(MoveEffect.to(
+      targetPos + (offset ?? Vector2.all(0.0)),
+      EffectController(duration: 0.03 / dt),
+      onComplete: () {
+        unit.asset.animationState.value = nextState;
+      },
+    ));
   }
 
   void _attack(double dt) {
-    if (elapsedTime <= 0.5) {
-      sprite.x += (unit.owner == Owner.p1) ? 4 : -4;
-    }
-    if (elapsedTime > 1) {
-      elapsedTime = 0;
-      animationState = UnitAniState.exitChallenge;
-      if (unit.incomingCharge > 0) {
-        fireCharge(
-            sprite.position -
+    final attackDist = (unit.owner == Owner.p1) ? 40.0 : -40.0;
+    final targetPos = (unit.owner == Owner.p1)
+        ? MatchPosition.p1HitBox
+        : MatchPosition.p2HitBox;
+    sprite.add(MoveEffect.to(
+      Stage.positions[targetPos]! + Vector2(attackDist, 0),
+      EffectController(duration: 0.005 / dt),
+      onComplete: () {
+        AnimationsManager.fireCharge(dt,
+            unit: unit,
+            startPos: sprite.position -
                 (unit.owner == Owner.p1 ? Vector2.all(60) : Vector2(-60, 60)),
-            unit.incomingCharge);
-      }
-      return;
-    }
-    elapsedTime += dt;
+            charge: unit.incomingCharge);
+        animationState.value = UnitAniState.exitChallenge;
+      },
+    ));
   }
 
-  void _exitChallenge() {
-    if (unit.owner == Owner.p1 &&
-        sprite.x > Stage.positions[MatchPosition.p1Combatant]!.x) {
-      sprite.x -= 8;
-    } else if (unit.owner == Owner.p2 &&
-        sprite.x < Stage.positions[MatchPosition.p2Combatant]!.x) {
-      sprite.x += 8;
-    } else {
-      animationState = UnitAniState.exitCombat;
-    }
+  void _exitChallenge(double dt) {
+    final targetPos = unit.owner == Owner.p1
+        ? Stage.positions[MatchPosition.p1Combatant]!
+        : Stage.positions[MatchPosition.p2Combatant]!;
+
+    sprite.add(MoveEffect.to(
+      targetPos,
+      EffectController(duration: 0.02 / dt),
+      onComplete: () {
+        unit.asset.animationState.value = UnitAniState.exitCombat;
+      },
+    ));
   }
 
   void _exitCombat(MatchPosition position) {
@@ -81,234 +90,217 @@ extension UnitAssetsAnimationExt on UnitAssets {
   }
 
   void _idle(position) {
-    sprite.position = Stage.positions[position]!;
-    animationState = UnitAniState.idle;
+    if (position != MatchPosition.defeated) {
+      sprite.position = Stage.positions[position]!;
+      animationState.value = UnitAniState.idle;
+    }
   }
 
-  bool _dodge(double dt) {
-    sprite.x += unit.owner == Owner.p1 ? 4 : -4;
-    sprite.y -= 4;
-    if (elapsedTime > 0.25) {
-      elapsedTime = 0;
-      return true;
-    }
-    elapsedTime += dt;
-    return false;
+  void _dodgeStart(double dt, UnitAniState nextState) {
+    final dodgeDist = Vector2(unit.owner == Owner.p1 ? 30 : -30, -25);
+    sprite.add(MoveEffect.by(
+      dodgeDist,
+      EffectController(duration: 0.004 / dt),
+      onComplete: () => animationState.value = nextState,
+    ));
   }
 
   void _dodgeEnd(double dt) {
-    sprite.x -= unit.owner == Owner.p1 ? 4 : -4;
-    sprite.y += 4;
-    if (elapsedTime > 0.25) {
-      elapsedTime = 0;
-      animationState = UnitAniState.exitChallenge;
-      return;
-    }
-    elapsedTime += dt;
+    final dodgeDist = Vector2(unit.owner == Owner.p1 ? 30 : -30, -25);
+
+    sprite.add(MoveEffect.by(
+      -dodgeDist,
+      EffectController(duration: 0.004 / dt),
+      onComplete: () => animationState.value = UnitAniState.exitChallenge,
+    ));
   }
 
-  void _counter() {
-    sprite.angle += pi * ((unit.owner == Owner.p1) ? 0.5 : -0.5);
-    if (sprite.angle > 2 * pi || sprite.angle < -2 * pi) {
+  void _counter(double dt) {
+    var target = (unit.owner == Owner.p1) ? tau : -tau;
+    sprite.add(RotateEffect.to(target, EffectController(duration: 0.008 / dt),
+        onComplete: () {
       sprite.angle = 0;
-      sprite.y = 820;
-      fireCharge(
-          sprite.position -
+      sprite.y = Stage.positions[MatchPosition.p1HitBox]!.y;
+      AnimationsManager.fireCharge(dt,
+          unit: unit,
+          startPos: sprite.position -
               (unit.owner == Owner.p1 ? Vector2.all(60) : Vector2(-60, 60)),
-          unit.incomingCharge);
-      animationState = UnitAniState.exitChallenge;
-    }
+          charge: unit.incomingCharge);
+      animationState.value = UnitAniState.exitChallenge;
+    }));
   }
 
   void _block(double dt) {
-    sprite.x -= (elapsedTime > 0.5)
-        ? 0
-        : (unit.owner == Owner.p1)
-            ? 4
-            : -4;
-
-    if (elapsedTime > 1.0) {
-      elapsedTime = 0;
+    final dist = (unit.owner == Owner.p1) ? -40.0 : 40.0;
+    sprite.add(
+        MoveEffect.by(Vector2(dist, 0), EffectController(duration: 0.003 / dt),
+            onComplete: () async {
+      await Future.delayed(Duration(milliseconds: 10 ~/ dt));
       if (unit.incomingDamage > 0) {
-        fireDamage(
-            sprite.position -
+        AnimationsManager.fireDamage(dt,
+            unit: unit,
+            startPos: sprite.position -
                 (unit.owner == Owner.p1 ? Vector2(0, 25) : Vector2(0, 25)),
-            unit.incomingDamage);
+            damage: unit.incomingDamage);
       }
-      fireCharge(
-          sprite.position -
-              (unit.owner == Owner.p1 ? Vector2.all(60) : Vector2(-60, 60)),
-          unit.incomingCharge);
-      animationState = UnitAniState.exitChallenge;
-      return;
-    }
-    elapsedTime += dt;
+      AnimationsManager.fireCharge(
+        dt,
+        unit: unit,
+        startPos: sprite.position -
+            (unit.owner == Owner.p1 ? Vector2.all(60) : Vector2(-60, 60)),
+        charge: unit.incomingCharge,
+      );
+      animationState.value = UnitAniState.exitChallenge;
+    }));
   }
 
-  void _hit() {
-    if (hitCounter < 2) {
-      if (hitCounter % 2.0 == 0.0) {
-        sprite.scale.x += (unit.owner == Owner.p1) ? 0.5 : -0.5;
-      } else {
-        sprite.scale.x -= (unit.owner == Owner.p1) ? 0.5 : -0.5;
-      }
-
-      if (sprite.scale.x >= 1.0) {
-        sprite.scale.x = 1.0;
-        hitCounter += 1;
-      } else if (sprite.scale.x <= -1.0) {
-        sprite.scale.x = -1.0;
-        hitCounter += 1;
-      }
-    } else {
-      hitCounter = 0;
-      fireDamage(
-          sprite.position -
-              (unit.owner == Owner.p1 ? Vector2(0, 25) : Vector2(0, 25)),
-          unit.incomingDamage);
-      animationState = UnitAniState.exitChallenge;
-    }
+// TODO: change attack and hit to look better
+  void _hit(double dt) {
+    sprite.add(ScaleEffect.to(Vector2(sprite.scale.x * -1.0, 1),
+        EffectController(duration: 0.005 / dt, repeatCount: 2), onComplete: () {
+      sprite.scale.x *= -1;
+      AnimationsManager.fireDamage(
+        dt,
+        unit: unit,
+        startPos: sprite.position -
+            (unit.owner == Owner.p1 ? Vector2(0, 25) : Vector2(0, 25)),
+        damage: unit.incomingDamage,
+      );
+      animationState.value = UnitAniState.exitChallenge;
+    }));
   }
 
-  void _critStart() {
-    sprite.x -= (unit.owner == Owner.p1) ? 8 : -8;
-    sprite.y -= 10;
-    if ((unit.owner == Owner.p1 && sprite.x < 860) ||
-        unit.owner == Owner.p2 && sprite.x > 1040) {
-      animationState = UnitAniState.critEnd;
-    }
+  void _critStart(double dt) {
+    final critDistX = (unit.owner == Owner.p1) ? 80.0 : -80.0;
+    final critDist = sprite.position - Vector2(critDistX, 40);
+    sprite.angle = (unit.owner == Owner.p1) ? -pi * 0.25 : pi * 0.25;
+    sprite.add(MoveEffect.to(critDist, EffectController(duration: 0.005 / dt),
+        onComplete: () {
+      unit.asset.animationState.value = UnitAniState.critEnd;
+    }));
   }
 
   void _critEnd(double dt) {
-    if (sprite.y < 820) {
-      sprite.x -= (unit.owner == Owner.p1) ? 8 : -8;
-      sprite.y += 10;
-    }
+    final critDistX = (unit.owner == Owner.p1) ? 60.0 : -60.0;
+    final critDist = sprite.position - Vector2(critDistX, -60);
+    sprite.angle = (unit.owner == Owner.p1) ? -pi * 0.5 : pi * 0.5;
+    sprite.add(MoveEffect.to(critDist, EffectController(duration: 0.005 / dt),
+        onComplete: () async {
+      AnimationsManager.fireDamage(dt,
+          unit: unit,
+          startPos: sprite.position -
+              (unit.owner == Owner.p1 ? Vector2(0, 50) : Vector2(0, 50)),
+          damage: unit.incomingDamage);
+      await Future.delayed(Duration(milliseconds: 20 ~/ dt));
 
-    if (unit.owner == Owner.p1 && sprite.angle > -pi * 0.5) {
-      sprite.angle -= (pi * 0.125);
-    } else if (unit.owner == Owner.p2 && sprite.angle < pi * 0.5) {
-      sprite.angle += (pi * 0.125);
-    }
-
-    if (sprite.y >= 820) {
-      if (elapsedTime >= 1) {
-        sprite.angle = 0;
-        elapsedTime = 0;
-        fireDamage(
-            sprite.position -
-                (unit.owner == Owner.p1 ? Vector2(0, 25) : Vector2(0, 25)),
-            unit.incomingDamage);
-        animationState = UnitAniState.exitChallenge;
-        return;
-      }
-    }
-    elapsedTime += dt;
+      sprite.angle = 0;
+      unit.asset.animationState.value = UnitAniState.exitChallenge;
+    }));
   }
 
+// TODO:
   void _missedAttack(double dt) {
-    sprite.x += (unit.owner == Owner.p1) ? 2 : -2;
-    if (elapsedTime > 0.5) {
-      elapsedTime = 0;
-      animationState = UnitAniState.counteredAttack;
-      return;
-    }
-    elapsedTime += dt;
+    final attackDist = (unit.owner == Owner.p1) ? 40.0 : -40.0;
+    final targetPos = (unit.owner == Owner.p1)
+        ? MatchPosition.p1HitBox
+        : MatchPosition.p2HitBox;
+    sprite.add(MoveEffect.to(
+      Stage.positions[targetPos]! + Vector2(attackDist, 0),
+      EffectController(duration: 0.01 / dt),
+      onComplete: () {
+        animationState.value = UnitAniState.counteredAttack;
+      },
+    ));
   }
 
   void _counteredAttack(double dt) {
-    sprite.angle = pi * ((unit.owner == Owner.p1) ? 0.5 : -0.5);
-    sprite.y = 860;
-    if (elapsedTime > 0.5) {
-      elapsedTime = 0;
-      sprite.angle = 0;
-      sprite.y = 820;
-      fireDamage(
-          sprite.position -
+    final angleDir = (unit.owner == Owner.p1) ? pi * 0.5 : -pi * 0.5;
+    sprite.add(RotateEffect.to(
+        0,
+        EffectController(
+          duration: 0,
+          startDelay: 0.1,
+        ), onComplete: () async {
+      AnimationsManager.fireDamage(dt,
+          unit: unit,
+          startPos: sprite.position -
               (unit.owner == Owner.p1 ? Vector2(0, 25) : Vector2(0, 25)),
-          unit.incomingDamage);
-      animationState = UnitAniState.exitChallenge;
-      return;
-    }
-    elapsedTime += dt;
+          damage: unit.incomingDamage);
+      sprite.y = Stage.positions[MatchPosition.p1HitBox]!.y + 20.0;
+      sprite.angle = angleDir;
+      await Future.delayed(Duration(milliseconds: (20.0 ~/ dt)));
+      sprite.angle = 0;
+      animationState.value = UnitAniState.exitChallenge;
+    }));
   }
 
   void _lethal(double dt) {
-    sprite.x -= (unit.owner == Owner.p1) ? 35 : -35;
-    sprite.y -= 12;
+    final dir = (unit.owner == Owner.p1) ? -1400.0 : 1400.0;
     sprite.angle -= pi * (unit.owner == Owner.p1 ? 0.25 : -0.25);
-    if (elapsedTime > 2) {
-      sprite.angle = 0;
-      fireDamage(
-          sprite.position -
-              (unit.owner == Owner.p1 ? Vector2(0, 25) : Vector2(0, 25)),
-          unit.incomingDamage);
-      animationState = UnitAniState.exitChallenge;
-      return;
-    }
-    elapsedTime += dt;
+
+    sprite.add(
+      MoveEffect.by(Vector2(dir, -300), EffectController(duration: 0.05 / dt),
+          onComplete: () {
+        sprite.angle = 0;
+        AnimationsManager.fireDamage(dt,
+            unit: unit,
+            startPos: sprite.position -
+                (unit.owner == Owner.p1 ? Vector2(0, 25) : Vector2(0, 25)),
+            damage: unit.incomingDamage);
+        animationState.value = UnitAniState.exitChallenge;
+      }),
+    );
   }
 
   void _staggeredAttack(double dt) {
-    if (unit.owner == Owner.p1) {
-      sprite.x -= 4;
-      if (sprite.angle > -pi * 2) {
-        sprite.angle -= pi * 0.25;
-      }
-    } else {
-      sprite.x += 4;
-      if (sprite.angle < pi * 2) {
-        sprite.angle += pi * 0.25;
-      }
-    }
-    if (elapsedTime > 0.5) {
+    var target = (unit.owner == Owner.p1) ? -tau : tau;
+    sprite.add(RotateEffect.to(target, EffectController(duration: 0.008 / dt),
+        onComplete: () async {
       sprite.angle = 0;
-      elapsedTime = 0;
-      fireCharge(
-          sprite.position -
+      AnimationsManager.fireCharge(dt,
+          unit: unit,
+          startPos: sprite.position -
               (unit.owner == Owner.p1 ? Vector2.all(60) : Vector2(-60, 60)),
-          unit.incomingCharge);
-      animationState = UnitAniState.exitChallenge;
-      return;
-    }
-    elapsedTime += dt;
+          charge: unit.incomingCharge);
+      await Future.delayed(Duration(milliseconds: (20.0 ~/ dt)));
+      animationState.value = UnitAniState.exitChallenge;
+    }));
   }
 
   void _knockback(double dt) {
-    sprite.x -= (elapsedTime > 0.5) ? 0 : ((unit.owner == Owner.p1) ? 4 : -4);
-    sprite.angle = -pi * ((unit.owner == Owner.p1) ? 0.25 : -0.25);
-    if (elapsedTime > 1.0) {
-      sprite.angle = 0;
-      elapsedTime = 0;
-      fireDamage(
-          sprite.position -
+    final targetPos = unit.owner == Owner.p1 ? 120.0 : -120.0;
+    sprite.angle = pi * ((unit.owner == Owner.p1) ? -0.25 : 0.25);
+    sprite.add(MoveEffect.to(sprite.position - Vector2(targetPos, 0),
+        EffectController(duration: 0.008 / dt), onComplete: () async {
+      AnimationsManager.fireDamage(dt,
+          unit: unit,
+          startPos: sprite.position -
               (unit.owner == Owner.p1 ? Vector2(0, 25) : Vector2(0, 25)),
-          unit.incomingDamage);
-      fireCharge(
-          sprite.position -
+          damage: unit.incomingDamage);
+      AnimationsManager.fireCharge(dt,
+          unit: unit,
+          startPos: sprite.position -
               (unit.owner == Owner.p1 ? Vector2.all(60) : Vector2(-60, 60)),
-          unit.incomingCharge);
-      animationState = UnitAniState.exitChallenge;
-      return;
-    }
-    elapsedTime += dt;
+          charge: unit.incomingCharge);
+      await Future.delayed(Duration(milliseconds: 3 ~/ dt));
+      sprite.angle = 0;
+      animationState.value = UnitAniState.exitChallenge;
+    }));
   }
 
   void animateAttack(double dt) {
-    switch (animationState) {
+    switch (animationState.value) {
       case UnitAniState.enterCombat:
         _enterCombat();
         break;
       case UnitAniState.challenge:
-        if (_challenge()) {
-          animationState = UnitAniState.attack;
-        }
+        _challenge(dt, UnitAniState.attack);
         break;
       case UnitAniState.attack:
         _attack(dt);
         break;
       case UnitAniState.exitChallenge:
-        _exitChallenge();
+        _exitChallenge(dt);
         break;
       case UnitAniState.exitCombat:
         _exitCombat(unit.position);
@@ -320,25 +312,23 @@ extension UnitAssetsAnimationExt on UnitAssets {
   }
 
   void animateDodge(double dt) {
-    switch (animationState) {
+    switch (animationState.value) {
       case UnitAniState.enterCombat:
         _enterCombat();
         break;
       case UnitAniState.challenge:
-        if (_challenge()) {
-          animationState = UnitAniState.dodgeStart;
-        }
+        _challenge(dt, UnitAniState.dodgeStart,
+            offset: Vector2(unit.owner == Owner.p1 ? -30 : 30, 0));
         break;
       case UnitAniState.dodgeStart:
-        if (_dodge(dt)) {
-          animationState = UnitAniState.dodgeEnd;
-        }
+        _dodgeStart(dt, UnitAniState.dodgeEnd);
+
         break;
       case UnitAniState.dodgeEnd:
         _dodgeEnd(dt);
         break;
       case UnitAniState.exitChallenge:
-        _exitChallenge();
+        _exitChallenge(dt);
         break;
       case UnitAniState.exitCombat:
         _exitCombat(unit.position);
@@ -350,20 +340,19 @@ extension UnitAssetsAnimationExt on UnitAssets {
   }
 
   void animateBlock(double dt) {
-    switch (animationState) {
+    switch (animationState.value) {
       case UnitAniState.enterCombat:
         _enterCombat();
         break;
       case UnitAniState.challenge:
-        if (_challenge()) {
-          animationState = UnitAniState.block;
-        }
+        _challenge(dt, UnitAniState.block);
+
         break;
       case UnitAniState.block:
         _block(dt);
         break;
       case UnitAniState.exitChallenge:
-        _exitChallenge();
+        _exitChallenge(dt);
         break;
       case UnitAniState.exitCombat:
         _exitCombat(unit.position);
@@ -375,20 +364,19 @@ extension UnitAssetsAnimationExt on UnitAssets {
   }
 
   void animateHit(double dt) {
-    switch (animationState) {
+    switch (animationState.value) {
       case UnitAniState.enterCombat:
         _enterCombat();
         break;
       case UnitAniState.challenge:
-        if (_challenge()) {
-          animationState = UnitAniState.hit;
-        }
+        _challenge(dt, UnitAniState.hit);
+
         break;
       case UnitAniState.hit:
-        _hit();
+        _hit(dt);
         break;
       case UnitAniState.exitChallenge:
-        _exitChallenge();
+        _exitChallenge(dt);
         break;
       case UnitAniState.exitCombat:
         _exitCombat(unit.position);
@@ -400,23 +388,22 @@ extension UnitAssetsAnimationExt on UnitAssets {
   }
 
   void animateCriticalHit(double dt) {
-    switch (animationState) {
+    switch (animationState.value) {
       case UnitAniState.enterCombat:
         _enterCombat();
         break;
       case UnitAniState.challenge:
-        if (_challenge()) {
-          animationState = UnitAniState.critStart;
-        }
+        _challenge(dt, UnitAniState.critStart);
+
         break;
       case UnitAniState.critStart:
-        _critStart();
+        _critStart(dt);
         break;
       case UnitAniState.critEnd:
         _critEnd(dt);
         break;
       case UnitAniState.exitChallenge:
-        _exitChallenge();
+        _exitChallenge(dt);
         break;
       case UnitAniState.exitCombat:
         _exitCombat(unit.position);
@@ -428,25 +415,22 @@ extension UnitAssetsAnimationExt on UnitAssets {
   }
 
   void animateCounter(double dt) {
-    switch (animationState) {
+    switch (animationState.value) {
       case UnitAniState.enterCombat:
         _enterCombat();
         break;
       case UnitAniState.challenge:
-        if (_challenge()) {
-          animationState = UnitAniState.dodgeStart;
-        }
+        _challenge(dt, UnitAniState.dodgeStart,
+            offset: Vector2(unit.owner == Owner.p1 ? -30 : 30, 0));
         break;
       case UnitAniState.dodgeStart:
-        if (_dodge(dt)) {
-          animationState = UnitAniState.counter;
-        }
+        _dodgeStart(dt, UnitAniState.counter);
         break;
       case UnitAniState.counter:
-        _counter();
+        _counter(dt);
         break;
       case UnitAniState.exitChallenge:
-        _exitChallenge();
+        _exitChallenge(dt);
         break;
       case UnitAniState.exitCombat:
         _exitCombat(unit.position);
@@ -457,24 +441,22 @@ extension UnitAssetsAnimationExt on UnitAssets {
   }
 
   void animateCounteredAttack(double dt) {
-    switch (animationState) {
+    switch (animationState.value) {
       case UnitAniState.enterCombat:
         _enterCombat();
         break;
       case UnitAniState.challenge:
-        if (_challenge()) {
-          animationState = UnitAniState.attack;
-        }
+        _challenge(dt, UnitAniState.attack);
+
         break;
       case UnitAniState.attack:
         _missedAttack(dt);
         break;
       case UnitAniState.counteredAttack:
         _counteredAttack(dt);
-
         break;
       case UnitAniState.exitChallenge:
-        _exitChallenge();
+        _exitChallenge(dt);
         break;
       case UnitAniState.exitCombat:
         _exitCombat(unit.position);
@@ -486,20 +468,19 @@ extension UnitAssetsAnimationExt on UnitAssets {
   }
 
   void animateLethalHit(double dt) {
-    switch (animationState) {
+    switch (animationState.value) {
       case UnitAniState.enterCombat:
         _enterCombat();
         break;
       case UnitAniState.challenge:
-        if (_challenge()) {
-          animationState = UnitAniState.lethal;
-        }
+        _challenge(dt, UnitAniState.lethal);
+
         break;
       case UnitAniState.lethal:
         _lethal(dt);
         break;
       case UnitAniState.exitChallenge:
-        _exitChallenge();
+        _exitChallenge(dt);
         break;
       case UnitAniState.exitCombat:
         _exitCombat(unit.position);
@@ -511,20 +492,19 @@ extension UnitAssetsAnimationExt on UnitAssets {
   }
 
   void animateStaggeredAttack(double dt) {
-    switch (animationState) {
+    switch (animationState.value) {
       case UnitAniState.enterCombat:
         _enterCombat();
         break;
       case UnitAniState.challenge:
-        if (_challenge()) {
-          animationState = UnitAniState.staggeredAttack;
-        }
+        _challenge(dt, UnitAniState.staggeredAttack);
+
         break;
       case UnitAniState.staggeredAttack:
         _staggeredAttack(dt);
         break;
       case UnitAniState.exitChallenge:
-        _exitChallenge();
+        _exitChallenge(dt);
         break;
       case UnitAniState.exitCombat:
         _exitCombat(unit.position);
@@ -536,14 +516,13 @@ extension UnitAssetsAnimationExt on UnitAssets {
   }
 
   void animatePushback(double dt) {
-    switch (animationState) {
+    switch (animationState.value) {
       case UnitAniState.enterCombat:
         _enterCombat();
         break;
       case UnitAniState.challenge:
-        if (_challenge()) {
-          animationState = UnitAniState.knockback;
-        }
+        _challenge(dt, UnitAniState.knockback);
+
         break;
       case UnitAniState.knockback:
         _knockback(dt);
@@ -551,7 +530,7 @@ extension UnitAssetsAnimationExt on UnitAssets {
         break;
 
       case UnitAniState.exitChallenge:
-        _exitChallenge();
+        _exitChallenge(dt);
         break;
       case UnitAniState.exitCombat:
         _exitCombat(unit.position);
