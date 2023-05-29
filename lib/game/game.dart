@@ -64,8 +64,7 @@ class GameManager {
     _prepareUnits();
     (spriteList[SCORE_TEXT]! as TextComponent).text =
         '${player1.points} : ${player2.points}';
-    brawlQ.addAll(GameManager.executionOrder(units));
-    prevBrawlQ.value = brawlQ;
+    setBrawlQ;
     state = GameState.combat;
   }
 
@@ -115,13 +114,36 @@ class GameManager {
       brawlQ.removeAt(0);
       updateActive;
     } else {
-      // if (prevBrawlQ.value.isNotEmpty) {
-      //   prevActive = prevBrawlQ.value.first;
-      // }
-      prevBrawlQ.value = List.from(brawlQ); // TODO: test move back up
-
+      prevBrawlQ.value = List.from(brawlQ);
       brawlQ.removeAt(0);
     }
+  }
+
+  void get setBrawlQ {
+    int? lastActiveID;
+    if (brawlQ.isNotEmpty) {
+      lastActiveID = active.id;
+    }
+    brawlQ.clear();
+    brawlQ.addAll(units);
+    brawlQ.sort((a, b) => b.currentStats[StatType.execution]
+        .compareTo(a.currentStats[StatType.execution]));
+    MatchUnit? lastFrontrow;
+    if (lastActiveID != null) {
+      while (active.id != lastActiveID) {
+        if (MatchHelper.isFrontrow(active.type)) {
+          lastFrontrow = active;
+        }
+        brawlQ.removeAt(0);
+      }
+    }
+    brawlQ.removeWhere((e) => !MatchHelper.isFrontrow(e.type));
+
+    final prevList = [
+      lastFrontrow ?? brawlQ.lastWhere((e) => MatchHelper.isFrontrow(e.type))
+    ];
+    prevList.addAll(brawlQ);
+    prevBrawlQ.value = prevList;
   }
 
   void get updateActive {
@@ -154,7 +176,7 @@ class GameManager {
           player1.points += MatchHelper.getUnitPoints(unit.type);
         }
 
-        if (player1.points >= 7 || player2.points >= 7) {
+        if (player1.points >= 9 || player2.points >= 9) {
           state = GameState.end;
           return;
         }

@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:equatable/equatable.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flame/experimental.dart';
@@ -14,7 +13,7 @@ import 'package:skygame_2d/graphics/graphics.dart';
 import 'package:skygame_2d/models/enums.dart';
 import 'package:skygame_2d/utils.dart/extensions.dart';
 
-class _ActiveQIcon extends SpriteComponent {
+class _ActiveQIcon {
   final int id;
   final SpriteComponent comp;
   _ActiveQIcon(this.id, this.comp);
@@ -33,21 +32,7 @@ class BrawlQComponent extends PositionComponent {
     ));
     position = Vector2(950, 200);
 
-    // add(RectangleComponent(
-    //   anchor: Anchor.center,
-    //   size: Vector2(55, 55),
-    //   position: Vector2(200, 0),
-    //   priority: 6,
-    //   paint: Paint()..color = Colors.white.withOpacity(0.4),
-    // ));
-
-    // add(RectangleComponent(
-    //   anchor: Anchor.center,
-    //   size: Vector2(55, 55),
-    //   position: Vector2(100, 0),
-    //   priority: 6,
-    //   paint: Paint()..color = Colors.white.withOpacity(0.2),
-    // ));
+    onQueueChange();
   }
 
   final ClipComponent main = ClipComponent(
@@ -67,12 +52,9 @@ class BrawlQComponent extends PositionComponent {
 
   List<MatchUnit> get _getRenderedUnits {
     final List<MatchUnit> result =
-        // (game.prevActive != null) ? [game.prevActive!] : [];
-        // result.addAll(
         animatedQ.value.where((e) => MatchHelper.isFrontrow(e.type)).toList();
-    // );
 
-    while (result.length < 6) {
+    while (result.length < 7) {
       final orderedList = GameManager.executionOrder(game.units)
           .where((e) => MatchHelper.isFrontrow(e.type))
           .toList();
@@ -82,132 +64,147 @@ class BrawlQComponent extends PositionComponent {
   }
 
   final Map<int, SpriteComponent> reusable = {};
+  List<_ActiveQIcon> activeComps = [];
 
   Future<void> onQueueChange() async {
     var renderedUnits = _getRenderedUnits;
     final activeIds = renderedUnits.map<int>((e) => e.id).toList();
-    final removableIDList = <int>[];
-    for (var id in reusable.keys) {
-      if (!activeIds.contains(id)) {
-        main.remove(reusable[id]!);
-        removableIDList.add(id);
+    final removableComps = <_ActiveQIcon>[];
+    for (var active in activeComps) {
+      if (active.comp.position.x <= main.position.x - 25) {
+        removableComps.add(active);
+        main.remove(active.comp);
+      } else if (!activeIds.contains(active.id) &&
+          !removableComps.contains(active)) {
+        removableComps.add(active);
+        main.remove(active.comp);
       }
     }
-    for (var id in removableIDList) {
-      reusable.remove(id);
+    for (var removable in removableComps) {
+      activeComps.remove(removable);
+    }
+    removableComps.clear();
+
+    List<_ActiveQIcon?> orderedComps = [];
+    for (int j = 0; j < renderedUnits.length; j++) {
+      orderedComps.add(activeComps.firstWhereOrNull((e) =>
+          e.id == renderedUnits[j].id && orderedComps.contains(e) == false));
     }
 
-    for (int i = 0; i < min(renderedUnits.length, 6); i++) {
-      SpriteComponent? icon;
-      bool isNew = false;
-      if (i < game.brawlQ.length) {
-        // reuse
-        // Check if reuse exists
-        final currentUnitID = renderedUnits[i].id;
-        icon = reusable[currentUnitID];
-        if (icon == null) {
-          isNew = true;
-          icon = GraphicsManager.createUnitProfile(
-              renderedUnits[i].position, renderedUnits[i].character.profile);
-          reusable[currentUnitID] = icon;
-        } else {
-          continue;
+    activeComps =
+        List<_ActiveQIcon>.from(orderedComps.where((e) => e != null).toList());
+    for (int i = 0; i < min(renderedUnits.length, 7); i++) {
+      final currentUnitID = renderedUnits[i].id;
+      final idOcc = renderedUnits
+          // .getRange(0, 7)
+          .where((e) => e.id == currentUnitID)
+          .toList()
+          .length;
+      // final currentOccIndex = renderedUnits
+      //         .getRange(0, i + 1)
+      //         // .toList()
+      //         .where((e) => e.id == currentUnitID)
+      //         .toList()
+      //         .length -
+      //     1;
+      final activeIDOcc =
+          activeComps.where((e) => e.id == currentUnitID).toList().length;
+
+      if (activeIDOcc > idOcc) {
+        final diff = activeIDOcc - idOcc;
+        // for (int i = 0; i < diff; i++) {
+        final excessList = activeComps
+            .where((e) => e.id == currentUnitID)
+            .toList()
+            .getRange(0, diff)
+            .toList();
+        for (int i = 0; i < diff; i++) {
+          main.remove(excessList[i].comp);
         }
-        // icon.position = main.position + Vector2(i * 100, 50);
-      } else {
-        isNew = true;
-        icon = GraphicsManager.createUnitProfile(
-            renderedUnits[i].position, renderedUnits[i].character.profile);
-        // icon.position = main.position + Vector2(i * 100, 50);
-      }
-      // icon = activeComps
-      //     .getRange(i, activeComps.length)
-      //     .firstWhereOrNull((e) => e.id == renderedUnits[i].id)
-      //     ?.comp;
-      // }
-      // if (isNew) {
-      //   final iconPos =
-      //       main.position + Vector2(i * 100, 50); // + Vector2(100, 0);
-      // }
-      icon.position = main.position + Vector2(i * 100, 50);
-
-      icon.anchor = Anchor.center;
-      icon.size = Vector2.all(55);
-      // icon.position = iconPos;
-      if (isNew) {
-        final ownerBadge = RectangleComponent(
-          anchor: Anchor.center,
-          size: Vector2.all(16),
-          position: Vector2(28.5, 65),
-          paint: Paint()
-            ..color =
-                renderedUnits[i].owner == Owner.p1 ? Colors.blue : Colors.red,
-        );
-        icon.add(ownerBadge);
+        for (int i = 0; i < diff; i++) {
+          activeComps.remove(excessList[i]);
+        }
       }
 
-      // final active = RectangleComponent(
-      //   anchor: Anchor.center,
-      //   size: Vector2.all(70),
-      //   position: iconPos + Vector2(0, 0),
-      //   priority: 3,
-      //   paint: Paint()..color = Colors.green,
-      // );
-      if (isNew) {
-        final eff = MoveEffect.to(
-          Vector2(0, 50),
-          EffectController(speed: 34),
-          onComplete: () {
-            if (isNew && reusable.values.contains(icon) == false) {
-              icon!.add(RemoveEffect());
+      if (activeComps.length > i && activeComps[i].id == currentUnitID) {
+        if (activeComps[i].comp.position.x > main.position.x + i * 100) {
+          // print(
+          //     'compos: ${activeComps[i].comp.position.x} vs expect: ${main.position.x + i * 100}');
+          activeComps[i].comp.position = main.position + Vector2(i * 100, 50);
+        }
+        continue;
+      } else if (idOcc <= activeIDOcc) {
+        final modComp = activeComps
+            .getRange(i, activeComps.length)
+            .toList()
+            .firstWhereOrNull((e) => e.id == currentUnitID);
+        if (modComp != null) {
+          modComp.comp.position = main.position + Vector2(i * 100, 50);
+          final removableRange =
+              activeComps.getRange(i, activeComps.indexOf(modComp)).toList();
+          for (int j = 0; j < removableRange.length; j++) {
+            // if (activeComps[j].id != currentUnitID) {
+            removableComps.add(removableRange[j]);
+            // } else {
+            // break;
+          }
+          // }
+          for (var removable in removableComps) {
+            if (main.contains(removable.comp)) {
+              main.remove(removable.comp);
             }
-            // if (icon!.position.x < main.position.x + 25) {
-            // if (i >= game.brawlQ.length) {
-//  final copies =
-//                 activeComps.getRange(i, activeComps.length).where((e) => e.id == renderedUnits[i].id);
-//             activeComps.removeWhere((e) => e.comp == icon);
-            // icon.add(RemoveEffect(delay: 0));
-            // }
-          },
-        );
-        icon.add(eff);
-      }
-
-      // final eff2 = MoveEffect.by(
-      //   Vector2(-100, 0),
-      //   EffectController(duration: 3),
-      //   onComplete: () {
-      //     if (ownerBadge.position.x < main.position.x) {
-      //       ownerBadge.add(RemoveEffect(delay: 0));
-      //     }
-      //   },
-      // );
-
-      // ownerBadge.setOpacity((i < 5) ? (5 - i < 2 ? 0 : i) / 5 + 0.1 : 0);
-
-      // if (i < 5) {
-      //   final opEff =
-      //       OpacityEffect.to((5 - (i - 1)) / 6, EffectController(duration: 3));
-      //   opEff.removeOnFinish = true;
-      //   ownerBadge.add(opEff);
-      // }
-      // if (i == 1) {
-      //   icon.add(active);
-      // }
-      // if (icon.position.x > main.position.x + 25) {
-      //   final existingEff =
-      //       icon.children.firstWhereOrNull((e) => e is MoveEffect);
-      //   if (existingEff != null) {
-      //     final existProg = (existingEff as MoveEffect).controller.progress;
-      //     DelayedEffectController(eff.controller, delay: 3 * (1 - existProg));
-      //   }
-      //   icon.add(eff);
-      // }
-      // ownerBadge.add(eff2);
-      if (isNew) {
-        // activeComps.add(_ActiveQIcon(renderedUnits[i].id, icon));
-        main.add(icon);
+            activeComps.remove(removable);
+          }
+        } else {
+          _addNewIcon(renderedUnits[i], Vector2(i * 100, 50));
+        }
+      } else {
+        _addNewIcon(renderedUnits[i], Vector2(i * 100, 50));
       }
     }
+    if (activeComps.length != 7) {
+      final currentIDs = activeComps.map<int>((e) => e.id).toList();
+      currentIDs.sort();
+      final finalIDs = activeIds.getRange(0, 7).toList();
+      finalIDs.sort();
+      int redoCounter = 0;
+      for (int i = 0; i < currentIDs.length; i++) {
+        if (i - redoCounter >= finalIDs.length ||
+            currentIDs[i] != finalIDs[i - redoCounter]) {
+          final removable =
+              activeComps.firstWhere((e) => e.id == currentIDs[i]);
+          if (main.contains(removable.comp)) {
+            main.remove(removable.comp);
+          }
+          activeComps.remove(removable);
+          redoCounter += 1;
+        }
+      }
+    }
+  }
+
+  _addNewIcon(MatchUnit unit, Vector2 offset) {
+    final icon = GraphicsManager.createUnitProfile(
+        unit.position, unit.character.profile);
+    icon.position = main.position + offset;
+    icon.anchor = Anchor.center;
+    icon.size = Vector2.all(55);
+
+    final ownerBadge = RectangleComponent(
+      anchor: Anchor.center,
+      size: Vector2.all(16),
+      position: Vector2(28.5, 65),
+      paint: Paint()..color = unit.owner == Owner.p1 ? Colors.blue : Colors.red,
+    );
+    icon.add(ownerBadge);
+
+    final eff = MoveEffect.to(
+      Vector2(-30, 50),
+      EffectController(speed: 34),
+    );
+    icon.add(eff);
+
+    activeComps.add(_ActiveQIcon(unit.id, icon));
+    main.add(icon);
   }
 }

@@ -3,7 +3,7 @@ import 'package:skygame_2d/game/unit.dart';
 import 'package:skygame_2d/game/game.dart';
 import 'package:skygame_2d/models/enums.dart';
 
-const int BASE_DAMAGE = 400;
+const int BASE_DAMAGE = 150;
 
 class Simulator {
   static double elementalFactor(Element attacker, Element defender) {

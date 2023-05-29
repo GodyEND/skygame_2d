@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flame/components.dart';
+import 'package:skygame_2d/game/helper.dart';
 import 'package:skygame_2d/game/unit.dart';
 import 'package:skygame_2d/graphics/graphics.dart';
 import 'package:skygame_2d/models/enums.dart';
@@ -21,14 +22,15 @@ extension UnitRenderExt on MatchUnit {
   }
 
   void updateAssetVisibility(double dt) {
-    if (type != BrawlType.lead &&
-        type != BrawlType.leftAce &&
-        type != BrawlType.rightAce) {
+    if (!MatchHelper.isFrontrow(type)) {
       asset.healthbar.setOpacity(0);
       asset.healthbarBG.setOpacity(0);
       asset.chargebar.setOpacity(0);
       textInfo(DAMAGE_TEXT)!.text = '';
       textInfo(CHARGE_TEXT)!.text = '';
+      for (var chargeSeparator in asset.chargeSeparator) {
+        chargeSeparator.setOpacity(0);
+      }
     } else {
       asset.healthbar.setOpacity(1);
       asset.healthbarBG.setOpacity(1);
@@ -38,6 +40,9 @@ extension UnitRenderExt on MatchUnit {
       textInfo(CHARGE_TEXT)!.text = '${currentStats[StatType.storage]}';
       updateHealthBar(dt);
       updateChargeBar(dt);
+      for (var chargeSeparator in asset.chargeSeparator) {
+        chargeSeparator.setOpacity(1);
+      }
     }
   }
 

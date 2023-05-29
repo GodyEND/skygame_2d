@@ -124,7 +124,7 @@ class SkyGame2D extends FlameGame with KeyboardEvents {
       case GameState.replaceReserve:
         if (game.player1.state == PlayerState.ready &&
             game.player2.state == PlayerState.ready) {
-          game.updateActive;
+          game.setBrawlQ;
           game.state = GameState.combat;
         }
         break;
