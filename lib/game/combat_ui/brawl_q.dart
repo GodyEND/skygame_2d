@@ -31,7 +31,7 @@ class BrawlQComponent extends PositionComponent {
       size: Vector2(500, 12),
       paint: Paint()..color = Colors.white,
     ));
-    position = Vector2(950, 200);
+    position = Vector2(Constants.SCREEN_CENTER.x, 200);
 
     onQueueChange();
   }
@@ -65,6 +65,7 @@ class BrawlQComponent extends PositionComponent {
   }
 
   final Map<int, SpriteComponent> reusable = {};
+  // ignore: library_private_types_in_public_api
   List<_ActiveQIcon> activeComps = [];
 
   Future<void> onQueueChange() async {
@@ -172,7 +173,8 @@ class BrawlQComponent extends PositionComponent {
 
     final eff = MoveEffect.to(
       Vector2(-30, 50),
-      EffectController(speed: 34),
+      // TODO: use dt
+      EffectController(speed: 34.0 * Constants.ANI_SPEED.toDouble()),
     );
     icon.add(eff);
 

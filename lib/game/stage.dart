@@ -52,20 +52,28 @@ class Stage {
         Vector2(Constants.SCREEN_CENTER.x + spriteHeight.x * 0.55, _lead1Pos.y),
   };
 
-  static final Map<MatchPosition, Vector2> hudPositions = {
-    MatchPosition.p1Lead: Vector2(150, 200),
-    MatchPosition.p1LeftAce: Vector2(200, 100),
-    MatchPosition.p1RightAce: Vector2(100, 300),
-    MatchPosition.p1LeftLink: Vector2(100, 105),
-    MatchPosition.p1RightLink: Vector2(50, 205),
-    MatchPosition.p2Lead: Vector2(1770, 200),
-    MatchPosition.p2LeftAce: Vector2(1820, 300),
-    MatchPosition.p2RightAce: Vector2(1720, 100),
-    MatchPosition.p2LeftLink: Vector2(1870, 205),
-    MatchPosition.p2RightLink: Vector2(1820, 105),
-    // MatchPosition.p1Combatant: Vector2(735, 820),
-    // MatchPosition.p2Combatant: Vector2(1165, 820),
-  };
+  static Vector2 get hudResolution =>
+      Vector2(Constants.SCREEN_WIDTH * 0.18, 100);
+  static Vector2 get hudLeadPos =>
+      Vector2(Constants.SCREEN_WIDTH * 0.12, Constants.SCREEN_HEIGHT * 0.12);
+  static Vector2 get hudLead2Pos =>
+      Vector2(Constants.SCREEN_WIDTH * 0.88, Constants.SCREEN_HEIGHT * 0.12);
+  static Map<MatchPosition, Vector2> get hudPositions => {
+        MatchPosition.p1Lead: hudLeadPos,
+        MatchPosition.p1LeftAce: hudLeadPos + Vector2(75, -hudResolution.y),
+        MatchPosition.p1RightAce: hudLeadPos + Vector2(-75, hudResolution.y),
+        MatchPosition.p1LeftLink:
+            hudLeadPos + Vector2(-30, -hudResolution.y + 25),
+        MatchPosition.p1RightLink: hudLeadPos + Vector2(-105, 25),
+        MatchPosition.p2Lead: hudLead2Pos,
+        MatchPosition.p2LeftAce: hudLead2Pos + Vector2(75, hudResolution.y),
+        MatchPosition.p2RightAce: hudLead2Pos + Vector2(-75, -hudResolution.y),
+        MatchPosition.p2LeftLink: hudLead2Pos + Vector2(105, 25),
+        MatchPosition.p2RightLink:
+            hudLead2Pos + Vector2(30, -hudResolution.y + 25),
+        // MatchPosition.p1Combatant: Vector2(735, 820),
+        // MatchPosition.p2Combatant: Vector2(1165, 820),
+      };
 
   Stage(this.name, this.bg);
 }

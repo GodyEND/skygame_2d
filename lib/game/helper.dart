@@ -105,9 +105,6 @@ class MatchHelper {
       currentTarget = game.field[newTargetPos];
       attacker.target = newTargetPos;
     }
-    // if (currentTarget!.position == MatchPosition.defeated) {
-    //   game.state == GameState.end;
-    // }
     return currentTarget!;
   }
 

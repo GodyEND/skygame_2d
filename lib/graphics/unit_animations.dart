@@ -61,11 +61,13 @@ extension UnitAssetsAnimationExt on UnitAssets {
       Stage.positions[targetPos]! + Vector2(attackDist, 0),
       EffectController(duration: 0.005 / dt),
       onComplete: () {
-        AnimationsManager.fireCharge(dt,
-            unit: unit,
-            startPos: sprite.position -
-                (unit.owner == Owner.p1 ? Vector2.all(60) : Vector2(-60, 60)),
-            charge: unit.incomingCharge);
+        if (unit.incomingCharge > 0) {
+          AnimationsManager.fireCharge(dt,
+              unit: unit,
+              startPos: sprite.position -
+                  (unit.owner == Owner.p1 ? Vector2.all(60) : Vector2(-60, 60)),
+              charge: unit.incomingCharge);
+        }
         animationState.value = UnitAniState.exitChallenge;
       },
     ));

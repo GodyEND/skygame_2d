@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:skygame_2d/game/stage.dart';
 import 'package:skygame_2d/models/unit_assets.dart';
 import 'package:skygame_2d/game/helper.dart';
 import 'package:skygame_2d/game/unit.dart';
@@ -6,6 +7,7 @@ import 'package:skygame_2d/game/game.dart';
 import 'package:skygame_2d/graphics/graphics.dart';
 import 'package:skygame_2d/models/unit.dart';
 import 'package:skygame_2d/models/enums.dart';
+import 'package:skygame_2d/models/unit_hud.dart';
 
 enum MatchState { setup, base, replace, end }
 
@@ -51,24 +53,22 @@ class Player {
       owner: owner,
       position: unitPos,
       target: MatchHelper.getDefaultTarget(unitPos),
-      links: [],
-      asset: _addAssets(game, unit, unitPos),
+      links: const [],
+      asset: _addAssets(unit, unitPos),
     );
     matchUnits[position]!.asset.unit = matchUnits[position]!;
   }
 }
 
-UnitAssets _addAssets(GameManager game, Unit unit, MatchPosition unitPos) {
+UnitAssets _addAssets(Unit unit, MatchPosition unitPos) {
   return UnitAssets(
       sprite: GraphicsManager.createUnitSprite(unitPos, unit.image),
-      // profile: GraphicsManager.createUnitProfile(unitPos, unit.profile),
-      // healthbar: GraphicsManager.createHealthBar(unitPos),
-      // healthbarBG: GraphicsManager.createHealthBarBG(unitPos),
-      // chargebar: GraphicsManager.createChargeBar(unitPos),
-
+      hud: UnitHUDComponent(
+        profileImage: unit.profile,
+        matchPosition: unitPos,
+        size: Stage.hudResolution,
+      ),
       infoList: {
-        DAMAGE_TEXT: GraphicsManager.createHPHUDText(unitPos),
-        CHARGE_TEXT: GraphicsManager.createChargeHUDText(unitPos),
         EXEC_ICON: GraphicsManager.createUnitProfile(unitPos, unit.profile),
       });
 }

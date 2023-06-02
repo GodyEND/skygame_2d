@@ -91,12 +91,12 @@ extension GameReplaceState on GameManager {
       target ??= field[MatchHelper.getPosRef(
           MatchHelper.getOwner(old.target), BrawlType.lead)];
       replacement.target = target!.position;
-      replacement.asset.prepCombatAssets;
+      replacement.asset.refresh();
       field[old.position] = replacement;
     }
 
     old.position = MatchPosition.defeated;
-    old.asset.clearAssets(gameContext);
+    old.asset.removeFromGame(gameContext);
 
     if (replacementPos != null) {
       field[replacementPos] = null;

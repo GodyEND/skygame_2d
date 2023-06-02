@@ -102,7 +102,10 @@ class GameManager {
     field[MatchPosition.p2RightLink] = p2RightLink;
   }
 
-  MatchUnit get active => brawlQ.first;
+  MatchUnit get active {
+    if (brawlQ.isEmpty) setBrawlQ;
+    return brawlQ.first;
+  }
 
   void get _resetBrawlQ {
     brawlQ.addAll(GameManager.executionOrder(units));
@@ -214,7 +217,7 @@ class GameManager {
     (spriteList[SCORE_TEXT]! as TextComponent).text =
         '${player1.points} : ${player2.points}';
     for (var unit in units) {
-      unit.asset.prepCombatAssets;
+      unit.asset.refresh();
     }
   }
 }

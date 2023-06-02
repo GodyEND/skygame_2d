@@ -1,3 +1,5 @@
+// ignore_for_file: non_constant_identifier_names, constant_identifier_names
+
 import 'package:flame/components.dart';
 
 class Constants {
@@ -11,6 +13,8 @@ class Constants {
   static double get SCREEN_HEIGHT => _screen_width * 9 / 16;
   static Vector2 get SCREEN_CENTER =>
       Vector2(SCREEN_WIDTH * 0.5, SCREEN_HEIGHT * 0.5);
+
+  static const int HUD_TEXT_PRIORITY = 10;
 // Combat settings
   static const int COMBAT_Q_LENGTH = 7;
   static const int ANI_SPEED = 1;

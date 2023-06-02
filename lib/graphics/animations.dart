@@ -17,12 +17,12 @@ class AnimationsManager {
     // Fire animation
     final scaleEff = ScaleEffect.to(
         Vector2.all(1),
-        DelayedEffectController(EffectController(duration: 1 / (32 * dt)),
-            delay: dt * 5));
+        DelayedEffectController(EffectController(duration: 0.01 / dt),
+            delay: 0.03 / dt));
     final moveEff = MoveEffect.by(
         Vector2(0, -28),
-        DelayedEffectController(EffectController(duration: 1 / (32 * dt)),
-            delay: dt * 5));
+        DelayedEffectController(EffectController(duration: 0.01 / dt),
+            delay: 0.03 / dt));
     sprite.add(scaleEff);
     sprite.add(moveEff);
   }

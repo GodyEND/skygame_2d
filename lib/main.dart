@@ -30,12 +30,18 @@ void main() {
 class SkyGame2D extends FlameGame with KeyboardEvents {
   late GameManager game;
 
-  // double elapsedTime = 0.0;
-
   @override
   Future<void> onLoad() async {
     Constants.setSCREEN_WIDTH(size.x);
     await setup();
+  }
+
+  @override
+  void handleResize(Vector2 size) {
+    // ignore: invalid_use_of_internal_member
+    super.handleResize(size);
+    Constants.setSCREEN_WIDTH(size.x);
+    // Add refresh method to render objects
   }
 
   @override
@@ -71,6 +77,7 @@ class SkyGame2D extends FlameGame with KeyboardEvents {
     Units.load;
 
     game = GameManager(this);
+    game.state = GameState.setup;
   }
 
   @override
@@ -82,7 +89,7 @@ class SkyGame2D extends FlameGame with KeyboardEvents {
         _setup();
         break;
       case GameState.combat:
-        _renderCombat(dt);
+        _renderCombat(dt * Constants.ANI_SPEED);
         break;
       case GameState.replace:
         if (game.player1.toBeReplaced != null) {
@@ -117,6 +124,8 @@ class SkyGame2D extends FlameGame with KeyboardEvents {
         break;
       case GameState.end:
         print('MATCH ENDED');
+        break;
+      default:
         break;
     }
 
@@ -167,7 +176,7 @@ class SkyGame2D extends FlameGame with KeyboardEvents {
             return;
           }
           game.currentEvent = Simulator.combatEventResult(game);
-          game.currentEvent = CombatEventResult.stagger;
+          // game.currentEvent = CombatEventResult.dodge;
           AnimationsManager.animateEventText(dt, game.currentEvent);
 
           // Simulate Combat
@@ -214,7 +223,6 @@ class SkyGame2D extends FlameGame with KeyboardEvents {
       case CombatState.fx:
         break;
       case CombatState.swap:
-        // if (elapsedTime == 0) {
         final user = game.active;
         final lead =
             game.field[MatchHelper.getPosRef(user.owner, BrawlType.lead)]!;
@@ -223,24 +231,15 @@ class SkyGame2D extends FlameGame with KeyboardEvents {
             user.currentStats.values[StatType.storage]! -
                 user.currentCosts[CostType.swap];
 
-        AnimationsManager.prepareSwap(user, lead);
+        // AnimationsManager.prepareSwap(user, lead);
         game.updateFieldForSwap(dt, user, lead);
 
         for (var unit in game.units) {
           unit.render(dt);
         }
-        // }
 
-        // elapsedTime += dt;
-        // if (elapsedTime > 3) {
-        //   elapsedTime = 0;
-
-        //   game.cleanup(dt);
-        //   // TODO: Update ActionQ
-        // }
         break;
       case CombatState.retreat:
-        // if (elapsedTime == 0) {
         final user = game.active;
         late MatchUnit newActive;
         final ll =
@@ -264,22 +263,15 @@ class SkyGame2D extends FlameGame with KeyboardEvents {
         user.currentStats.values[StatType.storage] =
             user.currentStats.values[StatType.storage]! -
                 user.currentCosts[CostType.retreat];
-        AnimationsManager.prepareSwap(user, newActive);
+        // AnimationsManager.prepareSwap(user, newActive);
         game.updateFieldForSwap(dt, user, newActive);
 
         for (var unit in game.units) {
           unit.render(dt);
         }
-        // }
-
-        // elapsedTime += dt;
-        // if (elapsedTime > 3) {
-        //   elapsedTime = 0;
 
         game.cleanup(dt);
 
-        // TODO: Update ActionQ
-        // }
         break;
       default:
         break;

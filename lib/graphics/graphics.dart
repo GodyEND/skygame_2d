@@ -1,3 +1,5 @@
+// ignore_for_file: constant_identifier_names
+
 import 'dart:ui' as ui;
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
@@ -10,8 +12,6 @@ import 'package:skygame_2d/utils.dart/constants.dart';
 
 // Keys
 const String SCORE_TEXT = 'score_text';
-const String DAMAGE_TEXT = 'damage_text';
-const String CHARGE_TEXT = 'charge_text';
 const String EVENT_TEXT = 'event_text';
 const String EXEC_ICON = 'exec_icon';
 
@@ -57,6 +57,7 @@ class GraphicsManager {
       MatchPosition unitPos, ui.Image image) {
     final owner = MatchHelper.getOwner(unitPos);
     final scale = Vector2((owner == Owner.p2) ? 1.0 : -1.0, 1.0);
+    // return SpriteComponent();
     return SpriteComponent(
         size: Vector2(80, 80),
         scale: scale,
@@ -80,31 +81,14 @@ class GraphicsManager {
       scale: scale,
       position: Stage.hudPositions[unitPos],
       sprite: Sprite(image),
-      anchor: Anchor.center,
     );
-  }
-
-  static TextComponent createHPHUDText(MatchPosition unitPos) {
-    final sprite = createHUDText;
-    final owner = MatchHelper.getOwner(unitPos);
-    sprite.position = Stage.hudPositions[unitPos] ?? Vector2(0, 0);
-    sprite.position += owner == Owner.p1 ? Vector2(210, 12) : Vector2(-210, 12);
-    return sprite;
-  }
-
-  static TextComponent createChargeHUDText(MatchPosition unitPos) {
-    final sprite = createHUDText;
-    final owner = MatchHelper.getOwner(unitPos);
-    sprite.position = Stage.hudPositions[unitPos] ?? Vector2(0, 0);
-    sprite.position += owner == Owner.p1 ? Vector2(210, 43) : Vector2(-210, 43);
-    return sprite;
   }
 
   static TextComponent createScoreHUDText() {
     return TextComponent(
       anchor: Anchor.center,
-      priority: 5,
-      position: Vector2(950, 100),
+      priority: Constants.HUD_TEXT_PRIORITY,
+      position: Vector2(Constants.SCREEN_CENTER.x, 100),
       textRenderer: TextPaint(
         style: TextStyle(
             fontWeight: FontWeight.w900,
@@ -119,7 +103,7 @@ class GraphicsManager {
   static TextComponent get createHUDText {
     return TextComponent(
       anchor: Anchor.center,
-      priority: 5,
+      priority: Constants.HUD_TEXT_PRIORITY,
       textRenderer: TextPaint(
         style: TextStyle(
             fontWeight: FontWeight.w900,
@@ -161,85 +145,38 @@ class GraphicsManager {
     );
   }
 
-  static RectangleComponent createHealthBar(MatchPosition unitPos) {
+  static RectangleComponent createHealthBar() {
     final sprite = RectangleComponent(size: Vector2(300, 25));
     sprite.setColor(Colors.green);
     sprite.priority = 2;
-    final fieldPos = MatchHelper.getBrawlType(unitPos);
-
-    if (fieldPos != BrawlType.lead &&
-        fieldPos != BrawlType.leftAce &&
-        fieldPos != BrawlType.rightAce) {
-      return sprite;
-    }
-
-    final owner = MatchHelper.getOwner(unitPos);
-    if (owner == Owner.p1) {
-      sprite.position = Stage.hudPositions[unitPos]! + Vector2(60, 0);
-    } else {
-      sprite.anchor = Anchor.topRight;
-      sprite.position = Stage.hudPositions[unitPos]! - Vector2(60, 0);
-    }
     return sprite;
   }
 
-  static RectangleComponent createHealthBarBG(MatchPosition unitPos) {
+  static RectangleComponent createHealthBarBG() {
     final sprite = RectangleComponent(size: Vector2(300, 25));
     sprite.setColor(Colors.black);
     sprite.priority = 1;
-    final fieldPos = MatchHelper.getBrawlType(unitPos);
-
-    if (fieldPos != BrawlType.lead &&
-        fieldPos != BrawlType.leftAce &&
-        fieldPos != BrawlType.rightAce) {
-      return sprite;
-    }
-
-    final owner = MatchHelper.getOwner(unitPos);
-    if (owner == Owner.p1) {
-      sprite.position = Stage.hudPositions[unitPos]! + Vector2(60, 0);
-    } else {
-      sprite.anchor = Anchor.topRight;
-      sprite.position = Stage.hudPositions[unitPos]! - Vector2(60, 0);
-    }
     return sprite;
   }
 
-  static RectangleComponent createChargeBar(MatchPosition unitPos) {
+  static RectangleComponent createChargeBar() {
     final sprite = RectangleComponent(size: Vector2(0, 12));
     sprite.setColor(Colors.blue);
-    sprite.priority = 1;
-
-    final fieldPos = MatchHelper.getBrawlType(unitPos);
-
-    if (fieldPos != BrawlType.lead &&
-        fieldPos != BrawlType.leftAce &&
-        fieldPos != BrawlType.rightAce) {
-      return sprite;
-    }
-
-    final owner = MatchHelper.getOwner(unitPos);
-    if (owner == Owner.p1) {
-      sprite.position = Stage.hudPositions[unitPos]! + Vector2(60, 37);
-    } else {
-      sprite.anchor = Anchor.topRight;
-      sprite.position = Stage.hudPositions[unitPos]! - Vector2(60, -37);
-    }
+    sprite.priority = 2;
     return sprite;
   }
 
-  static RectangleComponent createChargeSeparator(MatchPosition unitPos) {
+  static RectangleComponent createChargeBarBG() {
+    final sprite = RectangleComponent(size: Vector2(300, 12));
+    sprite.setColor(Colors.grey.shade500);
+    sprite.priority = 1;
+    return sprite;
+  }
+
+  static RectangleComponent createChargeSeparator() {
     final sprite = RectangleComponent(size: Vector2(3, 12));
     sprite.setColor(Colors.black);
-    sprite.priority = 2;
-
-    final owner = MatchHelper.getOwner(unitPos);
-    if (owner == Owner.p1) {
-      sprite.position = Stage.hudPositions[unitPos]! + Vector2(60, 37);
-    } else {
-      sprite.anchor = Anchor.topRight;
-      sprite.position = Stage.hudPositions[unitPos]! - Vector2(60, -37);
-    }
+    sprite.priority = 3;
     return sprite;
   }
 

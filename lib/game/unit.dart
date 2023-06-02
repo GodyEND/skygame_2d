@@ -14,6 +14,7 @@ import 'package:skygame_2d/models/unit.dart';
 import 'package:skygame_2d/models/unit_assets.dart';
 import 'package:skygame_2d/models/unit_render_ext.dart';
 
+// ignore: must_be_immutable
 class MatchUnit extends Equatable {
   final int id;
   final Owner owner;
@@ -28,29 +29,28 @@ class MatchUnit extends Equatable {
   FX currentFX;
   BES currentBES;
   Costs currentCosts;
-  List<Command> actionQ = [];
-  List<EventNotation> eventQ = [];
+  final List<Command> actionQ = [];
+  final List<EventNotation> eventQ = [];
   final UnitAssets asset;
   final GameManager game;
 
   // Live Settings
   MatchPosition target;
-  List<MatchPosition> links;
+  final List<MatchPosition> links;
 
   // Updates
   int incomingDamage;
-  bool isDamaged = false;
   int incomingCharge;
-  bool isCharging = false;
 
-  MatchUnit(this.character,
-      {required this.game,
-      required this.owner,
-      required this.target,
-      required this.position,
-      required this.links,
-      required this.asset})
-      : id = game.units.length + 1,
+  MatchUnit(
+    this.character, {
+    required this.game,
+    required this.owner,
+    required this.target,
+    required this.position,
+    required this.links,
+    required this.asset,
+  })  : id = game.units.length + 1,
         incomingDamage = 0,
         incomingCharge = 0,
         currentSpecies = character.species,
@@ -74,31 +74,32 @@ class MatchUnit extends Equatable {
         currentRelease = character.release,
         currentFX = character.fx,
         currentBES = character.bes,
-        currentCosts = character.costs {
+        currentCosts = character.costs,
+        super() {
     game.units.add(this);
   }
 
   void render(double dt) {
-    updateAssetVisibility(dt);
+    asset.hud.hpText.text =
+        '${currentStats[StatType.hp]} / ${iStats[StatType.hp]}';
+    asset.hud.chargeText.text = '${currentStats[StatType.storage]}';
     // TODO: listener
     if (asset.animationState.value.index > UnitAniState.knockback.index) {
       updateHealthBar(dt);
       updateChargeBar(dt);
       updateChargeBarSeparator(dt);
     }
+    asset.hud.setOpacity();
   }
 
   void get resetLiveStatus {
     incomingDamage = 0;
     incomingCharge = 0;
-    isDamaged = false;
-    isCharging = false;
   }
 
   BrawlType get type => MatchHelper.getBrawlType(position);
 
   @override
-  // TODO: implement props
   List<Object?> get props => [
         id,
         owner,

@@ -1,59 +1,19 @@
 import 'dart:math';
 
 import 'package:flame/components.dart';
-import 'package:skygame_2d/game/helper.dart';
 import 'package:skygame_2d/game/unit.dart';
 import 'package:skygame_2d/graphics/graphics.dart';
 import 'package:skygame_2d/models/enums.dart';
 
 extension UnitRenderExt on MatchUnit {
-  TextComponent? textInfo(String key) {
-    if (asset.infoList[key] is TextComponent) {
-      return asset.infoList[key] as TextComponent;
-    }
-    return null;
-  }
-
-  SpriteComponent? iconInfo(String key) {
-    if (asset.infoList[key] is SpriteComponent) {
-      return asset.infoList[key] as SpriteComponent;
-    }
-    return null;
-  }
-
-  void updateAssetVisibility(double dt) {
-    if (!MatchHelper.isFrontrow(type)) {
-      // asset.healthbar.setOpacity(0);
-      // asset.healthbarBG.setOpacity(0);
-      // asset.chargebar.setOpacity(0);
-      textInfo(DAMAGE_TEXT)!.text = '';
-      textInfo(CHARGE_TEXT)!.text = '';
-      // for (var chargeSeparator in asset.chargeSeparator) {
-      //   chargeSeparator.add(RemoveEffect());
-      // }
-    } else {
-      // asset.healthbar.setOpacity(1);
-      // asset.healthbarBG.setOpacity(1);
-      // asset.chargebar.setOpacity(1);
-      textInfo(DAMAGE_TEXT)!.text =
-          '${currentStats[StatType.hp]} / ${iStats[StatType.hp]}';
-      textInfo(CHARGE_TEXT)!.text = '${currentStats[StatType.storage]}';
-      updateHealthBar(dt);
-      updateChargeBar(dt);
-      // for (var chargeSeparator in asset.chargeSeparator) {
-      //   chargeSeparator.setOpacity(1);
-      // }
-    }
-  }
-
   void updateHealthBar(double dt) {
-    // asset.healthbar.width =
-    //     300 * max(0, currentStats[StatType.hp] / iStats[StatType.hp]);
+    asset.hud.healthbar.width = asset.hud.healthbarBG.width *
+        max(0, currentStats[StatType.hp] / iStats[StatType.hp]);
   }
 
   void updateChargeBar(double dt) {
-    // asset.chargebar.width =
-    //     300 * min(1, currentStats[StatType.storage] / iStats[StatType.storage]);
+    asset.hud.chargebar.width = asset.hud.chargebarBG.width *
+        min(1, currentStats[StatType.storage] / iStats[StatType.storage]);
   }
 
   void updateChargeBarSeparator(double dt) {
@@ -64,25 +24,26 @@ extension UnitRenderExt on MatchUnit {
     }
     var separators = divisions.floor();
     if (divisions.floor() == divisions) separators = max(0, separators - 1);
-    // if (asset.chargeSeparator.length > separators) {
-    //   final diff = asset.chargeSeparator.length - separators;
-    //   for (int i = 0; i < diff; i++) {
-    //     game.gameContext.remove(asset.chargeSeparator.last);
-    //   }
-    // } else if (asset.chargeSeparator.length < separators) {
-    //   final diff = separators - asset.chargeSeparator.length;
-    //   for (int i = 0; i < diff; i++) {
-    //     asset.chargeSeparator
-    //         .add(GraphicsManager.createChargeSeparator(position));
-    //     game.gameContext.add(asset.chargeSeparator.last);
-    //   }
-    // }
+    if (asset.hud.chargeSeparator.length > separators) {
+      final diff = asset.hud.chargeSeparator.length - separators;
+      for (int i = 0; i < diff; i++) {
+        asset.hud.remove(asset.hud.chargeSeparator.last);
+      }
+    } else if (asset.hud.chargeSeparator.length < separators) {
+      final diff = separators - asset.hud.chargeSeparator.length;
+      for (int i = 0; i < diff; i++) {
+        asset.hud.chargeSeparator.add(GraphicsManager.createChargeSeparator());
+        asset.hud.add(asset.hud.chargeSeparator.last);
+      }
+    }
 
-    // for (int i = 0; i < asset.chargeSeparator.length; i++) {
-    //   final offset = (300 / divisions) * (divisions - divisions.floor());
-    //   final divBar = ((300 - offset) / divisions.floor());
-    //   asset.chargeSeparator[i].x = asset.chargebar.position.x +
-    //       (i + 1) * ((owner == Owner.p1) ? divBar : -divBar);
-    // }
+    for (int i = 0; i < asset.hud.chargeSeparator.length; i++) {
+      final offset = (asset.hud.chargebarBG.width / divisions) *
+          (divisions - divisions.floor());
+      final divBar =
+          ((asset.hud.chargebarBG.width - offset) / divisions.floor());
+      asset.hud.chargeSeparator[i].position = asset.hud.chargebarBG.position +
+          Vector2((i + 1) * ((owner == Owner.p1) ? divBar : -divBar), 0);
+    }
   }
 }

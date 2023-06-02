@@ -170,13 +170,6 @@ class Simulator {
       default:
         break;
     }
-
-    if (defender.incomingDamage > 0) {
-      defender.isDamaged = true;
-    }
-    if (attacker.incomingDamage > 0) {
-      attacker.isDamaged = true;
-    }
   }
 
   static setCharge(GameManager game, MatchUnit attacker, MatchUnit defender) {
@@ -232,13 +225,6 @@ class Simulator {
         break;
       default:
         break;
-    }
-
-    if (attacker.incomingCharge > 0) {
-      attacker.isCharging = true;
-    }
-    if (defender.incomingCharge > 0) {
-      defender.isCharging = true;
     }
   }
 
