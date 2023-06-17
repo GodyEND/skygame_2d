@@ -39,8 +39,8 @@ class Simulator {
     final defender = game.field[attacker.target]!;
     CombatEventResult result = CombatEventResult.hit;
     // Check for Hit
-    double hitChance = attacker.currentBES.values[BESType.hit]! -
-        defender.currentBES.values[BESType.evasion]!;
+    double hitChance = attacker.current.bes.values[BESType.hit]! -
+        defender.current.bes.values[BESType.evasion]!;
     if (hitChance <= 0) {
       result = CombatEventResult.dodge;
     } else if (hitChance < 100) {
@@ -52,15 +52,15 @@ class Simulator {
     }
     // Check for Counter
     if (result == CombatEventResult.dodge) {
-      final counterChance = defender.currentBES.values[BESType.counter]!;
+      final counterChance = defender.current.bes.values[BESType.counter]!;
       final rng = Random().nextInt(100);
       if (rng <= counterChance) {
         return CombatEventResult.counter;
       }
     }
     // Check for Crit
-    final critChance = attacker.currentBES.values[BESType.crit]! -
-        defender.currentBES.values[BESType.critResist]!;
+    final critChance = attacker.current.bes.values[BESType.crit]! -
+        defender.current.bes.values[BESType.critResist]!;
     if (critChance > 0) {
       final rng = Random().nextInt(100);
       if (rng <= critChance) {
@@ -69,7 +69,7 @@ class Simulator {
     }
 
 // Check Lethality
-    final lethality = attacker.currentBES.values[BESType.lethality]!;
+    final lethality = attacker.current.bes.values[BESType.lethality]!;
     if (result == CombatEventResult.crit && lethality > 10) {
       final lethalChance = log(lethality) * 0.1;
       final rng = Random().nextDouble() * 100;
@@ -79,8 +79,8 @@ class Simulator {
     }
 
     // Check for Block
-    final blockChance = defender.currentBES.values[BESType.block]! -
-        defender.currentBES.values[BESType.force]!;
+    final blockChance = defender.current.bes.values[BESType.block]! -
+        defender.current.bes.values[BESType.force]!;
     if (blockChance > 0) {
       final rng = Random().nextInt(100);
       if (rng < blockChance) {
@@ -88,22 +88,22 @@ class Simulator {
       }
     }
     // Check for Stagger
-    final blockMastery = defender.currentBES.values[BESType.blockMastery]!;
+    final blockMastery = defender.current.bes.values[BESType.blockMastery]!;
     if (result == CombatEventResult.block && blockMastery > 0) {
       final rng = Random().nextDouble() * 100;
       final staggerChance =
-          max(0, blockMastery - attacker.currentBES[BESType.force]);
+          max(0, blockMastery - attacker.current.bes[BESType.force]);
       if (rng <= staggerChance) {
         return CombatEventResult.stagger;
       }
     }
 
     // Check for Knockback
-    final knockback = attacker.currentBES.values[BESType.force]!;
+    final knockback = attacker.current.bes.values[BESType.force]!;
     if (result == CombatEventResult.block && knockback > 0) {
       final rng = Random().nextDouble() * 100;
       final knockbackChance =
-          max(0, knockback - attacker.currentBES[BESType.blockMastery]);
+          max(0, knockback - attacker.current.bes[BESType.blockMastery]);
 
       if (rng <= knockbackChance) {
         return CombatEventResult.overwhelm;
@@ -118,9 +118,9 @@ class Simulator {
     defender.incomingDamage = 0;
     switch (game.currentEvent) {
       case CombatEventResult.hit:
-        final acc = attacker.currentBES.values[BESType.hit]!.toInt();
+        final acc = attacker.current.bes.values[BESType.hit]!.toInt();
         final rng = Random().nextInt(acc);
-        final eva = defender.currentBES.values[BESType.evasion]!.toInt();
+        final eva = defender.current.bes.values[BESType.evasion]!.toInt();
         final evaRNG = Random().nextInt(eva);
         final evasiveness = 0.1 * evaRNG / 100;
         final double accuracyFactor =
@@ -129,7 +129,7 @@ class Simulator {
             _damageFormula(attacker, defender, accuracyFactor: accuracyFactor);
         break;
       case CombatEventResult.crit:
-        final critPow = attacker.currentBES.values[BESType.lethality]!.toInt();
+        final critPow = attacker.current.bes.values[BESType.lethality]!.toInt();
         final rng = critPow > 0 ? Random().nextInt(critPow) : 0;
         final double critFactor = 1.2 + rng / 100;
         defender.incomingDamage =
@@ -137,12 +137,12 @@ class Simulator {
         break;
       case CombatEventResult.lethal:
         defender.incomingDamage =
-            defender.currentStats.values[StatType.hp]!.toInt();
+            defender.current.stats.values[StatType.hp]!.toInt();
         break;
       case CombatEventResult.counter:
-        final acc = defender.currentBES.values[BESType.hit]!.toInt();
+        final acc = defender.current.bes.values[BESType.hit]!.toInt();
         final rng = Random().nextInt(acc);
-        final eva = attacker.currentBES.values[BESType.evasion]!.toInt();
+        final eva = attacker.current.bes.values[BESType.evasion]!.toInt();
         final evaRNG = Random().nextInt(eva);
         final evasiveness = 0.5 * evaRNG / 100;
         final double accuracyFactor =
@@ -159,7 +159,7 @@ class Simulator {
                 ? 1 / 1.2
                 : 1;
         final blockPow =
-            (attacker.currentBES.values[BESType.blockMastery]! * blockMod)
+            (attacker.current.bes.values[BESType.blockMastery]! * blockMod)
                 .toInt();
 
         final rng = blockPow > 0 ? Random().nextInt(blockPow) : 0;
@@ -178,36 +178,36 @@ class Simulator {
 
     switch (game.currentEvent) {
       case CombatEventResult.hit:
-        final charge = attacker.currentStats[StatType.charge].toInt();
+        final charge = attacker.current.stats[StatType.charge].toInt();
         attacker.incomingCharge = charge;
-        attacker.currentStats.values[StatType.storage] =
-            (attacker.currentStats[StatType.storage].toInt() + charge)
+        attacker.current.stats.values[StatType.storage] =
+            (attacker.current.stats[StatType.storage].toInt() + charge)
                 .toDouble();
         break;
       case CombatEventResult.counter:
-        final charge = defender.currentStats[StatType.charge].toInt();
+        final charge = defender.current.stats[StatType.charge].toInt();
         defender.incomingCharge = charge;
-        defender.currentStats.values[StatType.storage] =
-            (defender.currentStats[StatType.storage].toInt() + charge)
+        defender.current.stats.values[StatType.storage] =
+            (defender.current.stats[StatType.storage].toInt() + charge)
                 .toDouble();
         break;
       case CombatEventResult.crit:
       case CombatEventResult.lethal:
-        final charge = (attacker.currentStats[StatType.charge] *
+        final charge = (attacker.current.stats[StatType.charge] *
                 ((game.currentEvent == CombatEventResult.crit) ? 1.5 : 2))
             .toInt();
         attacker.incomingCharge = charge;
-        attacker.currentStats.values[StatType.storage] =
-            (attacker.currentStats[StatType.storage].toInt() + charge)
+        attacker.current.stats.values[StatType.storage] =
+            (attacker.current.stats[StatType.storage].toInt() + charge)
                 .toDouble();
         break;
       case CombatEventResult.block:
       case CombatEventResult.overwhelm:
       case CombatEventResult.stagger:
-        final chargeA = (attacker.currentStats[StatType.charge] * 0.5).toInt();
+        final chargeA = (attacker.current.stats[StatType.charge] * 0.5).toInt();
         attacker.incomingCharge = chargeA;
-        attacker.currentStats.values[StatType.storage] =
-            (attacker.currentStats[StatType.storage].toInt() + chargeA)
+        attacker.current.stats.values[StatType.storage] =
+            (attacker.current.stats[StatType.storage].toInt() + chargeA)
                 .toDouble();
 
         final chargeFactor = (game.currentEvent == CombatEventResult.block)
@@ -216,11 +216,11 @@ class Simulator {
                 ? 0.25 * 1.5
                 : 0.25 / 1.5;
         final chargeD =
-            (defender.currentStats[StatType.charge] * chargeFactor).toInt();
+            (defender.current.stats[StatType.charge] * chargeFactor).toInt();
         if (game.currentEvent == CombatEventResult.stagger) {}
         defender.incomingCharge = chargeD;
-        defender.currentStats.values[StatType.storage] =
-            (defender.currentStats[StatType.storage].toInt() + chargeD)
+        defender.current.stats.values[StatType.storage] =
+            (defender.current.stats[StatType.storage].toInt() + chargeD)
                 .toDouble();
         break;
       default:
@@ -236,15 +236,15 @@ class Simulator {
     final elementalFactor = Simulator.elementalFactor(
         attacker.character.element, defender.character.element);
 
-    final attackerCS = attacker.currentStats[StatType.storage];
-    final attackerS = attacker.iStats[StatType.storage];
+    final attackerCS = attacker.current.stats[StatType.storage];
+    final attackerS = attacker.initial.stats[StatType.storage];
     final double storageBonus = attackerCS > attackerS
         ? pow(1.1, attackerCS / attackerS).toDouble()
         : 1;
-    final atk = attacker.currentStats[StatType.attack] * storageBonus;
+    final atk = attacker.current.stats[StatType.attack] * storageBonus;
     final dmg = ((Constants.BASE_DAMAGE *
                 atk /
-                defender.currentStats[StatType.defense]) *
+                defender.current.stats[StatType.defense]) *
             accuracyFactor *
             critFactor *
             blockFactor *

@@ -1,7 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:skygame_2d/game/game.dart';
 import 'package:skygame_2d/models/enums.dart';
-import 'package:skygame_2d/models/player.dart';
 
 extension GameInputExt on GameManager {
   bool player1Input(RawKeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
@@ -50,7 +49,6 @@ extension GameInputExt on GameManager {
 
   _validateP1Input(
       RawKeyEvent event, Set<LogicalKeyboardKey> keysPressed, BrawlType user) {
-    Owner owner = Owner.p1;
     // Target Switch A
     final isP1Target = keysPressed.contains(LogicalKeyboardKey.keyA);
     // Swap E
@@ -66,25 +64,25 @@ extension GameInputExt on GameManager {
     final isP1AutoRelease = keysPressed.contains(LogicalKeyboardKey.keyS);
     final isP1AutoGuard = keysPressed.contains(LogicalKeyboardKey.keyG);
     if (isP1Target) {
-      addToCommandQ(Command(CommandType.target, owner, user));
+      // addToCommandQ(Command(CommandType.target, owner, user));
       return true;
     } else if (isP1Swap) {
-      addToCommandQ(Command(CommandType.swap, owner, user));
+      // addToCommandQ(Command(CommandType.swap, owner, user));
       return true;
     } else if (isP1Retreat) {
-      addToCommandQ(Command(CommandType.retreat, owner, user));
+      // addToCommandQ(Command(CommandType.retreat, owner, user));
       return true;
     } else if (isP1Release) {
-      addToCommandQ(Command(CommandType.releaseAtk, owner, user));
+      // addToCommandQ(Command(CommandType.releaseAtk, owner, user));
       return true;
     } else if (isP1Guard) {
-      addToCommandQ(Command(CommandType.guard, owner, user));
+      // addToCommandQ(Command(CommandType.guard, owner, user));
       return true;
     } else if (isP1AutoRelease) {
-      addToCommandQ(Command(CommandType.autoRelease, owner, user));
+      // addToCommandQ(Command(CommandType.autoRelease, owner, user));
       return true;
     } else if (isP1AutoGuard) {
-      addToCommandQ(Command(CommandType.autoRelease, owner, user));
+      // addToCommandQ(Command(CommandType.autoRelease, owner, user));
       return true;
     }
     return false;
@@ -92,7 +90,6 @@ extension GameInputExt on GameManager {
 
   _validateP2Input(
       RawKeyEvent event, Set<LogicalKeyboardKey> keysPressed, BrawlType user) {
-    Owner owner = Owner.p2;
     // Target Switch :
     final isP2Target = keysPressed.contains(LogicalKeyboardKey.semicolon);
     // Swap I
@@ -108,25 +105,25 @@ extension GameInputExt on GameManager {
     final isP2AutoRelease = keysPressed.contains(LogicalKeyboardKey.keyL);
     final isP2AutoGuard = keysPressed.contains(LogicalKeyboardKey.keyH);
     if (isP2Target) {
-      addToCommandQ(Command(CommandType.target, owner, user));
+      // addToCommandQ(Command(CommandType.target, owner, user));
       return true;
     } else if (isP2Swap) {
-      addToCommandQ(Command(CommandType.swap, owner, user));
+      // addToCommandQ(Command(CommandType.swap, owner, user));
       return true;
     } else if (isP2Retreat) {
-      addToCommandQ(Command(CommandType.retreat, owner, user));
+      // addToCommandQ(Command(CommandType.retreat, owner, user));
       return true;
     } else if (isP2Release) {
-      addToCommandQ(Command(CommandType.releaseAtk, owner, user));
+      // addToCommandQ(Command(CommandType.releaseAtk, owner, user));
       return true;
     } else if (isP2Guard) {
-      addToCommandQ(Command(CommandType.guard, owner, user));
+      // addToCommandQ(Command(CommandType.guard, owner, user));
       return true;
     } else if (isP2AutoRelease) {
-      addToCommandQ(Command(CommandType.autoRelease, owner, user));
+      // addToCommandQ(Command(CommandType.autoRelease, owner, user));
       return true;
     } else if (isP2AutoGuard) {
-      addToCommandQ(Command(CommandType.autoRelease, owner, user));
+      // addToCommandQ(Command(CommandType.autoRelease, owner, user));
       return true;
     }
     return false;

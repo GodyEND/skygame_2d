@@ -2,10 +2,10 @@ import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:skygame_2d/game/unit.dart';
 import 'package:skygame_2d/graphics/unit_animations.dart';
-import 'package:skygame_2d/models/unit_hud.dart';
+import 'package:skygame_2d/models/match_unit/unit_hud.dart';
 
-class UnitAssets {
-  late MatchUnit unit;
+class MatchUnitAssets {
+  final MatchUnit parent;
   // Combat Asset
   final SpriteComponent sprite;
 // Hud asset
@@ -16,10 +16,11 @@ class UnitAssets {
   ValueNotifier<Function()> animationListener = ValueNotifier(() {});
   Function() prevListener = () {};
 
-  UnitAssets({
+  MatchUnitAssets({
     required this.sprite,
     required this.hud,
     required this.infoList,
+    required this.parent,
   }) {
     animationListener.addListener(manageAnimationStateListener);
   }

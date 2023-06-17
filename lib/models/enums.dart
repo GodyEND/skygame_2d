@@ -36,7 +36,20 @@ enum GameState {
 
 enum CombatState { attack, release, guard, swap, retreat, fx }
 
-enum PlayerState { waiting, ready }
+enum PlayerState { waiting, replace, ready }
+
+enum MatchState { setup, base, replace, end }
+
+enum CommandType {
+  normalAtk,
+  guard,
+  retreat,
+  swap,
+  releaseAtk,
+  target,
+  autoGuard,
+  autoRelease
+}
 
 enum BrawlType {
   lead,

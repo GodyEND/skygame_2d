@@ -19,7 +19,8 @@ class Release1 extends Release {
   void action(MatchUnit user, GameManager game) async {
     final targetLocations = [user.target];
     targetLocations.addAll(MatchHelper.getLinkRef(
-        game.field[user.target]!.owner, MatchHelper.getBrawlType(user.target)));
+        game.field[user.target]!.ownerID,
+        MatchHelper.getBrawlType(user.target)));
 
     for (var targetLocation in targetLocations) {
       final target = game.field[targetLocation];
@@ -48,10 +49,10 @@ class Release2 extends Release {
 
   @override
   void action(MatchUnit user, GameManager game) {
-    user.currentStats.values[StatType.attack] =
-        user.currentStats[StatType.attack] * 1.3;
-    user.currentStats.values[StatType.defense] =
-        user.currentStats[StatType.defense] * 1.3;
+    user.current.stats.values[StatType.attack] =
+        user.current.stats[StatType.attack] * 1.3;
+    user.current.stats.values[StatType.defense] =
+        user.current.stats[StatType.defense] * 1.3;
   }
 }
 

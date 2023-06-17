@@ -10,7 +10,6 @@ import 'package:skygame_2d/game/game.dart';
 import 'package:skygame_2d/game/helper.dart';
 import 'package:skygame_2d/game/unit.dart';
 import 'package:skygame_2d/graphics/graphics.dart';
-import 'package:skygame_2d/models/enums.dart';
 import 'package:skygame_2d/utils.dart/constants.dart';
 import 'package:skygame_2d/utils.dart/extensions.dart';
 
@@ -167,7 +166,8 @@ class BrawlQComponent extends PositionComponent {
       anchor: Anchor.center,
       size: Vector2.all(16),
       position: Vector2(28.5, 65),
-      paint: Paint()..color = unit.owner == Owner.p1 ? Colors.blue : Colors.red,
+      paint: Paint()
+        ..color = MatchHelper.isLeftTeam(unit) ? Colors.blue : Colors.red,
     );
     icon.add(ownerBadge);
 

@@ -16,8 +16,10 @@ class Burn extends Event {
 
   @override
   void action(MatchUnit target, GameManager game) {
-    target.currentStats.values[StatType.hp] = max(0.0,
-        target.currentStats[StatType.hp] - target.iStats[StatType.hp] * 0.06);
+    target.current.stats.values[StatType.hp] = max(
+        0.0,
+        target.current.stats[StatType.hp] -
+            target.initial.stats[StatType.hp] * 0.06);
     final event = target.eventQ.firstWhere((e) => e.event is Burn);
     event.turn = max(0, event.turn - 1);
     if (event.turn == 0) {

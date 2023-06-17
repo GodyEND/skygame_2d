@@ -3,11 +3,12 @@ import 'package:skygame_2d/game/game.dart';
 import 'package:skygame_2d/game/unit.dart';
 import 'package:skygame_2d/main.dart';
 import 'package:skygame_2d/models/enums.dart';
+import 'package:skygame_2d/utils.dart/constants.dart';
 
 class MatchHelper {
-  static MatchPosition getPosRef(Owner owner, BrawlType type) {
+  static MatchPosition getPosRef(int owner, BrawlType type) {
     switch (owner) {
-      case Owner.p1:
+      case 1:
         switch (type) {
           case BrawlType.lead:
             return MatchPosition.p1Lead;
@@ -101,16 +102,16 @@ class MatchHelper {
     if (currentTarget == null ||
         currentTarget.position == MatchPosition.defeated) {
       final newTargetPos = MatchHelper.getPosRef(
-          MatchHelper.getOpponent(attacker.owner), BrawlType.lead);
+          MatchHelper.getOpponent(attacker.ownerID), BrawlType.lead);
       currentTarget = game.field[newTargetPos];
       attacker.target = newTargetPos;
     }
     return currentTarget!;
   }
 
-  static List<MatchPosition> getLinkRef(Owner owner, BrawlType position) {
-    switch (owner) {
-      case Owner.p1:
+  static List<MatchPosition> getLinkRef(int ownerID, BrawlType position) {
+    switch (ownerID) {
+      case Constants.FIRST_PLAYER:
         switch (position) {
           case BrawlType.leftLink:
             return [MatchPosition.p1Lead, MatchPosition.p1LeftAce];
@@ -131,6 +132,10 @@ class MatchHelper {
     }
   }
 
+  static bool isLeftTeam(MatchUnit unit) {
+    return unit.ownerID == Constants.FIRST_PLAYER;
+  }
+
   static bool isFrontrow(BrawlType type) {
     return (type == BrawlType.lead ||
         type == BrawlType.leftAce ||
@@ -141,8 +146,8 @@ class MatchHelper {
     return (position.name.contains('p1')) ? Owner.p1 : Owner.p2;
   }
 
-  static Owner getOpponent(Owner owner) {
-    return owner == Owner.p1 ? Owner.p2 : Owner.p1;
+  static int getOpponent(int ownerID) {
+    return ownerID == 1 ? Constants.SECOND_PLAYER : Constants.FIRST_PLAYER;
   }
 
   static bool remove(SkyGame2D gameContext, Component c) {
@@ -162,10 +167,10 @@ class MatchHelper {
   }
 
   static List<MatchUnit> getOpposingUnits(
-      Map<MatchPosition, MatchUnit?> field, Owner owner) {
+      Map<MatchPosition, MatchUnit?> field, int ownerID) {
     List<MatchUnit?> opponents = [];
-    switch (owner) {
-      case Owner.p1:
+    switch (ownerID) {
+      case Constants.FIRST_PLAYER:
         opponents.add(field[MatchPosition.p2Lead]);
         opponents.add(field[MatchPosition.p2LeftAce]);
         opponents.add(field[MatchPosition.p2RightAce]);

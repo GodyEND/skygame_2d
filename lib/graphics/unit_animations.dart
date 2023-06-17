@@ -3,8 +3,9 @@ import 'dart:math';
 import 'package:flame/effects.dart';
 import 'package:flame/game.dart';
 import 'package:flame/geometry.dart';
+import 'package:skygame_2d/game/helper.dart';
 import 'package:skygame_2d/graphics/animations.dart';
-import 'package:skygame_2d/models/unit_assets.dart';
+import 'package:skygame_2d/models/match_unit/unit_assets.dart';
 import 'package:skygame_2d/game/stage.dart';
 import 'package:skygame_2d/models/enums.dart';
 
@@ -30,9 +31,9 @@ enum UnitAniState {
   end,
 }
 
-extension UnitAssetsAnimationExt on UnitAssets {
+extension UnitAssetsAnimationExt on MatchUnitAssets {
   void _enterCombat() {
-    final startPos = unit.owner == Owner.p1
+    final startPos = MatchHelper.isLeftTeam(parent)
         ? MatchPosition.p1Combatant
         : MatchPosition.p2Combatant;
     sprite.position = Stage.positions[startPos]!;
@@ -40,33 +41,35 @@ extension UnitAssetsAnimationExt on UnitAssets {
   }
 
   void _challenge(double dt, UnitAniState nextState, {Vector2? offset}) {
-    final targetPos = unit.owner == Owner.p1
+    final targetPos = MatchHelper.isLeftTeam(parent)
         ? Stage.positions[MatchPosition.p1HitBox]!
         : Stage.positions[MatchPosition.p2HitBox]!;
     sprite.add(MoveEffect.to(
       targetPos + (offset ?? Vector2.all(0.0)),
       EffectController(duration: 0.03 / dt),
       onComplete: () {
-        unit.asset.animationState.value = nextState;
+        parent.asset.animationState.value = nextState;
       },
     ));
   }
 
   void _attack(double dt) {
-    final attackDist = (unit.owner == Owner.p1) ? 40.0 : -40.0;
-    final targetPos = (unit.owner == Owner.p1)
+    final attackDist = MatchHelper.isLeftTeam(parent) ? 40.0 : -40.0;
+    final targetPos = MatchHelper.isLeftTeam(parent)
         ? MatchPosition.p1HitBox
         : MatchPosition.p2HitBox;
     sprite.add(MoveEffect.to(
       Stage.positions[targetPos]! + Vector2(attackDist, 0),
       EffectController(duration: 0.005 / dt),
       onComplete: () {
-        if (unit.incomingCharge > 0) {
+        if (parent.incomingCharge > 0) {
           AnimationsManager.fireCharge(dt,
-              unit: unit,
+              unit: parent,
               startPos: sprite.position -
-                  (unit.owner == Owner.p1 ? Vector2.all(60) : Vector2(-60, 60)),
-              charge: unit.incomingCharge);
+                  (MatchHelper.isLeftTeam(parent)
+                      ? Vector2.all(60)
+                      : Vector2(-60, 60)),
+              charge: parent.incomingCharge);
         }
         animationState.value = UnitAniState.exitChallenge;
       },
@@ -74,7 +77,7 @@ extension UnitAssetsAnimationExt on UnitAssets {
   }
 
   void _exitChallenge(double dt) {
-    final targetPos = unit.owner == Owner.p1
+    final targetPos = MatchHelper.isLeftTeam(parent)
         ? Stage.positions[MatchPosition.p1Combatant]!
         : Stage.positions[MatchPosition.p2Combatant]!;
 
@@ -82,7 +85,7 @@ extension UnitAssetsAnimationExt on UnitAssets {
       targetPos,
       EffectController(duration: 0.02 / dt),
       onComplete: () {
-        unit.asset.animationState.value = UnitAniState.exitCombat;
+        parent.asset.animationState.value = UnitAniState.exitCombat;
       },
     ));
   }
@@ -99,7 +102,7 @@ extension UnitAssetsAnimationExt on UnitAssets {
   }
 
   void _dodgeStart(double dt, UnitAniState nextState) {
-    final dodgeDist = Vector2(unit.owner == Owner.p1 ? 30 : -30, -25);
+    final dodgeDist = Vector2(MatchHelper.isLeftTeam(parent) ? 30 : -30, -25);
     sprite.add(MoveEffect.by(
       dodgeDist,
       EffectController(duration: 0.004 / dt),
@@ -108,7 +111,7 @@ extension UnitAssetsAnimationExt on UnitAssets {
   }
 
   void _dodgeEnd(double dt) {
-    final dodgeDist = Vector2(unit.owner == Owner.p1 ? 30 : -30, -25);
+    final dodgeDist = Vector2(MatchHelper.isLeftTeam(parent) ? 30 : -30, -25);
 
     sprite.add(MoveEffect.by(
       -dodgeDist,
@@ -118,39 +121,45 @@ extension UnitAssetsAnimationExt on UnitAssets {
   }
 
   void _counter(double dt) {
-    var target = (unit.owner == Owner.p1) ? tau : -tau;
+    var target = MatchHelper.isLeftTeam(parent) ? tau : -tau;
     sprite.add(RotateEffect.to(target, EffectController(duration: 0.008 / dt),
         onComplete: () {
       sprite.angle = 0;
       sprite.y = Stage.positions[MatchPosition.p1HitBox]!.y;
       AnimationsManager.fireCharge(dt,
-          unit: unit,
+          unit: parent,
           startPos: sprite.position -
-              (unit.owner == Owner.p1 ? Vector2.all(60) : Vector2(-60, 60)),
-          charge: unit.incomingCharge);
+              (MatchHelper.isLeftTeam(parent)
+                  ? Vector2.all(60)
+                  : Vector2(-60, 60)),
+          charge: parent.incomingCharge);
       animationState.value = UnitAniState.exitChallenge;
     }));
   }
 
   void _block(double dt) {
-    final dist = (unit.owner == Owner.p1) ? -40.0 : 40.0;
+    final dist = MatchHelper.isLeftTeam(parent) ? -40.0 : 40.0;
     sprite.add(
         MoveEffect.by(Vector2(dist, 0), EffectController(duration: 0.003 / dt),
             onComplete: () async {
       await Future.delayed(Duration(milliseconds: 10 ~/ dt));
-      if (unit.incomingDamage > 0) {
+      if (parent.incomingDamage > 0) {
         AnimationsManager.fireDamage(dt,
-            unit: unit,
+            unit: parent,
             startPos: sprite.position -
-                (unit.owner == Owner.p1 ? Vector2(0, 25) : Vector2(0, 25)),
-            damage: unit.incomingDamage);
+                (MatchHelper.isLeftTeam(parent)
+                    ? Vector2(0, 25)
+                    : Vector2(0, 25)),
+            damage: parent.incomingDamage);
       }
       AnimationsManager.fireCharge(
         dt,
-        unit: unit,
+        unit: parent,
         startPos: sprite.position -
-            (unit.owner == Owner.p1 ? Vector2.all(60) : Vector2(-60, 60)),
-        charge: unit.incomingCharge,
+            (MatchHelper.isLeftTeam(parent)
+                ? Vector2.all(60)
+                : Vector2(-60, 60)),
+        charge: parent.incomingCharge,
       );
       animationState.value = UnitAniState.exitChallenge;
     }));
@@ -163,47 +172,49 @@ extension UnitAssetsAnimationExt on UnitAssets {
       sprite.scale.x *= -1;
       AnimationsManager.fireDamage(
         dt,
-        unit: unit,
+        unit: parent,
         startPos: sprite.position -
-            (unit.owner == Owner.p1 ? Vector2(0, 25) : Vector2(0, 25)),
-        damage: unit.incomingDamage,
+            (MatchHelper.isLeftTeam(parent) ? Vector2(0, 25) : Vector2(0, 25)),
+        damage: parent.incomingDamage,
       );
       animationState.value = UnitAniState.exitChallenge;
     }));
   }
 
   void _critStart(double dt) {
-    final critDistX = (unit.owner == Owner.p1) ? 80.0 : -80.0;
+    final critDistX = MatchHelper.isLeftTeam(parent) ? 80.0 : -80.0;
     final critDist = sprite.position - Vector2(critDistX, 40);
-    sprite.angle = (unit.owner == Owner.p1) ? -pi * 0.25 : pi * 0.25;
+    sprite.angle = MatchHelper.isLeftTeam(parent) ? -pi * 0.25 : pi * 0.25;
     sprite.add(MoveEffect.to(critDist, EffectController(duration: 0.005 / dt),
         onComplete: () {
-      unit.asset.animationState.value = UnitAniState.critEnd;
+      parent.asset.animationState.value = UnitAniState.critEnd;
     }));
   }
 
   void _critEnd(double dt) {
-    final critDistX = (unit.owner == Owner.p1) ? 60.0 : -60.0;
+    final critDistX = MatchHelper.isLeftTeam(parent) ? 60.0 : -60.0;
     final critDist = sprite.position - Vector2(critDistX, -60);
-    sprite.angle = (unit.owner == Owner.p1) ? -pi * 0.5 : pi * 0.5;
+    sprite.angle = MatchHelper.isLeftTeam(parent) ? -pi * 0.5 : pi * 0.5;
     sprite.add(MoveEffect.to(critDist, EffectController(duration: 0.005 / dt),
         onComplete: () async {
       AnimationsManager.fireDamage(dt,
-          unit: unit,
+          unit: parent,
           startPos: sprite.position -
-              (unit.owner == Owner.p1 ? Vector2(0, 50) : Vector2(0, 50)),
-          damage: unit.incomingDamage);
+              (MatchHelper.isLeftTeam(parent)
+                  ? Vector2(0, 50)
+                  : Vector2(0, 50)),
+          damage: parent.incomingDamage);
       await Future.delayed(Duration(milliseconds: 20 ~/ dt));
 
       sprite.angle = 0;
-      unit.asset.animationState.value = UnitAniState.exitChallenge;
+      parent.asset.animationState.value = UnitAniState.exitChallenge;
     }));
   }
 
 // TODO:
   void _missedAttack(double dt) {
-    final attackDist = (unit.owner == Owner.p1) ? 40.0 : -40.0;
-    final targetPos = (unit.owner == Owner.p1)
+    final attackDist = MatchHelper.isLeftTeam(parent) ? 40.0 : -40.0;
+    final targetPos = MatchHelper.isLeftTeam(parent)
         ? MatchPosition.p1HitBox
         : MatchPosition.p2HitBox;
     sprite.add(MoveEffect.to(
@@ -216,7 +227,7 @@ extension UnitAssetsAnimationExt on UnitAssets {
   }
 
   void _counteredAttack(double dt) {
-    final angleDir = (unit.owner == Owner.p1) ? pi * 0.5 : -pi * 0.5;
+    final angleDir = MatchHelper.isLeftTeam(parent) ? pi * 0.5 : -pi * 0.5;
     sprite.add(RotateEffect.to(
         0,
         EffectController(
@@ -224,10 +235,12 @@ extension UnitAssetsAnimationExt on UnitAssets {
           startDelay: 0.1,
         ), onComplete: () async {
       AnimationsManager.fireDamage(dt,
-          unit: unit,
+          unit: parent,
           startPos: sprite.position -
-              (unit.owner == Owner.p1 ? Vector2(0, 25) : Vector2(0, 25)),
-          damage: unit.incomingDamage);
+              (MatchHelper.isLeftTeam(parent)
+                  ? Vector2(0, 25)
+                  : Vector2(0, 25)),
+          damage: parent.incomingDamage);
       sprite.y = Stage.positions[MatchPosition.p1HitBox]!.y + 20.0;
       sprite.angle = angleDir;
       await Future.delayed(Duration(milliseconds: (20.0 ~/ dt)));
@@ -237,53 +250,61 @@ extension UnitAssetsAnimationExt on UnitAssets {
   }
 
   void _lethal(double dt) {
-    final dir = (unit.owner == Owner.p1) ? -1400.0 : 1400.0;
-    sprite.angle -= pi * (unit.owner == Owner.p1 ? 0.25 : -0.25);
+    final dir = MatchHelper.isLeftTeam(parent) ? -1400.0 : 1400.0;
+    sprite.angle -= pi * (MatchHelper.isLeftTeam(parent) ? 0.25 : -0.25);
 
     sprite.add(
       MoveEffect.by(Vector2(dir, -300), EffectController(duration: 0.05 / dt),
           onComplete: () {
         sprite.angle = 0;
         AnimationsManager.fireDamage(dt,
-            unit: unit,
+            unit: parent,
             startPos: sprite.position -
-                (unit.owner == Owner.p1 ? Vector2(0, 25) : Vector2(0, 25)),
-            damage: unit.incomingDamage);
+                (MatchHelper.isLeftTeam(parent)
+                    ? Vector2(0, 25)
+                    : Vector2(0, 25)),
+            damage: parent.incomingDamage);
         animationState.value = UnitAniState.exitChallenge;
       }),
     );
   }
 
   void _staggeredAttack(double dt) {
-    var target = (unit.owner == Owner.p1) ? -tau : tau;
+    var target = MatchHelper.isLeftTeam(parent) ? -tau : tau;
     sprite.add(RotateEffect.to(target, EffectController(duration: 0.008 / dt),
         onComplete: () async {
       sprite.angle = 0;
       AnimationsManager.fireCharge(dt,
-          unit: unit,
+          unit: parent,
           startPos: sprite.position -
-              (unit.owner == Owner.p1 ? Vector2.all(60) : Vector2(-60, 60)),
-          charge: unit.incomingCharge);
+              (MatchHelper.isLeftTeam(parent)
+                  ? Vector2.all(60)
+                  : Vector2(-60, 60)),
+          charge: parent.incomingCharge);
       await Future.delayed(Duration(milliseconds: (20.0 ~/ dt)));
       animationState.value = UnitAniState.exitChallenge;
     }));
   }
 
   void _knockback(double dt) {
-    final targetPos = unit.owner == Owner.p1 ? 120.0 : -120.0;
-    sprite.angle = pi * ((unit.owner == Owner.p1) ? -0.25 : 0.25);
+    final targetPos = MatchHelper.isLeftTeam(parent) ? 120.0 : -120.0;
+    sprite.angle = pi * (MatchHelper.isLeftTeam(parent) ? -0.25 : 0.25);
     sprite.add(MoveEffect.to(sprite.position - Vector2(targetPos, 0),
         EffectController(duration: 0.008 / dt), onComplete: () async {
       AnimationsManager.fireDamage(dt,
-          unit: unit,
+          unit: parent,
           startPos: sprite.position -
-              (unit.owner == Owner.p1 ? Vector2(0, 25) : Vector2(0, 25)),
-          damage: unit.incomingDamage);
+              (MatchHelper.isLeftTeam(parent)
+                  ? Vector2(0, 25)
+                  : Vector2(0, 25)),
+          damage: parent.incomingDamage);
       AnimationsManager.fireCharge(dt,
-          unit: unit,
+          unit: parent,
           startPos: sprite.position -
-              (unit.owner == Owner.p1 ? Vector2.all(60) : Vector2(-60, 60)),
-          charge: unit.incomingCharge);
+              (MatchHelper.isLeftTeam(parent)
+                  ? Vector2.all(60)
+                  : Vector2(-60, 60)),
+          charge: parent.incomingCharge);
       await Future.delayed(Duration(milliseconds: 3 ~/ dt));
       sprite.angle = 0;
       animationState.value = UnitAniState.exitChallenge;
@@ -305,10 +326,10 @@ extension UnitAssetsAnimationExt on UnitAssets {
         _exitChallenge(dt);
         break;
       case UnitAniState.exitCombat:
-        _exitCombat(unit.position);
+        _exitCombat(parent.position);
         break;
       default:
-        _idle(unit.position);
+        _idle(parent.position);
         break;
     }
   }
@@ -320,7 +341,7 @@ extension UnitAssetsAnimationExt on UnitAssets {
         break;
       case UnitAniState.challenge:
         _challenge(dt, UnitAniState.dodgeStart,
-            offset: Vector2(unit.owner == Owner.p1 ? -30 : 30, 0));
+            offset: Vector2(MatchHelper.isLeftTeam(parent) ? -30 : 30, 0));
         break;
       case UnitAniState.dodgeStart:
         _dodgeStart(dt, UnitAniState.dodgeEnd);
@@ -333,10 +354,10 @@ extension UnitAssetsAnimationExt on UnitAssets {
         _exitChallenge(dt);
         break;
       case UnitAniState.exitCombat:
-        _exitCombat(unit.position);
+        _exitCombat(parent.position);
         break;
       default:
-        _idle(unit.position);
+        _idle(parent.position);
         break;
     }
   }
@@ -357,10 +378,10 @@ extension UnitAssetsAnimationExt on UnitAssets {
         _exitChallenge(dt);
         break;
       case UnitAniState.exitCombat:
-        _exitCombat(unit.position);
+        _exitCombat(parent.position);
         break;
       default:
-        _idle(unit.position);
+        _idle(parent.position);
         break;
     }
   }
@@ -381,10 +402,10 @@ extension UnitAssetsAnimationExt on UnitAssets {
         _exitChallenge(dt);
         break;
       case UnitAniState.exitCombat:
-        _exitCombat(unit.position);
+        _exitCombat(parent.position);
         break;
       default:
-        _idle(unit.position);
+        _idle(parent.position);
         break;
     }
   }
@@ -408,10 +429,10 @@ extension UnitAssetsAnimationExt on UnitAssets {
         _exitChallenge(dt);
         break;
       case UnitAniState.exitCombat:
-        _exitCombat(unit.position);
+        _exitCombat(parent.position);
         break;
       default:
-        _idle(unit.position);
+        _idle(parent.position);
         break;
     }
   }
@@ -423,7 +444,7 @@ extension UnitAssetsAnimationExt on UnitAssets {
         break;
       case UnitAniState.challenge:
         _challenge(dt, UnitAniState.dodgeStart,
-            offset: Vector2(unit.owner == Owner.p1 ? -30 : 30, 0));
+            offset: Vector2(MatchHelper.isLeftTeam(parent) ? -30 : 30, 0));
         break;
       case UnitAniState.dodgeStart:
         _dodgeStart(dt, UnitAniState.counter);
@@ -435,10 +456,10 @@ extension UnitAssetsAnimationExt on UnitAssets {
         _exitChallenge(dt);
         break;
       case UnitAniState.exitCombat:
-        _exitCombat(unit.position);
+        _exitCombat(parent.position);
         break;
       default:
-        _idle(unit.position);
+        _idle(parent.position);
     }
   }
 
@@ -461,10 +482,10 @@ extension UnitAssetsAnimationExt on UnitAssets {
         _exitChallenge(dt);
         break;
       case UnitAniState.exitCombat:
-        _exitCombat(unit.position);
+        _exitCombat(parent.position);
         break;
       default:
-        _idle(unit.position);
+        _idle(parent.position);
         break;
     }
   }
@@ -485,10 +506,10 @@ extension UnitAssetsAnimationExt on UnitAssets {
         _exitChallenge(dt);
         break;
       case UnitAniState.exitCombat:
-        _exitCombat(unit.position);
+        _exitCombat(parent.position);
         break;
       default:
-        _idle(unit.position);
+        _idle(parent.position);
         break;
     }
   }
@@ -509,10 +530,10 @@ extension UnitAssetsAnimationExt on UnitAssets {
         _exitChallenge(dt);
         break;
       case UnitAniState.exitCombat:
-        _exitCombat(unit.position);
+        _exitCombat(parent.position);
         break;
       default:
-        _idle(unit.position);
+        _idle(parent.position);
         break;
     }
   }
@@ -535,10 +556,10 @@ extension UnitAssetsAnimationExt on UnitAssets {
         _exitChallenge(dt);
         break;
       case UnitAniState.exitCombat:
-        _exitCombat(unit.position);
+        _exitCombat(parent.position);
         break;
       default:
-        _idle(unit.position);
+        _idle(parent.position);
         break;
     }
   }

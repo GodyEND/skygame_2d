@@ -1,24 +1,49 @@
 import 'dart:math';
 
 import 'package:flame/components.dart';
+import 'package:skygame_2d/game/stage.dart';
 import 'package:skygame_2d/game/unit.dart';
 import 'package:skygame_2d/graphics/graphics.dart';
 import 'package:skygame_2d/models/enums.dart';
+import 'package:skygame_2d/models/match_unit/unit_assets.dart';
+import 'package:skygame_2d/models/match_unit/unit_hud.dart';
+import 'package:skygame_2d/utils.dart/constants.dart';
+
+extension UnitAssetManageExt on MatchUnit {
+  bool addMatchAssets() {
+    if (protectedAsset != null) return false;
+    protectedAsset = MatchUnitAssets(
+      sprite: GraphicsManager.createUnitSprite(position, character.image),
+      hud: UnitHUDComponent(
+        profileImage: character.profile,
+        matchPosition: position,
+        size: Stage.hudResolution,
+      ),
+      infoList: {
+        EXEC_ICON:
+            GraphicsManager.createUnitProfile(position, character.profile),
+      },
+      parent: this,
+    );
+    return true;
+  }
+}
 
 extension UnitRenderExt on MatchUnit {
   void updateHealthBar(double dt) {
     asset.hud.healthbar.width = asset.hud.healthbarBG.width *
-        max(0, currentStats[StatType.hp] / iStats[StatType.hp]);
+        max(0, current.stats[StatType.hp] / initial.stats[StatType.hp]);
   }
 
   void updateChargeBar(double dt) {
     asset.hud.chargebar.width = asset.hud.chargebarBG.width *
-        min(1, currentStats[StatType.storage] / iStats[StatType.storage]);
+        min(1,
+            current.stats[StatType.storage] / initial.stats[StatType.storage]);
   }
 
   void updateChargeBarSeparator(double dt) {
-    double divisions =
-        max(0, (currentStats[StatType.storage] / iStats[StatType.storage]));
+    double divisions = max(
+        0, (current.stats[StatType.storage] / initial.stats[StatType.storage]));
     if (divisions <= 1) {
       divisions = 0;
     }
@@ -43,7 +68,10 @@ extension UnitRenderExt on MatchUnit {
       final divBar =
           ((asset.hud.chargebarBG.width - offset) / divisions.floor());
       asset.hud.chargeSeparator[i].position = asset.hud.chargebarBG.position +
-          Vector2((i + 1) * ((owner == Owner.p1) ? divBar : -divBar), 0);
+          Vector2(
+              (i + 1) *
+                  ((ownerID == Constants.FIRST_PLAYER) ? divBar : -divBar),
+              0);
     }
   }
 }

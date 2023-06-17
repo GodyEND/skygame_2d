@@ -42,10 +42,10 @@ class FX2 extends FX {
         (e) => e.fx == this && e.userID == user.id && e.targetID == -1);
     if (notation != null) return;
     for (var target in targets) {
-      target.currentBES.values[BESType.block] =
-          target.currentBES.values[BESType.block]! - 25;
-      target.currentBES.values[BESType.evasion] =
-          target.currentBES.values[BESType.evasion]! - 25;
+      target.current.bes.values[BESType.block] =
+          target.current.bes.values[BESType.block]! - 25;
+      target.current.bes.values[BESType.evasion] =
+          target.current.bes.values[BESType.evasion]! - 25;
     }
     game.fxTracker.add(FXNotation(this, user.id, -1, game.turn));
   }
@@ -62,10 +62,10 @@ class FX3 extends FX {
   @override
   void action(MatchUnit user, GameManager game) {
     // NOTE: Do not know if this needs to be tracked
-    final targets = MatchHelper.getOpposingUnits(game.field, user.owner);
+    final targets = MatchHelper.getOpposingUnits(game.field, user.ownerID);
     for (var target in targets) {
-      target.currentStats.values[StatType.storage] =
-          max(0.0, target.currentStats[StatType.storage] - 50);
+      target.current.stats.values[StatType.storage] =
+          max(0.0, target.current.stats[StatType.storage] - 50);
     }
   }
 }
@@ -92,11 +92,11 @@ class FX4 extends FX {
       } else if (notation != null) {
         game.fxTracker.remove(notation);
       }
-      target.currentStats.values[StatType.hp] = min(
-          target.currentStats[StatType.hp] + 30,
-          target.iStats[StatType.hp] + 30);
-      target.currentStats.values[StatType.storage] =
-          target.currentStats[StatType.storage] + 30;
+      target.current.stats.values[StatType.hp] = min(
+          target.current.stats[StatType.hp] + 30,
+          target.initial.stats[StatType.hp] + 30);
+      target.current.stats.values[StatType.storage] =
+          target.current.stats[StatType.storage] + 30;
       game.fxTracker.add(FXNotation(this, user.id, target.id, game.turn));
     }
   }
@@ -120,8 +120,8 @@ class FX5 extends FX {
       final notation = game.fxTracker.firstWhereOrNull((e) =>
           e.fx == this && e.userID == user.id && e.targetID == target.id);
       if (notation != null) continue;
-      target.currentStats.values[StatType.execution] =
-          target.currentStats[StatType.execution] + 50.0;
+      target.current.stats.values[StatType.execution] =
+          target.current.stats[StatType.execution] + 50.0;
       game.fxTracker.add(FXNotation(this, user.id, target.id, game.turn));
     }
   }

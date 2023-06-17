@@ -36,7 +36,7 @@ class AnimationsManager {
     final sprite = GraphicsManager.createDamageText;
     sprite.text = '$damage DMG';
     sprite.position = startPos;
-    unit.game.gameContext.add(sprite);
+    GameManager.context.add(sprite);
 
     final effectDuration = 0.04 / dt;
     final controller = EffectController(duration: effectDuration);
@@ -54,7 +54,7 @@ class AnimationsManager {
     final sprite = GraphicsManager.createChargeText;
     sprite.text = '$charge';
     sprite.position = startPos;
-    unit.game.gameContext.add(sprite);
+    GameManager.context.add(sprite);
 
     final effectDuration = 0.04 / dt;
     final controller = EffectController(duration: effectDuration);
