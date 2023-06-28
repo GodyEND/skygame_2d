@@ -15,6 +15,7 @@ import 'package:skygame_2d/bloc/player/bloc.dart';
 import 'package:skygame_2d/bloc/player/listener.dart';
 import 'package:skygame_2d/bloc/player/state.dart';
 import 'package:skygame_2d/game/skygame_ext/key_input_ext.dart';
+import 'package:skygame_2d/models/player.dart';
 import 'package:skygame_2d/utils.dart/enums.dart';
 import 'package:skygame_2d/models/fx.dart';
 import 'package:skygame_2d/models/match_unit/unit.dart';
@@ -40,7 +41,7 @@ class SkyGame2D extends FlameGame with KeyboardEvents {
   @override
   Future<void> onLoad() async {
     await _loadGameData();
-    await setup();
+    await _setupBlocProviders();
   }
 
   Future<bool> _loadGameData() async {
@@ -62,50 +63,50 @@ class SkyGame2D extends FlameGame with KeyboardEvents {
     switch (bloc.state.sceneState) {
       case SceneState.teamBuilder:
         for (var playerBloc in playerBlocs) {
-          handledEvents.add(
-              teamBuilderInput(event, keysPressed, playerBloc.state.ownerID));
+          handledEvents.add(teamBuilderInput(
+            event,
+            keysPressed,
+            playerBloc.state.player.ownerID,
+          ));
         }
 
         if (handledEvents.contains(true)) {
           return KeyEventResult.handled;
         }
         return KeyEventResult.ignored;
-      //     case SceneState.combat:
-      //       final p1KeyHandled = game.player1Input(event, keysPressed);
-      //       final p2KeyHandled = game.player2Input(event, keysPressed);
-      //       if (p1KeyHandled || p2KeyHandled) {
-      //         return KeyEventResult.handled;
-      //       }
-      //       break;
-      //     case SceneState.replaceWing:
-      //       break;
-      //     case SceneState.replaceSupport:
-      //       break;
-      //     case SceneState.replaceReserve:
-      //       break;
+
       default:
         break;
     }
     return KeyEventResult.ignored;
   }
 
-  Future<void> setup() async {
+  Future<void> _setupBlocProviders() async {
     List<FlameBlocProvider> playerBlocProviders = [];
     List<PlayerBlocState> playerBlocStates = [];
-    List<PlayerKeyInputBlocState> playerKeyInputStates = [];
+    // List<KeyInputBlocState> playerKeyInputStates = [];
     for (int i = 1; i <= Constants.PLAYER_COUNT; i++) {
-      final playerState = InitialPlayerBlocState(i);
+      final playerState = InitialPlayerBlocState(
+          Player(i, teams: const [], collection: Units.all));
       final playerBloc = PlayerBloc(playerState);
       playerBlocs.add(playerBloc);
       playerBlocStates.add(playerState);
-      playerKeyInputStates.add(InitialPlayerKeyInputBlocState(
-        rowLength: Constants.TEAM_BUILDER_UNITS_PER_ROW,
-        options: Units.all.length,
-      ));
+      // playerKeyInputStates.add(InitialKeyInputBlocState(
+
+      //   sceneState: SceneState.load,
+      //   sceneBloc: null,
+      //   rowLength: Constants.TEAM_BUILDER_UNITS_PER_ROW,
+      //   options: Units.all.length,
+      // ));
       playerBlocProviders.add(FlameBlocProvider(create: () => playerBloc));
     }
     bloc = GameBloc(InitialGameBlocState(playerBlocStates));
-    keyBloc = KeyInputBloc(InitialKeyInputBlocState(playerKeyInputStates));
+    keyBloc = KeyInputBloc(InitialKeyInputBlocState(
+      sceneState: SceneState.load,
+      sceneBloc: null,
+      rowLength: Constants.TEAM_BUILDER_UNITS_PER_ROW,
+      options: Units.all.length,
+    ));
 
     await add(FlameMultiBlocProvider(providers: [
       FlameBlocProvider(create: () => bloc),
@@ -114,9 +115,9 @@ class SkyGame2D extends FlameGame with KeyboardEvents {
     ]));
 
     for (var playerBloc in playerBlocs) {
-      await add(playerBlocListener(bloc, playerBloc));
+      await add(playerBlocListener(playerBloc));
     }
-    add(gameBlocListener(bloc));
+    await add(gameBlocListener());
   }
 
   @override

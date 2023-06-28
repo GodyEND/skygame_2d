@@ -1,10 +1,15 @@
 import 'dart:async';
 
+import 'package:bloc/bloc.dart';
 import 'package:flame/components.dart';
 import 'package:skygame_2d/main.dart';
+import 'package:skygame_2d/scenes/team_builder.dart';
 
-class ManagedScene extends Component with HasGameRef<SkyGame2D> {
+/// NOTE: Do not forget to set managedBloc
+abstract class ManagedScene extends Component with HasGameRef<SkyGame2D> {
   final List<Component> sceneComponents = [];
+  BlocBase? managedBloc;
+
   FutureOr<void> addToScene(Component component) async {
     sceneComponents.add(component);
     await add(component);
@@ -14,5 +19,6 @@ class ManagedScene extends Component with HasGameRef<SkyGame2D> {
     for (var component in sceneComponents) {
       component.removeFromParent();
     }
+    SceneManager.scenes.remove(this);
   }
 }

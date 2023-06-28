@@ -30,7 +30,7 @@ class PlayerBloc extends Bloc<BlocEvent, PlayerBlocState> {
       // state.units.add(newUnit);
 
       emit(PlayerReadyBlocState(
-        ownerID: state.ownerID,
+        player: state.player,
         roster: state.roster,
       ));
     });

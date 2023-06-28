@@ -1,67 +1,69 @@
+import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:skygame_2d/bloc/events.dart';
+import 'package:skygame_2d/utils.dart/enums.dart';
 
-class PlayerKeyInputBlocState extends Equatable {
+class KeyInputBlocState extends Equatable {
+  final SceneState sceneState;
+  final BlocBase? sceneBloc;
   final int rowIndex;
   final int colIndex;
   final int rowLength;
   final int options;
-  const PlayerKeyInputBlocState({
+  final BlocEvent? event;
+  const KeyInputBlocState({
+    required this.sceneState,
+    required this.sceneBloc,
     required this.rowIndex,
     required this.colIndex,
     required this.rowLength,
     required this.options,
+    this.event,
   });
-  PlayerKeyInputBlocState copyWith({
+  KeyInputBlocState copyWith({
+    SceneState? cSceneState,
+    BlocBase? cSceneBloc,
     int? cRowIndex,
     int? cColIndex,
     int? cRowLength,
     int? cOptions,
+    BlocEvent? event,
   }) {
-    return PlayerKeyInputBlocState(
+    return KeyInputBlocState(
+      sceneState: cSceneState ?? sceneState,
+      sceneBloc: cSceneBloc ?? sceneBloc,
       rowIndex: cRowIndex ?? rowIndex,
       colIndex: cColIndex ?? colIndex,
       rowLength: cRowLength ?? rowLength,
       options: cOptions ?? options,
+      event: event,
     );
   }
 
   @override
-  List<Object?> get props => [rowIndex, colIndex, rowLength, options];
+  List<Object?> get props => [
+        sceneState,
+        sceneBloc,
+        rowIndex,
+        colIndex,
+        rowLength,
+        options,
+        event,
+      ];
 }
 
-class InitialPlayerKeyInputBlocState extends PlayerKeyInputBlocState {
-  const InitialPlayerKeyInputBlocState({
+class InitialKeyInputBlocState extends KeyInputBlocState {
+  const InitialKeyInputBlocState({
+    required SceneState sceneState,
+    BlocBase? sceneBloc,
     required int rowLength,
     required int options,
   }) : super(
+          sceneState: sceneState,
+          sceneBloc: sceneBloc,
           rowIndex: 0,
           colIndex: 0,
           rowLength: rowLength,
           options: options,
         );
-}
-
-class KeyInputBlocState extends Equatable {
-  final List<PlayerKeyInputBlocState> playerInputStates;
-
-  const KeyInputBlocState({
-    required this.playerInputStates,
-  });
-
-  KeyInputBlocState copyWith({
-    List<PlayerKeyInputBlocState>? cPlayerInputStates,
-  }) {
-    return KeyInputBlocState(
-      playerInputStates: cPlayerInputStates ?? playerInputStates,
-    );
-  }
-
-  @override
-  List<Object?> get props => [playerInputStates];
-}
-
-class InitialKeyInputBlocState extends KeyInputBlocState {
-  const InitialKeyInputBlocState(
-      List<PlayerKeyInputBlocState> playerInputStates)
-      : super(playerInputStates: playerInputStates);
 }

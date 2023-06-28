@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
+import 'package:skygame_2d/models/match_unit/unit.dart';
+import 'package:skygame_2d/models/match_unit/unit_team.dart';
 import 'package:skygame_2d/models/player.dart';
 import 'package:skygame_2d/utils.dart/enums.dart';
-import 'package:skygame_2d/models/match_unit/unit.dart';
-import 'package:skygame_2d/utils.dart/constants.dart';
 
 class TeamBuilderBlocState extends Equatable {
   final Player player;

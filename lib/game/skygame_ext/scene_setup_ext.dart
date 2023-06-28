@@ -2,31 +2,34 @@ import 'package:skygame_2d/main.dart';
 import 'package:skygame_2d/scenes/managed_scene.dart';
 import 'package:skygame_2d/scenes/player_collection.dart';
 import 'package:skygame_2d/scenes/team_builder.dart';
+import 'package:skygame_2d/utils.dart/constants.dart';
 
 extension SceneSetupExt on SkyGame2D {
-  void _clearScene() {
+  Future<void> _clearScene() async {
     for (var child in children) {
       if (child is ManagedScene) {
-        child.clearScene();
+        await child.clearScene();
         remove(child);
       }
     }
   }
 
-  bool setupPlayerCollection() {
+  Future<bool> setupPlayerCollection() async {
     try {
-      _clearScene();
-      add(PlayerCollectionScene());
+      await _clearScene();
+      await add(PlayerCollectionScene());
       return true;
     } catch (_) {
       return false;
     }
   }
 
-  bool setupTeamBuilder() {
+  Future<bool> setupTeamBuilder(List<int> ownerIDs) async {
     try {
-      _clearScene();
-      add(TeamBuilderScene());
+      await _clearScene();
+      for (var ownerID in ownerIDs) {
+        await add(TeamBuilderScene(ownerID));
+      }
       return true;
     } catch (_) {
       return false;

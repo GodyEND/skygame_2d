@@ -1,4 +1,5 @@
 import 'package:flutter/services.dart';
+import 'package:skygame_2d/bloc/key_input/bloc.dart';
 import 'package:skygame_2d/main.dart';
 import 'package:skygame_2d/utils.dart/enums.dart';
 import 'package:skygame_2d/utils.dart/constants.dart';
@@ -6,10 +7,13 @@ import 'package:skygame_2d/utils.dart/constants.dart';
 var teamBuilderKeys = {
   Constants.FIRST_PLAYER: [
     // Player 1
-    LogicalKeyboardKey.keyW,
-    LogicalKeyboardKey.keyS,
-    LogicalKeyboardKey.keyA,
-    LogicalKeyboardKey.keyD,
+    LogicalKeyboardKey.keyW, // Up
+    LogicalKeyboardKey.keyS, // Down
+    LogicalKeyboardKey.keyA, // Left
+    LogicalKeyboardKey.keyD, // Right
+    LogicalKeyboardKey.space, // Confirm
+    LogicalKeyboardKey.keyC, // Cancel
+    LogicalKeyboardKey.keyX, // Remove
   ],
   Constants.SECOND_PLAYER: [
     // Player 2
@@ -17,6 +21,9 @@ var teamBuilderKeys = {
     LogicalKeyboardKey.arrowDown,
     LogicalKeyboardKey.arrowLeft,
     LogicalKeyboardKey.arrowRight,
+    LogicalKeyboardKey.enter, // Confirm
+    LogicalKeyboardKey.backspace, // Cancel
+    LogicalKeyboardKey.delete, // Remove
   ],
 };
 
@@ -32,6 +39,9 @@ extension KeyInputExt on SkyGame2D {
     final isDown = keysPressed.contains(teamBuilderKeys[ownerID]![1]);
     final isLeft = keysPressed.contains(teamBuilderKeys[ownerID]![2]);
     final isRight = keysPressed.contains(teamBuilderKeys[ownerID]![3]);
+    final isConfirm = keysPressed.contains(teamBuilderKeys[ownerID]![4]);
+    final isCancel = keysPressed.contains(teamBuilderKeys[ownerID]![5]);
+    final isRemove = keysPressed.contains(teamBuilderKeys[ownerID]![6]);
     if (isKeyDown && isUp) {
       keyBloc.prevRowUnit(ownerID);
       return true;
@@ -42,6 +52,15 @@ extension KeyInputExt on SkyGame2D {
       keyBloc.prevUnit(ownerID);
       return true;
     } else if (isKeyDown && isRight) {
+      keyBloc.nextUnit(ownerID);
+      return true;
+    } else if (isKeyDown && isConfirm) {
+      keyBloc.add(KeyInputConfirmEvent(ownerID));
+      return true;
+    } else if (isKeyDown && isCancel) {
+      keyBloc.nextUnit(ownerID);
+      return true;
+    } else if (isKeyDown && isRemove) {
       keyBloc.nextUnit(ownerID);
       return true;
     }
