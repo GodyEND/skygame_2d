@@ -4,7 +4,7 @@ import 'package:skygame_2d/game/game.dart';
 import 'package:skygame_2d/game/unit.dart';
 import 'package:skygame_2d/graphics/graphics.dart';
 import 'package:skygame_2d/graphics/unit_animations.dart';
-import 'package:skygame_2d/models/enums.dart';
+import 'package:skygame_2d/utils.dart/enums.dart';
 import 'package:skygame_2d/utils.dart/constants.dart';
 
 class AnimationsManager {
@@ -33,16 +33,16 @@ class AnimationsManager {
     required Vector2 startPos,
     required int damage,
   }) async {
-    final sprite = GraphicsManager.createDamageText;
-    sprite.text = '$damage DMG';
-    sprite.position = startPos;
-    GameManager.context.add(sprite);
+    // final sprite = GraphicsManager.createDamageText;
+    // sprite.text = '$damage DMG';
+    // sprite.position = startPos;
+    // GameManager.context.add(sprite);
 
     final effectDuration = 0.04 / dt;
     final controller = EffectController(duration: effectDuration);
-    sprite.add(ScaleEffect.to(Vector2.all(1), controller));
-    sprite.add(MoveEffect.to(startPos + Vector2(0, -35), controller));
-    sprite.add(RemoveEffect(delay: effectDuration));
+    // sprite.add(ScaleEffect.to(Vector2.all(1), controller));
+    // sprite.add(MoveEffect.to(startPos + Vector2(0, -35), controller));
+    // sprite.add(RemoveEffect(delay: effectDuration));
   }
 
   static Future<void> fireCharge(
@@ -51,16 +51,16 @@ class AnimationsManager {
     required Vector2 startPos,
     required int charge,
   }) async {
-    final sprite = GraphicsManager.createChargeText;
-    sprite.text = '$charge';
-    sprite.position = startPos;
-    GameManager.context.add(sprite);
+    // final sprite = GraphicsManager.createChargeText;
+    // sprite.text = '$charge';
+    // sprite.position = startPos;
+    // GameManager.context.add(sprite);
 
     final effectDuration = 0.04 / dt;
     final controller = EffectController(duration: effectDuration);
-    sprite.add(ScaleEffect.to(Vector2.all(1), controller));
-    sprite.add(MoveEffect.to(startPos + Vector2(0, -25), controller));
-    sprite.add(RemoveEffect(delay: effectDuration));
+    // sprite.add(ScaleEffect.to(Vector2.all(1), controller));
+    // sprite.add(MoveEffect.to(startPos + Vector2(0, -25), controller));
+    // sprite.add(RemoveEffect(delay: effectDuration));
   }
 
   static prepareCombat(MatchUnit attacker, MatchUnit defender) {

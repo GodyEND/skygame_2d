@@ -1,13 +1,15 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+import 'package:skygame_2d/bloc/events.dart';
 import 'package:skygame_2d/bloc/player/state.dart';
 import 'package:skygame_2d/game/unit.dart';
-import 'package:skygame_2d/models/enums.dart';
+import 'package:skygame_2d/utils.dart/enums.dart';
 
 class GameBlocState extends Equatable {
   final List<PlayerBlocState> playerStates;
-  final GameState gameState; // Based of active unit actionQ
+  final SceneState sceneState; // Based of active unit actionQ
   final List<MatchUnit> units;
+  final BlocEvent? event;
 
 // Combat
   final int turn;
@@ -16,35 +18,39 @@ class GameBlocState extends Equatable {
 
   const GameBlocState({
     required this.playerStates,
-    required this.gameState,
+    required this.sceneState,
     required this.units,
     required this.turn,
     required this.exeQ,
     required this.prevExeQ,
+    this.event,
   });
 
   GameBlocState copyWith({
-    GameState? cGameState,
+    SceneState? cSceneState,
     int? cTurn,
+    BlocEvent? event,
   }) {
     return GameBlocState(
       playerStates: playerStates,
-      gameState: cGameState ?? gameState,
+      sceneState: cSceneState ?? sceneState,
       units: units,
       turn: cTurn ?? turn,
       exeQ: exeQ,
       prevExeQ: prevExeQ,
+      event: event,
     );
   }
 
   @override
   List<Object?> get props => [
         playerStates,
-        gameState,
+        sceneState,
         turn,
         units,
         exeQ,
         prevExeQ,
+        event,
       ];
 }
 
@@ -54,7 +60,7 @@ class InitialGameBlocState extends GameBlocState {
           playerStates: playerStates,
           turn: 1,
           units: const [],
-          gameState: GameState.setup,
+          sceneState: SceneState.load,
           exeQ: const [],
           prevExeQ: ValueNotifier([]),
         );

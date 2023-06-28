@@ -3,7 +3,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:skygame_2d/models/bes.dart';
 import 'package:skygame_2d/models/costs.dart';
-import 'package:skygame_2d/models/enums.dart';
+import 'package:skygame_2d/utils.dart/enums.dart';
 import 'package:skygame_2d/models/fx.dart';
 import 'package:skygame_2d/models/match_unit/unit.dart';
 import 'package:skygame_2d/models/release.dart';

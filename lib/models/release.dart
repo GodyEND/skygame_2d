@@ -1,6 +1,6 @@
 import 'package:skygame_2d/game/unit.dart';
 import 'package:skygame_2d/game/game.dart';
-import 'package:skygame_2d/models/enums.dart';
+import 'package:skygame_2d/utils.dart/enums.dart';
 import 'package:skygame_2d/abilities/release.dart';
 
 abstract class Release {

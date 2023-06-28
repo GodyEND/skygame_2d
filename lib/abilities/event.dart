@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:skygame_2d/game/unit.dart';
 import 'package:skygame_2d/game/game.dart';
-import 'package:skygame_2d/models/enums.dart';
+import 'package:skygame_2d/utils.dart/enums.dart';
 
 abstract class Event {
   final String desc;

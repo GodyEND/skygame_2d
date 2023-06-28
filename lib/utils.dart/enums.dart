@@ -22,15 +22,11 @@ enum BESType {
 
 enum CostType { release, retreat, guard, swap }
 
-enum Owner { p1, p2 }
-
-enum GameState {
-  setup,
-  combat,
-  replace,
-  replaceWing,
-  replaceSupport,
-  replaceReserve,
+enum SceneState {
+  load,
+  teamBuilder, // Players select units
+  teamFormation,
+  combat, // run simulation
   end,
 }
 
@@ -48,10 +44,10 @@ enum CommandType {
   releaseAtk,
   target,
   autoGuard,
-  autoRelease
+  autoRelease,
 }
 
-enum BrawlType {
+enum MatchPosition {
   lead,
   leftAce,
   rightAce,
@@ -63,27 +59,12 @@ enum BrawlType {
   reserve4,
   reserve5,
   defeated,
+  none,
 }
 
-enum MatchPosition {
-  p1Lead,
-  p1LeftAce,
-  p1RightAce,
-  p1LeftLink,
-  p1RightLink,
-  p1Reserve,
-  p1Combatant,
-  p1HitBox,
-  p2Lead,
-  p2LeftAce,
-  p2RightAce,
-  p2LeftLink,
-  p2RightLink,
-  p2Reserve,
-  p2Combatant,
-  p2HitBox,
-  none,
-  defeated,
+enum CombatPosition {
+  hitbox,
+  challenger,
 }
 
 enum CombatEventResult {
@@ -96,4 +77,12 @@ enum CombatEventResult {
   overwhelm,
   stagger,
   none,
+}
+
+enum TeamBuilderViewState {
+  team,
+  builder,
+  characterSelect,
+  teamName,
+  wait,
 }

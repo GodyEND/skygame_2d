@@ -1,14 +1,14 @@
 import 'package:equatable/equatable.dart';
 import 'package:skygame_2d/bloc/events.dart';
 import 'package:skygame_2d/game/unit.dart';
-import 'package:skygame_2d/models/enums.dart';
+import 'package:skygame_2d/utils.dart/enums.dart';
 
 class PlayerBlocState extends Equatable {
   final int ownerID;
   final PlayerState state;
   final int points;
   final List<MatchUnit> units;
-  final Map<BrawlType, MatchUnit> roster;
+  final Map<MatchPosition, MatchUnit> roster;
   final List<MatchPosition> toBeReplaced;
   final BlocEvent? event;
 
@@ -25,7 +25,7 @@ class PlayerBlocState extends Equatable {
   PlayerBlocState copyWith({
     PlayerState? cState,
     int? cPoints,
-    Map<BrawlType, MatchUnit>? cRoster,
+    Map<MatchPosition, MatchUnit>? cRoster,
     BlocEvent? cEvent,
   }) {
     return PlayerBlocState(
@@ -66,7 +66,7 @@ class InitialPlayerBlocState extends PlayerBlocState {
 
 class PlayerReadyBlocState extends PlayerBlocState {
   PlayerReadyBlocState({
-    required Map<BrawlType, MatchUnit> roster,
+    required Map<MatchPosition, MatchUnit> roster,
     required int ownerID,
   }) : super(
           ownerID: ownerID,

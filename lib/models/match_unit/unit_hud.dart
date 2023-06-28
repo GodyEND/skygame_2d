@@ -4,11 +4,13 @@ import 'package:flame/components.dart';
 import 'package:skygame_2d/game/helper.dart';
 import 'package:skygame_2d/game/stage.dart';
 import 'package:skygame_2d/graphics/graphics.dart';
-import 'package:skygame_2d/models/enums.dart';
+import 'package:skygame_2d/utils.dart/enums.dart';
+import 'package:skygame_2d/utils.dart/constants.dart';
 
 class UnitHUDComponent extends PositionComponent {
   late SpriteComponent profile;
   final ui.Image profileImage;
+  final int ownerID;
   MatchPosition matchPosition;
   late ShapeComponent healthbar;
   late ShapeComponent healthbarBG;
@@ -20,6 +22,7 @@ class UnitHUDComponent extends PositionComponent {
 
   UnitHUDComponent({
     required this.profileImage,
+    required this.ownerID,
     required this.matchPosition,
     required Vector2 size,
   }) : super(size: size) {
@@ -27,14 +30,15 @@ class UnitHUDComponent extends PositionComponent {
     position = Stage.hudPositions[matchPosition] ?? Vector2(0, 0);
 
     // Create Sprites
-    profile = GraphicsManager.createUnitProfile(matchPosition, profileImage);
-    healthbar = GraphicsManager.createHealthBar();
-    healthbarBG = GraphicsManager.createHealthBarBG();
-    chargebar = GraphicsManager.createChargeBar();
-    chargebarBG = GraphicsManager.createChargeBarBG();
-    // Text
-    hpText = GraphicsManager.createHUDText;
-    chargeText = GraphicsManager.createHUDText;
+    // profile =
+    //     GraphicsManager.createUnitProfile(ownerID, matchPosition, profileImage);
+    // healthbar = GraphicsManager.createHealthBar();
+    // healthbarBG = GraphicsManager.createHealthBarBG();
+    // chargebar = GraphicsManager.createChargeBar();
+    // chargebarBG = GraphicsManager.createChargeBarBG();
+    // // Text
+    // hpText = GraphicsManager.createHUDText;
+    // chargeText = GraphicsManager.createHUDText;
     // Set sprite positions
     add(profile);
     add(healthbarBG);
@@ -52,17 +56,16 @@ class UnitHUDComponent extends PositionComponent {
   }
 
   void get _setHUDPosition {
-    final fieldPos = MatchHelper.getBrawlType(matchPosition);
-    if (fieldPos.index > BrawlType.rightLink.index) return;
+    if (matchPosition.index > MatchPosition.rightLink.index) return;
     final hudPos = Stage.hudPositions[matchPosition]!;
-    final isP1 = MatchHelper.getOwner(matchPosition) == Owner.p1;
+    final isP1 = ownerID == Constants.FIRST_PLAYER;
     position = hudPos;
     final childAnchor = (isP1) ? Anchor.topLeft : Anchor.topRight;
 
     profile.anchor = anchor;
     profile.position = Vector2(0, 0);
 
-    if (MatchHelper.isFrontrow(fieldPos)) {
+    if (MatchHelper.isFrontrow(matchPosition)) {
       profile.size = Vector2(100, 100);
       healthbarBG.anchor = childAnchor;
       healthbarBG.position = Vector2(isP1 ? 15 : profile.position.x - 15, 35);
@@ -85,8 +88,7 @@ class UnitHUDComponent extends PositionComponent {
   }
 
   void setOpacity() {
-    final fieldPos = MatchHelper.getBrawlType(matchPosition);
-    if (MatchHelper.isFrontrow(fieldPos)) {
+    if (MatchHelper.isFrontrow(matchPosition)) {
       profile.setOpacity(1);
       healthbarBG.setOpacity(1);
       healthbar.setOpacity(1);

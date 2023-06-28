@@ -1,9 +1,55 @@
 import 'package:flutter/services.dart';
-import 'package:skygame_2d/game/game.dart';
-import 'package:skygame_2d/models/enums.dart';
+import 'package:skygame_2d/main.dart';
+import 'package:skygame_2d/utils.dart/enums.dart';
+import 'package:skygame_2d/utils.dart/constants.dart';
 
-extension GameInputExt on GameManager {
-  bool player1Input(RawKeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
+var teamBuilderKeys = {
+  Constants.FIRST_PLAYER: [
+    // Player 1
+    LogicalKeyboardKey.keyW,
+    LogicalKeyboardKey.keyS,
+    LogicalKeyboardKey.keyA,
+    LogicalKeyboardKey.keyD,
+  ],
+  Constants.SECOND_PLAYER: [
+    // Player 2
+    LogicalKeyboardKey.arrowUp,
+    LogicalKeyboardKey.arrowDown,
+    LogicalKeyboardKey.arrowLeft,
+    LogicalKeyboardKey.arrowRight,
+  ],
+};
+
+extension KeyInputExt on SkyGame2D {
+  bool teamBuilderInput(
+    RawKeyEvent event,
+    Set<LogicalKeyboardKey> keysPressed,
+    int ownerID,
+  ) {
+    final isKeyDown = event is RawKeyDownEvent;
+
+    final isUp = keysPressed.contains(teamBuilderKeys[ownerID]![0]);
+    final isDown = keysPressed.contains(teamBuilderKeys[ownerID]![1]);
+    final isLeft = keysPressed.contains(teamBuilderKeys[ownerID]![2]);
+    final isRight = keysPressed.contains(teamBuilderKeys[ownerID]![3]);
+    if (isKeyDown && isUp) {
+      keyBloc.prevRowUnit(ownerID);
+      return true;
+    } else if (isKeyDown && isDown) {
+      keyBloc.nextRowUnit(ownerID);
+      return true;
+    } else if (isKeyDown && isLeft) {
+      keyBloc.prevUnit(ownerID);
+      return true;
+    } else if (isKeyDown && isRight) {
+      keyBloc.nextUnit(ownerID);
+      return true;
+    }
+    return false;
+  }
+
+  bool player1CombatInput(
+      RawKeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
     final isKeyDown = event is RawKeyDownEvent;
 
     // P1 options
@@ -15,16 +61,17 @@ extension GameInputExt on GameManager {
     final isP1RAce = keysPressed.contains(LogicalKeyboardKey.keyX);
 
     if (isKeyDown && isP1LAce) {
-      return _validateP1Input(event, keysPressed, BrawlType.leftAce);
+      return _validateP1Input(event, keysPressed, MatchPosition.leftAce);
     } else if (isKeyDown && isP1Lead) {
-      return _validateP1Input(event, keysPressed, BrawlType.lead);
+      return _validateP1Input(event, keysPressed, MatchPosition.lead);
     } else if (isKeyDown && isP1RAce) {
-      return _validateP1Input(event, keysPressed, BrawlType.rightAce);
+      return _validateP1Input(event, keysPressed, MatchPosition.rightAce);
     }
     return false;
   }
 
-  bool player2Input(RawKeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
+  bool player2CombatInput(
+      RawKeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
     final isKeyDown = event is RawKeyDownEvent;
 
     // P1 options
@@ -38,17 +85,17 @@ extension GameInputExt on GameManager {
     // final isP1Back = keysPressed.contains(LogicalKeyboardKey.keyA);
 
     if (isKeyDown && isP2LAce) {
-      return _validateP2Input(event, keysPressed, BrawlType.leftAce);
+      return _validateP2Input(event, keysPressed, MatchPosition.leftAce);
     } else if (isKeyDown && isP2Lead) {
-      return _validateP2Input(event, keysPressed, BrawlType.lead);
+      return _validateP2Input(event, keysPressed, MatchPosition.lead);
     } else if (isKeyDown && isP2RAce) {
-      return _validateP2Input(event, keysPressed, BrawlType.rightAce);
+      return _validateP2Input(event, keysPressed, MatchPosition.rightAce);
     }
     return false;
   }
 
-  _validateP1Input(
-      RawKeyEvent event, Set<LogicalKeyboardKey> keysPressed, BrawlType user) {
+  _validateP1Input(RawKeyEvent event, Set<LogicalKeyboardKey> keysPressed,
+      MatchPosition user) {
     // Target Switch A
     final isP1Target = keysPressed.contains(LogicalKeyboardKey.keyA);
     // Swap E
@@ -88,8 +135,8 @@ extension GameInputExt on GameManager {
     return false;
   }
 
-  _validateP2Input(
-      RawKeyEvent event, Set<LogicalKeyboardKey> keysPressed, BrawlType user) {
+  _validateP2Input(RawKeyEvent event, Set<LogicalKeyboardKey> keysPressed,
+      MatchPosition user) {
     // Target Switch :
     final isP2Target = keysPressed.contains(LogicalKeyboardKey.semicolon);
     // Swap I

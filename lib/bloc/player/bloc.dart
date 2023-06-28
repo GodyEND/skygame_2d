@@ -4,7 +4,7 @@ import 'package:skygame_2d/bloc/player/events.dart';
 import 'package:skygame_2d/bloc/player/state.dart';
 import 'package:skygame_2d/game/helper.dart';
 import 'package:skygame_2d/game/unit.dart';
-import 'package:skygame_2d/models/enums.dart';
+import 'package:skygame_2d/utils.dart/enums.dart';
 import 'package:skygame_2d/models/match_unit/unit_render_ext.dart';
 
 class PlayerBloc extends Bloc<BlocEvent, PlayerBlocState> {
@@ -16,14 +16,13 @@ class PlayerBloc extends Bloc<BlocEvent, PlayerBlocState> {
       emit(state.copyWith(cPoints: state.points + 1));
     });
     on<SetPlayerUnitEvent>((event, emit) {
-      final unitPos = MatchHelper.getPosRef(event.ownerID, event.position);
       final newUnit = MatchUnit(
         event.unit,
         id: event.position.index +
             (event.ownerID - 1) * MatchPosition.values.length,
         ownerID: event.ownerID,
-        position: unitPos,
-        target: MatchHelper.getDefaultTarget(unitPos),
+        position: event.position,
+        target: MatchHelper.getDefaultTarget(event.position),
         links: const [],
       );
       newUnit.addMatchAssets();

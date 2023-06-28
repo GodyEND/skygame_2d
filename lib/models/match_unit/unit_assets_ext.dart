@@ -7,14 +7,15 @@ import 'package:skygame_2d/models/match_unit/unit_assets.dart';
 
 extension UnitAssetsExt on MatchUnitAssets {
   void addToGame() {
-    GameManager.context.add(sprite);
-    GameManager.context.add(hud);
+    // GameManager.context.add(sprite);
+    // GameManager.context.add(hud);
   }
 
   void refresh() {
     hud.refresh(parent.position);
-    sprite.position = Stage.positions[parent.position] ?? Vector2(0, 0);
-    if (MatchHelper.isFrontrow(parent.type)) {
+    sprite.position =
+        Stage.positions(parent.ownerID)[parent.position] ?? Vector2(0, 0);
+    if (MatchHelper.isFrontrow(parent.position)) {
       sprite.setOpacity(1);
     } else {
       sprite.setOpacity(0);

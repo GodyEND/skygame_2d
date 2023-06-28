@@ -1,7 +1,7 @@
 import 'package:skygame_2d/graphics/graphics.dart';
 import 'package:skygame_2d/models/bes.dart';
 import 'package:skygame_2d/models/costs.dart';
-import 'package:skygame_2d/models/enums.dart';
+import 'package:skygame_2d/utils.dart/enums.dart';
 import 'package:skygame_2d/models/fx.dart';
 import 'package:skygame_2d/models/match_unit/unit.dart';
 import 'package:skygame_2d/models/release.dart';
@@ -16,6 +16,7 @@ class Angelos1 extends Unit {
           species: Species.angelos,
           image: Sprites.q('angelos_1$PF_SPRITE'),
           profile: Sprites.q('angelos_1$PF_PROFILE'),
+          select: Sprites.q('angelos_1$PF_SELECT'),
           stats:
               Stats(hp: 40, storage: 80, atk: 70, def: 40, charge: 60, exe: 80),
           release: Releases.q('Flame Lance'),
@@ -33,6 +34,7 @@ class Angelos2 extends Unit {
           species: Species.angelos,
           image: Sprites.q('angelos_2$PF_SPRITE'),
           profile: Sprites.q('angelos_2$PF_PROFILE'),
+          select: Sprites.q('angelos_2$PF_SELECT'),
           stats:
               Stats(hp: 80, storage: 60, atk: 40, def: 60, charge: 60, exe: 40),
           release: Releases.q('Earth Coat'),
@@ -50,6 +52,7 @@ class Angelos3 extends Unit {
           species: Species.angelos,
           image: Sprites.q('angelos_3$PF_SPRITE'),
           profile: Sprites.q('angelos_3$PF_PROFILE'),
+          select: Sprites.q('angelos_3$PF_SELECT'),
           stats: Stats(
               hp: 60, storage: 100, atk: 60, def: 40, charge: 100, exe: 90),
           release: Releases.q('Low Swipe'),
@@ -67,6 +70,7 @@ class Angelos4 extends Unit {
           species: Species.angelos,
           image: Sprites.q('angelos_4$PF_SPRITE'),
           profile: Sprites.q('angelos_4$PF_PROFILE'),
+          select: Sprites.q('angelos_4$PF_SELECT'),
           stats: Stats(
               hp: 60, storage: 100, atk: 40, def: 60, charge: 80, exe: 60),
           release: Releases.q('Dragon Twister'),
@@ -84,6 +88,7 @@ class Angelos5 extends Unit {
           species: Species.angelos,
           image: Sprites.q('angelos_5$PF_SPRITE'),
           profile: Sprites.q('angelos_5$PF_PROFILE'),
+          select: Sprites.q('angelos_5$PF_SELECT'),
           stats:
               Stats(hp: 60, storage: 50, atk: 40, def: 60, charge: 80, exe: 60),
           release: Releases.q('Magnetise'),

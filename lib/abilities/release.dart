@@ -3,7 +3,7 @@ import 'package:skygame_2d/game/helper.dart';
 import 'package:skygame_2d/game/unit.dart';
 import 'package:skygame_2d/game/game.dart';
 import 'package:skygame_2d/game/trackers.dart';
-import 'package:skygame_2d/models/enums.dart';
+import 'package:skygame_2d/utils.dart/enums.dart';
 import 'package:skygame_2d/models/release.dart';
 import 'package:skygame_2d/utils.dart/extensions.dart';
 
@@ -18,12 +18,10 @@ class Release1 extends Release {
   @override
   void action(MatchUnit user, GameManager game) async {
     final targetLocations = [user.target];
-    targetLocations.addAll(MatchHelper.getLinkRef(
-        game.field[user.target]!.ownerID,
-        MatchHelper.getBrawlType(user.target)));
+    targetLocations.addAll(MatchHelper.getLinkRef(user.target));
 
     for (var targetLocation in targetLocations) {
-      final target = game.field[targetLocation];
+      final target = GameManager.field(user.ownerID)[targetLocation];
       if (target == null) continue;
 
       // TODO: if user attack hit

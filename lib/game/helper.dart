@@ -2,133 +2,43 @@ import 'package:flame/components.dart';
 import 'package:skygame_2d/game/game.dart';
 import 'package:skygame_2d/game/unit.dart';
 import 'package:skygame_2d/main.dart';
-import 'package:skygame_2d/models/enums.dart';
+import 'package:skygame_2d/utils.dart/enums.dart';
 import 'package:skygame_2d/utils.dart/constants.dart';
 
 class MatchHelper {
-  static MatchPosition getPosRef(int owner, BrawlType type) {
-    switch (owner) {
-      case 1:
-        switch (type) {
-          case BrawlType.lead:
-            return MatchPosition.p1Lead;
-          case BrawlType.leftAce:
-            return MatchPosition.p1LeftAce;
-          case BrawlType.rightAce:
-            return MatchPosition.p1RightAce;
-          case BrawlType.leftLink:
-            return MatchPosition.p1LeftLink;
-          case BrawlType.rightLink:
-            return MatchPosition.p1RightLink;
-          case BrawlType.reserve1:
-          case BrawlType.reserve2:
-          case BrawlType.reserve3:
-          case BrawlType.reserve4:
-          case BrawlType.reserve5:
-            return MatchPosition.p1Reserve;
-          case BrawlType.defeated:
-            return MatchPosition.defeated;
-        }
-      default:
-        switch (type) {
-          case BrawlType.lead:
-            return MatchPosition.p2Lead;
-          case BrawlType.leftAce:
-            return MatchPosition.p2LeftAce;
-          case BrawlType.rightAce:
-            return MatchPosition.p2RightAce;
-          case BrawlType.leftLink:
-            return MatchPosition.p2LeftLink;
-          case BrawlType.rightLink:
-            return MatchPosition.p2RightLink;
-          case BrawlType.reserve1:
-          case BrawlType.reserve2:
-          case BrawlType.reserve3:
-          case BrawlType.reserve4:
-          case BrawlType.reserve5:
-            return MatchPosition.p2Reserve;
-          case BrawlType.defeated:
-            return MatchPosition.defeated;
-        }
-    }
-  }
-
-  static BrawlType getBrawlType(MatchPosition position) {
-    switch (position) {
-      case MatchPosition.p1Lead:
-      case MatchPosition.p2Lead:
-        return BrawlType.lead;
-      case MatchPosition.p1LeftAce:
-      case MatchPosition.p2LeftAce:
-        return BrawlType.leftAce;
-      case MatchPosition.p1RightAce:
-      case MatchPosition.p2RightAce:
-        return BrawlType.rightAce;
-      case MatchPosition.p1LeftLink:
-      case MatchPosition.p2LeftLink:
-        return BrawlType.leftLink;
-      case MatchPosition.p1RightLink:
-      case MatchPosition.p2RightLink:
-        return BrawlType.rightLink;
-      case MatchPosition.defeated:
-        return BrawlType.defeated;
-      default:
-        return BrawlType.reserve1;
-    }
-  }
-
   static MatchPosition getDefaultTarget(MatchPosition position) {
-    final fieldPos = MatchHelper.getBrawlType(position);
-    late BrawlType target;
-    switch (fieldPos) {
-      case BrawlType.lead:
-        target = BrawlType.lead;
-        break;
-      case BrawlType.leftAce:
-        target = BrawlType.rightAce;
-        break;
-      case BrawlType.rightAce:
-        target = BrawlType.leftAce;
-        break;
+    switch (position) {
+      case MatchPosition.lead:
+        return MatchPosition.lead;
+      case MatchPosition.leftAce:
+        return MatchPosition.rightAce;
+      case MatchPosition.rightAce:
+        return MatchPosition.leftAce;
       default:
         return MatchPosition.none;
     }
-    return getPosRef(
-        MatchHelper.getOpponent(MatchHelper.getOwner(position)), target);
   }
 
   static MatchUnit getTarget(GameManager game, MatchUnit attacker) {
-    var currentTarget = game.field[attacker.target];
+    final opponentID = MatchHelper.getOpponent(attacker.ownerID);
+    var currentTarget = GameManager.field(opponentID)[attacker.target];
     if (currentTarget == null ||
         currentTarget.position == MatchPosition.defeated) {
-      final newTargetPos = MatchHelper.getPosRef(
-          MatchHelper.getOpponent(attacker.ownerID), BrawlType.lead);
-      currentTarget = game.field[newTargetPos];
+      const newTargetPos = MatchPosition.lead;
+      currentTarget = GameManager.field(opponentID)[newTargetPos];
       attacker.target = newTargetPos;
     }
     return currentTarget!;
   }
 
-  static List<MatchPosition> getLinkRef(int ownerID, BrawlType position) {
-    switch (ownerID) {
-      case Constants.FIRST_PLAYER:
-        switch (position) {
-          case BrawlType.leftLink:
-            return [MatchPosition.p1Lead, MatchPosition.p1LeftAce];
-          case BrawlType.rightLink:
-            return [MatchPosition.p1Lead, MatchPosition.p1RightAce];
-          default:
-            return [];
-        }
+  static List<MatchPosition> getLinkRef(MatchPosition position) {
+    switch (position) {
+      case MatchPosition.leftLink:
+        return [MatchPosition.lead, MatchPosition.leftAce];
+      case MatchPosition.rightLink:
+        return [MatchPosition.lead, MatchPosition.rightAce];
       default:
-        switch (position) {
-          case BrawlType.leftLink:
-            return [MatchPosition.p2Lead, MatchPosition.p2LeftAce];
-          case BrawlType.rightLink:
-            return [MatchPosition.p2Lead, MatchPosition.p2RightAce];
-          default:
-            return [];
-        }
+        return [];
     }
   }
 
@@ -136,14 +46,10 @@ class MatchHelper {
     return unit.ownerID == Constants.FIRST_PLAYER;
   }
 
-  static bool isFrontrow(BrawlType type) {
-    return (type == BrawlType.lead ||
-        type == BrawlType.leftAce ||
-        type == BrawlType.rightAce);
-  }
-
-  static Owner getOwner(MatchPosition position) {
-    return (position.name.contains('p1')) ? Owner.p1 : Owner.p2;
+  static bool isFrontrow(MatchPosition type) {
+    return (type == MatchPosition.lead ||
+        type == MatchPosition.leftAce ||
+        type == MatchPosition.rightAce);
   }
 
   static int getOpponent(int ownerID) {
@@ -166,34 +72,25 @@ class MatchHelper {
     return hasRemoved.contains(true);
   }
 
-  static List<MatchUnit> getOpposingUnits(
-      Map<MatchPosition, MatchUnit?> field, int ownerID) {
+  static List<MatchUnit> getOpposingUnits(int ownerID) {
     List<MatchUnit?> opponents = [];
-    switch (ownerID) {
-      case Constants.FIRST_PLAYER:
-        opponents.add(field[MatchPosition.p2Lead]);
-        opponents.add(field[MatchPosition.p2LeftAce]);
-        opponents.add(field[MatchPosition.p2RightAce]);
-        opponents.add(field[MatchPosition.p2LeftLink]);
-        opponents.add(field[MatchPosition.p2RightLink]);
-        break;
-      default:
-        opponents.add(field[MatchPosition.p1Lead]);
-        opponents.add(field[MatchPosition.p1LeftAce]);
-        opponents.add(field[MatchPosition.p1RightAce]);
-        opponents.add(field[MatchPosition.p1LeftLink]);
-        opponents.add(field[MatchPosition.p1RightLink]);
-        break;
-    }
+    final opponentID = (ownerID == Constants.FIRST_PLAYER)
+        ? Constants.SECOND_PLAYER
+        : Constants.FIRST_PLAYER;
+    opponents.add(GameManager.field(opponentID)[MatchPosition.lead]);
+    opponents.add(GameManager.field(opponentID)[MatchPosition.leftAce]);
+    opponents.add(GameManager.field(opponentID)[MatchPosition.rightAce]);
+    opponents.add(GameManager.field(opponentID)[MatchPosition.leftLink]);
+    opponents.add(GameManager.field(opponentID)[MatchPosition.rightLink]);
     return List<MatchUnit>.from(opponents.where((e) => e != null).toList());
   }
 
-  static int getUnitPoints(BrawlType type) {
+  static int getUnitPoints(MatchPosition type) {
     switch (type) {
-      case BrawlType.lead:
+      case MatchPosition.lead:
         return 2;
-      case BrawlType.leftAce:
-      case BrawlType.rightAce:
+      case MatchPosition.leftAce:
+      case MatchPosition.rightAce:
         return 1;
       default:
         return 0;

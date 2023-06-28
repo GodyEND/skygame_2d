@@ -1,7 +1,8 @@
 import 'dart:math';
+import 'package:skygame_2d/game/helper.dart';
 import 'package:skygame_2d/game/unit.dart';
 import 'package:skygame_2d/game/game.dart';
-import 'package:skygame_2d/models/enums.dart';
+import 'package:skygame_2d/utils.dart/enums.dart';
 import 'package:skygame_2d/utils.dart/constants.dart';
 
 class Simulator {
@@ -36,7 +37,8 @@ class Simulator {
 
   static CombatEventResult combatEventResult(GameManager game) {
     final attacker = game.active;
-    final defender = game.field[attacker.target]!;
+    final opponentID = MatchHelper.getOpponent(attacker.ownerID);
+    final defender = GameManager.field(opponentID)[attacker.target]!;
     CombatEventResult result = CombatEventResult.hit;
     // Check for Hit
     double hitChance = attacker.current.bes.values[BESType.hit]! -

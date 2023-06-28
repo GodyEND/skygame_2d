@@ -4,7 +4,7 @@ import 'package:skygame_2d/game/helper.dart';
 import 'package:skygame_2d/game/unit.dart';
 import 'package:skygame_2d/game/game.dart';
 import 'package:skygame_2d/game/trackers.dart';
-import 'package:skygame_2d/models/enums.dart';
+import 'package:skygame_2d/utils.dart/enums.dart';
 import 'package:skygame_2d/models/fx.dart';
 import 'package:skygame_2d/utils.dart/extensions.dart';
 
@@ -62,7 +62,7 @@ class FX3 extends FX {
   @override
   void action(MatchUnit user, GameManager game) {
     // NOTE: Do not know if this needs to be tracked
-    final targets = MatchHelper.getOpposingUnits(game.field, user.ownerID);
+    final targets = MatchHelper.getOpposingUnits(user.ownerID);
     for (var target in targets) {
       target.current.stats.values[StatType.storage] =
           max(0.0, target.current.stats[StatType.storage] - 50);
@@ -80,11 +80,12 @@ class FX4 extends FX {
 
   @override
   void action(MatchUnit user, GameManager game) {
-    final targets = game.field[user.position]?.links;
+    final targets = GameManager.field(user.ownerID)[user.position]?.links;
     if (targets == null) return;
     if (targets.isEmpty) return;
     for (var link in targets) {
-      final target = game.field[link]!;
+      final opponentID = MatchHelper.getOpponent(user.ownerID);
+      final target = GameManager.field(opponentID)[link]!;
       final notation = game.fxTracker.firstWhereOrNull((e) =>
           e.fx == this && e.userID == user.id && e.targetID == target.id);
       if (notation != null && notation.turn + 2 < game.turn) {
@@ -112,11 +113,13 @@ class FX5 extends FX {
 
   @override
   void action(MatchUnit user, GameManager game) {
-    final targets = game.field[user.position]?.links;
+    final targets = GameManager.field(user.ownerID)[user.position]?.links;
+
     if (targets == null) return;
     if (targets.isEmpty) return;
     for (var link in targets) {
-      final target = game.field[link]!;
+      final opponentID = MatchHelper.getOpponent(user.ownerID);
+      final target = GameManager.field(opponentID)[link]!;
       final notation = game.fxTracker.firstWhereOrNull((e) =>
           e.fx == this && e.userID == user.id && e.targetID == target.id);
       if (notation != null) continue;

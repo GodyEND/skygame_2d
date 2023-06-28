@@ -1,4 +1,4 @@
-import 'package:skygame_2d/models/enums.dart';
+import 'package:skygame_2d/utils.dart/enums.dart';
 
 class Stats {
   final Map<StatType, double> values;

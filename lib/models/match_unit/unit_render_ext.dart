@@ -4,7 +4,7 @@ import 'package:flame/components.dart';
 import 'package:skygame_2d/game/stage.dart';
 import 'package:skygame_2d/game/unit.dart';
 import 'package:skygame_2d/graphics/graphics.dart';
-import 'package:skygame_2d/models/enums.dart';
+import 'package:skygame_2d/utils.dart/enums.dart';
 import 'package:skygame_2d/models/match_unit/unit_assets.dart';
 import 'package:skygame_2d/models/match_unit/unit_hud.dart';
 import 'package:skygame_2d/utils.dart/constants.dart';
@@ -13,15 +13,17 @@ extension UnitAssetManageExt on MatchUnit {
   bool addMatchAssets() {
     if (protectedAsset != null) return false;
     protectedAsset = MatchUnitAssets(
-      sprite: GraphicsManager.createUnitSprite(position, character.image),
+      sprite: SpriteComponent(),
+      // GraphicsManager.createUnitSprite(ownerID, position, character.image),
       hud: UnitHUDComponent(
+        ownerID: ownerID,
         profileImage: character.profile,
         matchPosition: position,
         size: Stage.hudResolution,
       ),
       infoList: {
-        EXEC_ICON:
-            GraphicsManager.createUnitProfile(position, character.profile),
+        // EXEC_ICON: GraphicsManager.createUnitProfile(
+        //     ownerID, position, character.profile),
       },
       parent: this,
     );
@@ -57,7 +59,7 @@ extension UnitRenderExt on MatchUnit {
     } else if (asset.hud.chargeSeparator.length < separators) {
       final diff = separators - asset.hud.chargeSeparator.length;
       for (int i = 0; i < diff; i++) {
-        asset.hud.chargeSeparator.add(GraphicsManager.createChargeSeparator());
+        // asset.hud.chargeSeparator.add(GraphicsManager.createChargeSeparator());
         asset.hud.add(asset.hud.chargeSeparator.last);
       }
     }

@@ -51,12 +51,13 @@ class BrawlQComponent extends PositionComponent {
   }
 
   List<MatchUnit> get _getRenderedUnits {
-    final List<MatchUnit> result =
-        animatedQ.value.where((e) => MatchHelper.isFrontrow(e.type)).toList();
+    final List<MatchUnit> result = animatedQ.value
+        .where((e) => MatchHelper.isFrontrow(e.position))
+        .toList();
 
     while (result.length < 7) {
       final orderedList = GameManager.executionOrder(game.units)
-          .where((e) => MatchHelper.isFrontrow(e.type))
+          .where((e) => MatchHelper.isFrontrow(e.position))
           .toList();
       result.addAll(orderedList);
     }
@@ -156,11 +157,11 @@ class BrawlQComponent extends PositionComponent {
   }
 
   _addNewIcon(MatchUnit unit, Vector2 offset) {
-    final icon = GraphicsManager.createUnitProfile(
-        unit.position, unit.character.profile);
-    icon.position = main.position + offset;
-    icon.anchor = Anchor.center;
-    icon.size = Vector2.all(55);
+    // final icon = GraphicsManager.createUnitProfile(
+    //     unit.ownerID, unit.position, unit.character.profile);
+    // icon.position = main.position + offset;
+    // icon.anchor = Anchor.center;
+    // icon.size = Vector2.all(55);
 
     final ownerBadge = RectangleComponent(
       anchor: Anchor.center,
@@ -169,16 +170,16 @@ class BrawlQComponent extends PositionComponent {
       paint: Paint()
         ..color = MatchHelper.isLeftTeam(unit) ? Colors.blue : Colors.red,
     );
-    icon.add(ownerBadge);
+    // icon.add(ownerBadge);
 
     final eff = MoveEffect.to(
       Vector2(-30, 50),
       // TODO: use dt
       EffectController(speed: 34.0 * Constants.ANI_SPEED.toDouble()),
     );
-    icon.add(eff);
+    // icon.add(eff);
 
-    activeComps.add(_ActiveQIcon(unit.id, icon));
-    main.add(icon);
+    // activeComps.add(_ActiveQIcon(unit.id, icon));
+    // main.add(icon);
   }
 }

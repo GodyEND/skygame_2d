@@ -7,7 +7,7 @@ import 'package:skygame_2d/game/helper.dart';
 import 'package:skygame_2d/graphics/animations.dart';
 import 'package:skygame_2d/models/match_unit/unit_assets.dart';
 import 'package:skygame_2d/game/stage.dart';
-import 'package:skygame_2d/models/enums.dart';
+import 'package:skygame_2d/utils.dart/enums.dart';
 
 enum UnitAniState {
   none,
@@ -33,17 +33,12 @@ enum UnitAniState {
 
 extension UnitAssetsAnimationExt on MatchUnitAssets {
   void _enterCombat() {
-    final startPos = MatchHelper.isLeftTeam(parent)
-        ? MatchPosition.p1Combatant
-        : MatchPosition.p2Combatant;
-    sprite.position = Stage.positions[startPos]!;
+    sprite.position = Stage.zones(parent.ownerID)[CombatPosition.challenger]!;
     animationState.value = UnitAniState.challenge;
   }
 
   void _challenge(double dt, UnitAniState nextState, {Vector2? offset}) {
-    final targetPos = MatchHelper.isLeftTeam(parent)
-        ? Stage.positions[MatchPosition.p1HitBox]!
-        : Stage.positions[MatchPosition.p2HitBox]!;
+    final targetPos = Stage.zones(parent.ownerID)[CombatPosition.hitbox]!;
     sprite.add(MoveEffect.to(
       targetPos + (offset ?? Vector2.all(0.0)),
       EffectController(duration: 0.03 / dt),
@@ -55,11 +50,9 @@ extension UnitAssetsAnimationExt on MatchUnitAssets {
 
   void _attack(double dt) {
     final attackDist = MatchHelper.isLeftTeam(parent) ? 40.0 : -40.0;
-    final targetPos = MatchHelper.isLeftTeam(parent)
-        ? MatchPosition.p1HitBox
-        : MatchPosition.p2HitBox;
     sprite.add(MoveEffect.to(
-      Stage.positions[targetPos]! + Vector2(attackDist, 0),
+      Stage.zones(parent.ownerID)[CombatPosition.hitbox]! +
+          Vector2(attackDist, 0),
       EffectController(duration: 0.005 / dt),
       onComplete: () {
         if (parent.incomingCharge > 0) {
@@ -77,9 +70,7 @@ extension UnitAssetsAnimationExt on MatchUnitAssets {
   }
 
   void _exitChallenge(double dt) {
-    final targetPos = MatchHelper.isLeftTeam(parent)
-        ? Stage.positions[MatchPosition.p1Combatant]!
-        : Stage.positions[MatchPosition.p2Combatant]!;
+    final targetPos = Stage.zones(parent.ownerID)[CombatPosition.challenger]!;
 
     sprite.add(MoveEffect.to(
       targetPos,
@@ -96,7 +87,7 @@ extension UnitAssetsAnimationExt on MatchUnitAssets {
 
   void _idle(position) {
     if (position != MatchPosition.defeated) {
-      sprite.position = Stage.positions[position]!;
+      sprite.position = Stage.positions(parent.ownerID)[position]!;
       animationState.value = UnitAniState.idle;
     }
   }
@@ -125,7 +116,7 @@ extension UnitAssetsAnimationExt on MatchUnitAssets {
     sprite.add(RotateEffect.to(target, EffectController(duration: 0.008 / dt),
         onComplete: () {
       sprite.angle = 0;
-      sprite.y = Stage.positions[MatchPosition.p1HitBox]!.y;
+      sprite.y = Stage.zones(parent.ownerID)[CombatPosition.hitbox]!.y;
       AnimationsManager.fireCharge(dt,
           unit: parent,
           startPos: sprite.position -
@@ -214,11 +205,10 @@ extension UnitAssetsAnimationExt on MatchUnitAssets {
 // TODO:
   void _missedAttack(double dt) {
     final attackDist = MatchHelper.isLeftTeam(parent) ? 40.0 : -40.0;
-    final targetPos = MatchHelper.isLeftTeam(parent)
-        ? MatchPosition.p1HitBox
-        : MatchPosition.p2HitBox;
+
     sprite.add(MoveEffect.to(
-      Stage.positions[targetPos]! + Vector2(attackDist, 0),
+      Stage.zones(parent.ownerID)[CombatPosition.hitbox]! +
+          Vector2(attackDist, 0),
       EffectController(duration: 0.01 / dt),
       onComplete: () {
         animationState.value = UnitAniState.counteredAttack;
@@ -241,7 +231,7 @@ extension UnitAssetsAnimationExt on MatchUnitAssets {
                   ? Vector2(0, 25)
                   : Vector2(0, 25)),
           damage: parent.incomingDamage);
-      sprite.y = Stage.positions[MatchPosition.p1HitBox]!.y + 20.0;
+      sprite.y = Stage.zones(parent.ownerID)[CombatPosition.hitbox]!.y + 20.0;
       sprite.angle = angleDir;
       await Future.delayed(Duration(milliseconds: (20.0 ~/ dt)));
       sprite.angle = 0;

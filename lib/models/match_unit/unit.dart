@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:skygame_2d/characters/angelos/angelos.dart';
 import 'package:skygame_2d/models/bes.dart';
 import 'package:skygame_2d/models/costs.dart';
-import 'package:skygame_2d/models/enums.dart';
+import 'package:skygame_2d/utils.dart/enums.dart';
 import 'package:skygame_2d/models/fx.dart';
 import 'package:skygame_2d/models/release.dart';
 import 'package:skygame_2d/models/stats.dart';
@@ -14,6 +14,7 @@ abstract class Unit {
   final Species species;
   final Image image;
   final Image profile;
+  final Image select;
   final Stats stats;
   final Release release;
   final FX fx;
@@ -26,6 +27,7 @@ abstract class Unit {
     required this.species,
     required this.image,
     required this.profile,
+    required this.select,
     required this.stats,
     required this.release,
     required this.fx,
@@ -61,6 +63,10 @@ class Units {
     Angelos3();
     Angelos4();
     Angelos5();
+  }
+
+  static List<Unit> get all {
+    return _list;
   }
 
   static int get number => _list.length;

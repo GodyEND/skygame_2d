@@ -5,18 +5,27 @@ import 'package:skygame_2d/graphics/graphics.dart';
 class Sprites {
   static final Map<String, Image> _list = {};
 
-  static Future<void> loadImages() async {
-    for (int i = 1; i <= 5; i++) {
-      final filepath = 'angelos_$i$PF_SPRITE.png';
-      _list[filepath] = await Flame.images.load(filepath);
-    }
-    for (int i = 1; i <= 5; i++) {
-      final filepath = 'angelos_$i$PF_PROFILE.png';
-      _list[filepath] = await Flame.images.load(filepath);
-    }
-    for (int i = 1; i <= 1; i++) {
-      final filepath = 'map_$i.png';
-      _list[filepath] = await Flame.images.load(filepath);
+  static Future<bool> loadImages() async {
+    try {
+      for (int i = 1; i <= 5; i++) {
+        final filepath = 'angelos_$i$PF_SPRITE.png';
+        _list[filepath] = await Flame.images.load(filepath);
+      }
+      for (int i = 1; i <= 5; i++) {
+        final filepath = 'angelos_$i$PF_PROFILE.png';
+        _list[filepath] = await Flame.images.load(filepath);
+      }
+      for (int i = 1; i <= 5; i++) {
+        final filepath = 'angelos_$i$PF_SELECT.png';
+        _list[filepath] = await Flame.images.load(filepath);
+      }
+      for (int i = 1; i <= 1; i++) {
+        final filepath = 'map_$i.png';
+        _list[filepath] = await Flame.images.load(filepath);
+      }
+      return true;
+    } catch (_) {
+      return false;
     }
   }
 

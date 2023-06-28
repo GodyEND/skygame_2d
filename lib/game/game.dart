@@ -4,16 +4,17 @@ import 'package:skygame_2d/game/helper.dart';
 import 'package:skygame_2d/game/stage.dart';
 import 'package:skygame_2d/game/trackers.dart';
 import 'package:skygame_2d/game/unit.dart';
-import 'package:skygame_2d/main.dart';
-import 'package:skygame_2d/models/enums.dart';
+// import 'package:skygame_2d/main.dart';
+import 'package:skygame_2d/utils.dart/enums.dart';
 import 'package:skygame_2d/models/match_unit/unit_assets_ext.dart';
 import 'package:skygame_2d/setup.dart';
+import 'package:skygame_2d/utils.dart/constants.dart';
 
 class GameManager {
   late Stage stage;
   static Map<String, Component> spriteList = {};
-  static late SkyGame2D context;
-  GameState state = GameState.setup;
+  // static late SkyGame2D context;
+  SceneState state = SceneState.load;
   CombatState combatState = CombatState.attack;
   GameManager();
   // final List<Command> _commandQ = [];
@@ -23,7 +24,22 @@ class GameManager {
   // MatchUnit? prevActive;
   ValueNotifier<List<MatchUnit>> prevBrawlQ = ValueNotifier([]);
 
-  Map<MatchPosition, MatchUnit?> field = {};
+  static final Map<MatchPosition, MatchUnit?> _leftField = {};
+  static final Map<MatchPosition, MatchUnit?> _rightField = {};
+  static Map<MatchPosition, MatchUnit?> field(int ownerID) {
+    if (ownerID == Constants.FIRST_PLAYER) {
+      return _leftField;
+    }
+    return _rightField;
+  }
+
+  static void setField(int ownerID, MatchPosition position, MatchUnit? unit) {
+    if (ownerID == Constants.FIRST_PLAYER) {
+      _leftField[position] = unit;
+    } else {
+      _rightField[position] = unit;
+    }
+  }
 
   int turn = 1;
   CombatEventResult currentEvent = CombatEventResult.none;
@@ -60,7 +76,7 @@ class GameManager {
     // (spriteList[SCORE_TEXT]! as TextComponent).text =
     //     '${player1.points} : ${player2.points}';
     setBrawlQ;
-    state = GameState.combat;
+    state = SceneState.combat;
   }
 
   void _prepareUnits() {
@@ -108,7 +124,7 @@ class GameManager {
   }
 
   void get _updateBrawlQ {
-    if (!MatchHelper.isFrontrow(brawlQ[1].type)) {
+    if (!MatchHelper.isFrontrow(brawlQ[1].position)) {
       brawlQ.removeAt(0);
       updateActive;
     } else {
@@ -129,16 +145,17 @@ class GameManager {
     MatchUnit? lastFrontrow;
     if (lastActiveID != null) {
       while (active.id != lastActiveID) {
-        if (MatchHelper.isFrontrow(active.type)) {
+        if (MatchHelper.isFrontrow(active.position)) {
           lastFrontrow = active;
         }
         brawlQ.removeAt(0);
       }
     }
-    brawlQ.removeWhere((e) => !MatchHelper.isFrontrow(e.type));
+    brawlQ.removeWhere((e) => !MatchHelper.isFrontrow(e.position));
 
     final prevList = [
-      lastFrontrow ?? brawlQ.lastWhere((e) => MatchHelper.isFrontrow(e.type))
+      lastFrontrow ??
+          brawlQ.lastWhere((e) => MatchHelper.isFrontrow(e.position))
     ];
     prevList.addAll(brawlQ);
     prevBrawlQ.value = prevList;
@@ -155,7 +172,7 @@ class GameManager {
 
   static List<MatchUnit> executionOrder(List<MatchUnit> evaluatedList) {
     final result = List<MatchUnit>.from(evaluatedList)
-        .where((e) => MatchHelper.isFrontrow(e.type))
+        .where((e) => MatchHelper.isFrontrow(e.position))
         .toList();
     result.sort((a, b) => b.current.stats[StatType.execution]
         .compareTo(a.current.stats[StatType.execution]));
@@ -175,7 +192,7 @@ class GameManager {
         // }
 
         // if (player1.points >= 9 || player2.points >= 9) {
-        //   state = GameState.end;
+        //   state = SceneState.end;
         //   return;
         // }
 
@@ -187,7 +204,7 @@ class GameManager {
         //   player2.toBeReplaced = unit;
         //   player2.state = PlayerState.waiting;
         // }
-        state = GameState.replace;
+        // state = SceneState.replace;
       }
       unit.resetLiveStatus;
     }
@@ -196,14 +213,14 @@ class GameManager {
   void updateFieldForSwap(double dt, MatchUnit user, MatchUnit secondary) {
     final MatchPosition temp = secondary.position;
 
-    field[user.position] = null;
-    field[secondary.position] = null;
+    setField(user.ownerID, user.position, null);
+    setField(user.ownerID, secondary.position, null);
 
     secondary.position = user.position;
     user.position = temp;
 
-    field[secondary.position] = secondary;
-    field[user.position] = user;
+    setField(user.ownerID, secondary.position, secondary);
+    setField(user.ownerID, user.position, user);
 
     // update assets
   }

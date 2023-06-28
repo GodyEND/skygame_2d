@@ -1,110 +1,108 @@
 import 'package:skygame_2d/game/game.dart';
-import 'package:skygame_2d/game/helper.dart';
 import 'package:skygame_2d/game/unit.dart';
-import 'package:skygame_2d/models/enums.dart';
+import 'package:skygame_2d/utils.dart/enums.dart';
 import 'package:skygame_2d/models/match_unit/unit_assets_ext.dart';
 
 extension GameReplaceState on GameManager {
   void replaceFrontrow(MatchUnit old, {MatchPosition? inReplacement}) {
-    final fieldPos = old.type;
+    final fieldPos = old.position;
 
     MatchPosition? replacementPos;
     if (inReplacement != null) {
       replacementPos = inReplacement;
     } else {
-      final ll = MatchHelper.getPosRef(old.ownerID, BrawlType.leftLink);
-      final rl = MatchHelper.getPosRef(old.ownerID, BrawlType.rightLink);
+      final ll = GameManager.field(old.ownerID)[MatchPosition.leftLink];
+      final rl = GameManager.field(old.ownerID)[MatchPosition.rightLink];
       switch (fieldPos) {
-        case BrawlType.lead:
-          if (field[ll] != null && field[rl] != null) {
-            state = GameState.replaceSupport;
+        case MatchPosition.lead:
+          if (ll != null && rl != null) {
+            // state = SceneState.replaceSupport;
             return;
-          } else if (field[ll] != null) {
-            if (field[ll]!.position == MatchPosition.defeated) {
-              field[ll] = null;
-              state = GameState.replace;
+          } else if (ll != null) {
+            if (ll.position == MatchPosition.defeated) {
+              GameManager.setField(old.ownerID, MatchPosition.leftLink, null);
+              // state = SceneState.replace;
               return;
             } else {
-              replacementPos = ll;
+              replacementPos = ll.position;
             }
-          } else if (field[rl] != null) {
-            if (field[rl]!.position == MatchPosition.defeated) {
-              field[rl] = null;
-              state = GameState.replace;
+          } else if (rl != null) {
+            if (rl.position == MatchPosition.defeated) {
+              GameManager.setField(old.ownerID, MatchPosition.rightLink, null);
+              // state = SceneState.replace;
               return;
             } else {
-              replacementPos = rl;
+              replacementPos = rl.position;
             }
           } else {
-            final la = MatchHelper.getPosRef(old.ownerID, BrawlType.leftAce);
-            final ra = MatchHelper.getPosRef(old.ownerID, BrawlType.rightAce);
-            if (field[la] != null &&
-                field[la]!.position != MatchPosition.defeated &&
-                field[ra] != null &&
-                field[ra]!.position != MatchPosition.defeated) {
-              state = GameState.replaceWing;
+            final la = GameManager.field(old.ownerID)[MatchPosition.leftAce];
+            final ra = GameManager.field(old.ownerID)[MatchPosition.rightAce];
+            if (la != null &&
+                la.position != MatchPosition.defeated &&
+                ra != null &&
+                ra.position != MatchPosition.defeated) {
+              // state = SceneState.replaceWing;
               return;
-            } else if (field[la] != null) {
-              if (field[la]!.position == MatchPosition.defeated) {
-                field[la] = null;
-                state = GameState.replace;
+            } else if (la != null) {
+              if (la.position == MatchPosition.defeated) {
+                GameManager.setField(old.ownerID, MatchPosition.leftAce, null);
+                // state = SceneState.replace;
                 return;
               } else {
-                replacementPos = la;
+                replacementPos = la.position;
               }
-            } else if (field[ra] != null) {
-              if (field[ra]!.position == MatchPosition.defeated) {
-                field[ra] = null;
-                state = GameState.replace;
+            } else if (ra != null) {
+              if (ra.position == MatchPosition.defeated) {
+                GameManager.setField(old.ownerID, MatchPosition.rightAce, null);
+                // state = SceneState.replace;
                 return;
               } else {
-                replacementPos = ra;
+                replacementPos = ra.position;
               }
             } else {
-              state = GameState.replaceReserve;
+              // state = SceneState.replaceReserve;
               return;
             }
           }
           break;
-        case BrawlType.leftAce:
-          if (field[ll] != null) {
-            replacementPos = ll;
+        case MatchPosition.leftAce:
+          if (ll != null) {
+            replacementPos = ll.position;
           }
           break;
-        case BrawlType.rightAce:
-          if (field[rl] != null) {
-            replacementPos = rl;
+        case MatchPosition.rightAce:
+          if (rl != null) {
+            replacementPos = rl.position;
           }
           break;
         default:
-          state = GameState.replaceReserve;
+          // state = SceneState.replaceReserve;
           return;
       }
     }
 
-    final replacement = field[replacementPos];
+    final replacement = GameManager.field(old.ownerID)[replacementPos];
     if (replacement != null && replacement.position != MatchPosition.defeated) {
       replacement.position = old.position;
-      MatchUnit? target = field[old.target];
-      target ??= field[MatchHelper.getPosRef(
-          MatchHelper.getOpponent(old.ownerID), BrawlType.lead)];
+      MatchUnit? target = GameManager.field(old.ownerID)[old.target];
+      target ??= GameManager.field(old.ownerID)[MatchPosition.lead];
       replacement.target = target!.position;
       replacement.asset.refresh();
-      field[old.position] = replacement;
+      GameManager.field(old.ownerID)[old.position] = replacement;
     }
 
     old.position = MatchPosition.defeated;
-    old.asset.removeFromGame(GameManager.context);
+    // old.asset.removeFromGame(GameManager.context);
 
     if (replacementPos != null) {
-      field[replacementPos] = null;
+      GameManager.field(old.ownerID)[replacementPos] = null;
     } else if (replacementPos == null && inReplacement == null) {
-      state = GameState.replaceReserve;
+      // state = SceneState.replaceReserve;
     }
     // _clearReplacementStatus(old.ownerID);
   }
 
-  void _clearReplacementStatus(Owner owner) {
+  void _clearReplacementStatus(int ownerID) {
     // if (owner == Owner.p1) {
     //   player1.toBeReplaced = null;
     //   player1.confirmedReplacement = null;
@@ -116,53 +114,29 @@ extension GameReplaceState on GameManager {
     // }
   }
 
-  void setReplacement(Owner owner) {
-    if (state == GameState.replaceWing) {
-      if (owner == Owner.p1) {
-        final la = field[MatchPosition.p1LeftAce];
-        final ra = field[MatchPosition.p1RightAce];
-        // if (la == null && ra == null) {
-        //   player1.confirmedReplacement = MatchPosition.none;
-        // } else {
-        //   player1.confirmedReplacement = Random().nextInt(1) == 0
-        //       ? MatchPosition.p1LeftAce
-        //       : MatchPosition.p1RightAce;
-        // }
-      } else {
-        final la = field[MatchPosition.p2LeftAce];
-        final ra = field[MatchPosition.p2RightAce];
-        // if (la == null && ra == null) {
-        //   player2.confirmedReplacement = MatchPosition.none;
-        // } else {
-        //   player2.confirmedReplacement = Random().nextInt(1) == 0
-        //       ? MatchPosition.p2LeftAce
-        //       : MatchPosition.p2RightAce;
-        // }
-      }
-    } else if (state == GameState.replaceSupport) {
-      if (owner == Owner.p1) {
-        final ll = field[MatchPosition.p1LeftLink];
-        final rl = field[MatchPosition.p1RightLink];
-        // if (ll == null && rl == null) {
-        //   player1.confirmedReplacement = MatchPosition.none;
-        // } else {
-        //   player1.confirmedReplacement = Random().nextInt(1) == 0
-        //       ? MatchPosition.p1LeftLink
-        //       : MatchPosition.p1RightLink;
-        // }
-      } else {
-        final ll = field[MatchPosition.p2LeftLink];
-        final rl = field[MatchPosition.p2RightLink];
-        // if (ll == null && rl == null) {
-        //   player2.confirmedReplacement = MatchPosition.none;
-        // } else {
-        //   player2.confirmedReplacement = Random().nextInt(1) == 0
-        //       ? MatchPosition.p2LeftLink
-        //       : MatchPosition.p2RightLink;
-        // }
-      }
-    } else if (state == GameState.replaceReserve) {
-      // TODO:
-    }
+  void setReplacement(ownerID) {
+    // if (state == SceneState.replaceWing) {
+    //   final la = GameManager.field(ownerID)[MatchPosition.leftAce];
+    //   final ra = GameManager.field(ownerID)[MatchPosition.rightAce];
+    //   // if (la == null && ra == null) {
+    //   //   player1.confirmedReplacement = MatchPosition.none;
+    //   // } else {
+    //   //   player1.confirmedReplacement = Random().nextInt(1) == 0
+    //   //       ? MatchPosition.p1LeftAce
+    //   //       : MatchPosition.p1RightAce;
+    //   // }
+    // } else if (state == SceneState.replaceSupport) {
+    //   final ll = GameManager.field(ownerID)[MatchPosition.leftLink];
+    //   final rl = GameManager.field(ownerID)[MatchPosition.rightLink];
+    //   // if (ll == null && rl == null) {
+    //   //   player1.confirmedReplacement = MatchPosition.none;
+    //   // } else {
+    //   //   player1.confirmedReplacement = Random().nextInt(1) == 0
+    //   //       ? MatchPosition.p1LeftLink
+    //   //       : MatchPosition.p1RightLink;
+    //   // }
+    // } else if (state == SceneState.replaceReserve) {
+    //   // TODO:
+    // }
   }
 }
