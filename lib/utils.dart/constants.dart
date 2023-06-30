@@ -1,6 +1,10 @@
 // ignore_for_file: non_constant_identifier_names, constant_identifier_names
 
+import 'dart:async';
+import 'dart:ui';
+
 import 'package:flame/components.dart';
+import 'package:flutter/services.dart';
 
 class Constants {
   static const double SCREEN_WIDTH = 1920;
@@ -19,4 +23,33 @@ class Constants {
   // Combat References
   static const int FIRST_PLAYER = 1;
   static const int SECOND_PLAYER = 2;
+
+  static ShaderPaths shaders = ShaderPaths();
+  static TextureImages images = TextureImages();
+}
+
+class ShaderPaths {
+  final String color = 'assets/shaders/color.frag';
+  final String outline = 'assets/shaders/outline.frag';
+  final String greyscale = 'assets/shaders/greyscale.frag';
+}
+
+class TextureImages {
+  Image? outlineTex;
+  TextureImages() {
+    init();
+  }
+
+  Future<void> init() async {
+    final data = await rootBundle.load('assets/images/outline_tex.png');
+    outlineTex = await loadImage(Uint8List.view(data.buffer));
+  }
+
+  Future<Image> loadImage(Uint8List img) async {
+    final Completer<Image> imageCompleter = Completer();
+    decodeImageFromList(img, (Image img) {
+      imageCompleter.complete(img);
+    });
+    return imageCompleter.future;
+  }
 }

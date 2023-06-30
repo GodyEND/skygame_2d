@@ -28,6 +28,7 @@ void main() {
   final camera = Camera();
   camera.viewport = FixedResolutionViewport(
       Vector2(Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT));
+  Constants.images.outlineTex;
   runApp(GameWidget(game: SkyGame2D(camera: camera)));
 }
 

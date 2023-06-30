@@ -14,6 +14,10 @@ extension GameCombatExt on CombatScene {
   void gameCombat(double dt) {
     switch (combatBloc.state.combatState) {
       case CombatState.attack:
+        break;
+      default:
+        break;
+
       // if (combatBloc.state.attacker == null && defender == null) {
       //   combatBloc.state.attacker = combatBloc.state.active;
       //   combatBloc.state.defender = MatchHelper.getTarget(game, combatBloc.state.attacker!);

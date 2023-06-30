@@ -7,7 +7,12 @@
         {
             "name": "skygame_2d",
             "request": "launch",
-            "type": "dart"
+            "type": "dart",
+            "deviceId": "chrome",
+            "args": [
+                "--web-renderer",
+                "canvaskit"
+            ]
         },
         {
             "name": "skygame_2d (profile mode)",
