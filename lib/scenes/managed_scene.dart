@@ -10,12 +10,16 @@ abstract class ManagedScene extends Component with HasGameRef<SkyGame2D> {
   final List<Component> sceneComponents = [];
   BlocBase? managedBloc;
 
-  FutureOr<void> addToScene(Component component) async {
+  Future<void> addToScene(Component component) async {
     sceneComponents.add(component);
     await add(component);
   }
 
-  FutureOr<void> clearScene() async {
+  void registerSceneComponent(Component component) {
+    sceneComponents.add(component);
+  }
+
+  Future<void> clearScene() async {
     for (var component in sceneComponents) {
       component.removeFromParent();
     }

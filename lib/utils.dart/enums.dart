@@ -80,6 +80,7 @@ enum CombatEventResult {
 }
 
 enum TeamBuilderViewState {
+  load,
   team,
   builder,
   characterSelect,

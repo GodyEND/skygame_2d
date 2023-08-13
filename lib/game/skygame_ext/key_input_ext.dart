@@ -43,25 +43,25 @@ extension KeyInputExt on SkyGame2D {
     final isCancel = keysPressed.contains(teamBuilderKeys[ownerID]![5]);
     final isRemove = keysPressed.contains(teamBuilderKeys[ownerID]![6]);
     if (isKeyDown && isUp) {
-      keyBloc.prevRowUnit(ownerID);
+      keyBloc.add(KeyInputUpEvent(ownerID));
       return true;
     } else if (isKeyDown && isDown) {
-      keyBloc.nextRowUnit(ownerID);
+      keyBloc.add(KeyInputDownEvent(ownerID));
       return true;
     } else if (isKeyDown && isLeft) {
-      keyBloc.prevUnit(ownerID);
+      keyBloc.add(KeyInputLeftEvent(ownerID));
       return true;
     } else if (isKeyDown && isRight) {
-      keyBloc.nextUnit(ownerID);
+      keyBloc.add(KeyInputRightEvent(ownerID));
       return true;
     } else if (isKeyDown && isConfirm) {
       keyBloc.add(KeyInputConfirmEvent(ownerID));
       return true;
     } else if (isKeyDown && isCancel) {
-      keyBloc.nextUnit(ownerID);
+      keyBloc.add(KeyInputCancelEvent(ownerID));
       return true;
     } else if (isKeyDown && isRemove) {
-      keyBloc.nextUnit(ownerID);
+      keyBloc.add(KeyInputRemoveEvent(ownerID));
       return true;
     }
     return false;

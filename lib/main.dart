@@ -22,13 +22,15 @@ import 'package:skygame_2d/models/match_unit/unit.dart';
 import 'package:skygame_2d/models/release.dart';
 import 'package:skygame_2d/setup.dart';
 import 'package:skygame_2d/utils.dart/constants.dart';
+import 'package:skygame_2d/utils.dart/shader_manager.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final camera = Camera();
   camera.viewport = FixedResolutionViewport(
       Vector2(Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT));
-  Constants.images.outlineTex;
+  await Constants.images.init();
+  await ShaderManager.loadShaders();
   runApp(GameWidget(game: SkyGame2D(camera: camera)));
 }
 
@@ -103,10 +105,11 @@ class SkyGame2D extends FlameGame with KeyboardEvents {
     }
     bloc = GameBloc(InitialGameBlocState(playerBlocStates));
     keyBloc = KeyInputBloc(InitialKeyInputBlocState(
+      ownerID: Constants.FIRST_PLAYER,
       sceneState: SceneState.load,
       sceneBloc: null,
-      rowLength: Constants.TEAM_BUILDER_UNITS_PER_ROW,
-      options: Units.all.length,
+      rowLength: 1,
+      options: Units.all.length * 4,
     ));
 
     await add(FlameMultiBlocProvider(providers: [

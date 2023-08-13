@@ -19,6 +19,8 @@ extension KeyInputBlocListenerExt on SkyGame2D {
               case TeamBuilderViewState.team:
                 if (state.event is KeyInputConfirmEvent) {
                   sceneBloc.editNewTeam();
+                } else {
+                  sceneBloc.refresh();
                 }
                 break;
               default:

@@ -6,38 +6,14 @@ import 'package:skygame_2d/scenes/team_builder.dart';
 import 'package:skygame_2d/utils.dart/enums.dart';
 import 'package:skygame_2d/utils.dart/constants.dart';
 
-class KeyInputUpEvent extends BlocEvent {
-  final int ownerID;
-  KeyInputUpEvent(this.ownerID);
-}
-
-class KeyInputConfirmEvent extends BlocEvent {
-  final int ownerID;
-  KeyInputConfirmEvent(this.ownerID);
-}
-
-class UpdateKeyInputsEvent extends BlocEvent {
-  final SceneState sceneState;
-  final BlocBase? sceneBloc;
-  UpdateKeyInputsEvent({required this.sceneState, this.sceneBloc});
-}
-
 class KeyInputBloc extends Bloc<BlocEvent, KeyInputBlocState> {
   KeyInputBloc(KeyInputBlocState initialState) : super(initialState) {
-    on<KeyInputUpEvent>((event, emit) {
-      switch (state.sceneState) {
-        case SceneState.teamBuilder:
-          emit(state.copyWith(event: event));
-          break;
-        default:
-          break;
-      }
-    });
     on<KeyInputConfirmEvent>((event, emit) {
       switch (state.sceneState) {
         case SceneState.teamBuilder:
           final scene = SceneManager.scenes.firstWhere((e) =>
               e is TeamBuilderScene && e.ownerID == Constants.FIRST_PLAYER);
+          if (event.ownerID != state.ownerID) return;
           switch ((scene.managedBloc as TeamBuilderBloc).state.viewState) {
             case TeamBuilderViewState.team:
               emit(state.copyWith(event: event));
@@ -56,74 +32,78 @@ class KeyInputBloc extends Bloc<BlocEvent, KeyInputBlocState> {
           cSceneBloc: event.sceneBloc,
           event: event));
     });
+    on<KeyInputUpEvent>((event, emit) {
+      if (state.colIndex <= 0) return;
+      if (event.ownerID != state.ownerID) return;
+      emit(state.copyWith(cColIndex: state.colIndex - 1));
+    });
+
+    on<KeyInputDownEvent>((event, emit) {
+      if (state.colIndex >= (state.options / state.rowLength).ceil() - 1) {
+        return;
+      }
+      if (event.ownerID != state.ownerID) return;
+      emit(state.copyWith(cColIndex: state.colIndex + 1));
+    });
+
+    on<KeyInputLeftEvent>((event, emit) {
+      if (event.ownerID != state.ownerID) return;
+      if (state.rowIndex == 0) {
+        emit(state.copyWith(cRowIndex: state.rowLength - 1));
+      } else {
+        emit(state.copyWith(cRowIndex: state.rowIndex - 1));
+      }
+    });
+    on<KeyInputRightEvent>((event, emit) {
+      if (event.ownerID != state.ownerID) return;
+      if (state.rowIndex < state.rowLength - 1) {
+        emit(state.copyWith(cRowIndex: state.rowIndex + 1));
+      } else {
+        emit(state.copyWith(cRowIndex: 0));
+      }
+    });
   }
-  void nextUnit(int ownerID) {
-    // final activeState = state.playerInputStates[ownerID - 1];
-    // if (activeState.rowIndex + activeState.colIndex * activeState.rowLength >=
-    //     activeState.options) {
-    //   return;
-    // }
-    // final increaseRow = (activeState.rowIndex + 1 > activeState.rowLength - 1);
-    // final updatedPlayerInput = increaseRow
-    //     ? activeState.copyWith(cRowIndex: activeState.rowIndex + 1)
-    //     : activeState.copyWith(
-    //         cRowIndex: 0,
-    //         cColIndex: activeState.colIndex + 1,
-    //       );
-    // state.playerInputStates.remove(state.playerInputStates[ownerID - 1]);
-    // final updated = List<PlayerKeyInputBlocState>.from(state.playerInputStates);
-    // updated.insert(ownerID - 1, updatedPlayerInput);
-    // emit(state.copyWith(cPlayerInputStates: updated));
-  }
+}
 
-  void prevUnit(int ownerID) {
-    // final activeState = state.playerInputStates[ownerID - 1];
+/// Events
 
-    // if (activeState.currentUnit <= 0) return;
-    // final updated =
-    //     activeState.copyWith(cCurrentUnit: activeState.currentUnit - 1);
-  }
+class KeyInputUpEvent extends BlocEvent {
+  final int ownerID;
+  KeyInputUpEvent(this.ownerID);
+}
 
-  void nextRowUnit(int ownerID) {
-    // final activeState = state.playerInputStates[ownerID - 1];
+class KeyInputDownEvent extends BlocEvent {
+  final int ownerID;
+  KeyInputDownEvent(this.ownerID);
+}
 
-    // if (activeState.currentUnit + Constants.TEAM_BUILDER_UNITS_PER_ROW >
-    //     Units.all.length - 1) {
-    //   // Set cursor to last
-    //   final updated = activeState.copyWith(cCurrentUnit: Units.all.length - 1);
-    // } else {
-    //   final updated = activeState.copyWith(
-    //       cCurrentUnit:
-    //           activeState.currentUnit + Constants.TEAM_BUILDER_UNITS_PER_ROW);
-    // }
-  }
+class KeyInputLeftEvent extends BlocEvent {
+  final int ownerID;
+  KeyInputLeftEvent(this.ownerID);
+}
 
-  void prevRowUnit(int ownerID) {
-    // final activeState = state.playerInputStates[ownerID - 1];
+class KeyInputRightEvent extends BlocEvent {
+  final int ownerID;
+  KeyInputRightEvent(this.ownerID);
+}
 
-    // if (activeState.currentUnit - Constants.TEAM_BUILDER_UNITS_PER_ROW < 0) {
-    //   return;
-    // }
-    // final updated = activeState.copyWith(
-    //     cCurrentUnit:
-    //         activeState.currentUnit - Constants.TEAM_BUILDER_UNITS_PER_ROW);
-  }
+class KeyInputConfirmEvent extends BlocEvent {
+  final int ownerID;
+  KeyInputConfirmEvent(this.ownerID);
+}
 
-  void nextRosterPos(int ownerID) {
-    // final activeState = state.playerInputStates[ownerID - 1];
+class KeyInputCancelEvent extends BlocEvent {
+  final int ownerID;
+  KeyInputCancelEvent(this.ownerID);
+}
 
-    // if (activeState.currentPosition >= MatchPosition.reserve5.index) {
-    //   return;
-    // }
-    // final updated =
-    //     activeState.copyWith(cCurrentUnit: activeState.currentPosition + 1);
-  }
+class KeyInputRemoveEvent extends BlocEvent {
+  final int ownerID;
+  KeyInputRemoveEvent(this.ownerID);
+}
 
-  void prevRosterPos(int ownerID) {
-    // final activeState = state.playerInputStates[ownerID - 1];
-
-    // if (activeState.currentPosition <= 0) return;
-    // final updated =
-    //     activeState.copyWith(cCurrentUnit: activeState.currentPosition - 1);
-  }
+class UpdateKeyInputsEvent extends BlocEvent {
+  final SceneState sceneState;
+  final BlocBase? sceneBloc;
+  UpdateKeyInputsEvent({required this.sceneState, this.sceneBloc});
 }

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:skygame_2d/bloc/events.dart';
 import 'package:skygame_2d/models/match_unit/unit.dart';
 import 'package:skygame_2d/models/match_unit/unit_team.dart';
 import 'package:skygame_2d/models/player.dart';
@@ -11,6 +12,7 @@ class TeamBuilderBlocState extends Equatable {
   final List<Unit> collection;
   final TeamBuilderViewState viewState;
   final int selectedIndex;
+  final BlocEvent? event;
 
   const TeamBuilderBlocState({
     required this.player,
@@ -19,6 +21,7 @@ class TeamBuilderBlocState extends Equatable {
     required this.collection,
     required this.viewState,
     required this.selectedIndex,
+    this.event,
   });
 
   TeamBuilderBlocState copyWith({
@@ -27,6 +30,7 @@ class TeamBuilderBlocState extends Equatable {
     List<Unit>? cCollection,
     TeamBuilderViewState? cViewState,
     int? cSelectedIndex,
+    BlocEvent? event,
   }) {
     return TeamBuilderBlocState(
       player: player,
@@ -35,6 +39,7 @@ class TeamBuilderBlocState extends Equatable {
       collection: cCollection ?? collection,
       viewState: cViewState ?? viewState,
       selectedIndex: cSelectedIndex ?? selectedIndex,
+      event: event,
     );
   }
 
@@ -46,6 +51,7 @@ class TeamBuilderBlocState extends Equatable {
         collection,
         viewState,
         selectedIndex,
+        event,
       ];
 }
 
@@ -57,7 +63,7 @@ class InitialTeamBuilderBlocState extends TeamBuilderBlocState {
           selectedUnits:
               UnitTeam(player.teams.length + 1), // TODO: get unused id
           collection: player.collection,
-          viewState: TeamBuilderViewState.team,
+          viewState: TeamBuilderViewState.load,
           selectedIndex: 0,
         );
 }

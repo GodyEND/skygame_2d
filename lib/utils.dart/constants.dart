@@ -29,20 +29,26 @@ class Constants {
 }
 
 class ShaderPaths {
-  final String color = 'assets/shaders/color.frag';
-  final String outline = 'assets/shaders/outline.frag';
-  final String greyscale = 'assets/shaders/greyscale.frag';
+  static const String _dir = 'assets/shaders';
+  final String color = '$_dir/color.frag';
+  final String outline = '$_dir/outline.frag';
+  final String greyscale = '$_dir/greyscale.frag';
 }
 
 class TextureImages {
+  static const String _dir = 'assets/images';
+
   Image? outlineTex;
+  Image? unitTeamBG;
   TextureImages() {
     init();
   }
 
   Future<void> init() async {
-    final data = await rootBundle.load('assets/images/outline_tex.png');
+    final data = await rootBundle.load('$_dir/outline_tex.png');
     outlineTex = await loadImage(Uint8List.view(data.buffer));
+    final data2 = await rootBundle.load('$_dir/unit_team_bg.png');
+    unitTeamBG = await loadImage(Uint8List.view(data2.buffer));
   }
 
   Future<Image> loadImage(Uint8List img) async {

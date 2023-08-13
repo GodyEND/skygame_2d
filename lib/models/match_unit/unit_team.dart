@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:skygame_2d/models/match_unit/unit.dart';
 
 class UnitTeam {
@@ -10,4 +12,12 @@ class UnitTeam {
   operator []=(int index, Unit? unit) => _list[index] = unit;
 
   List<Unit?> toList() => _list;
+
+  static UnitTeam random(id) {
+    final newTeam = UnitTeam(id);
+    for (int i = 0; i < 10; i++) {
+      newTeam[i] = Random().nextInt(2) == 1 ? Unit.fromRAND() : null;
+    }
+    return newTeam;
+  }
 }
