@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flame/game.dart';
 import 'package:flame/input.dart';
@@ -15,6 +16,7 @@ import 'package:skygame_2d/bloc/player/bloc.dart';
 import 'package:skygame_2d/bloc/player/listener.dart';
 import 'package:skygame_2d/bloc/player/state.dart';
 import 'package:skygame_2d/game/skygame_ext/key_input_ext.dart';
+import 'package:skygame_2d/models/match_unit/unit_team.dart';
 import 'package:skygame_2d/models/player.dart';
 import 'package:skygame_2d/utils.dart/enums.dart';
 import 'package:skygame_2d/models/fx.dart';
@@ -88,9 +90,13 @@ class SkyGame2D extends FlameGame with KeyboardEvents {
     List<FlameBlocProvider> playerBlocProviders = [];
     List<PlayerBlocState> playerBlocStates = [];
     // List<KeyInputBlocState> playerKeyInputStates = [];
+    final teams = <UnitTeam>[];
+    for (int i = 0; i < Random().nextInt(10) + 1; i++) {
+      teams.add(UnitTeam.random(0));
+    }
     for (int i = 1; i <= Constants.PLAYER_COUNT; i++) {
       final playerState = InitialPlayerBlocState(
-          Player(i, teams: const [], collection: Units.all));
+          Player(i, teams: teams, collection: Units.all));
       final playerBloc = PlayerBloc(playerState);
       playerBlocs.add(playerBloc);
       playerBlocStates.add(playerState);
@@ -109,7 +115,7 @@ class SkyGame2D extends FlameGame with KeyboardEvents {
       sceneState: SceneState.load,
       sceneBloc: null,
       rowLength: 1,
-      options: Units.all.length * 4,
+      options: teams.length,
     ));
 
     await add(FlameMultiBlocProvider(providers: [

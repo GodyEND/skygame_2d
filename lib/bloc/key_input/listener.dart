@@ -18,9 +18,19 @@ extension KeyInputBlocListenerExt on SkyGame2D {
             switch (sceneBloc.state.viewState) {
               case TeamBuilderViewState.team:
                 if (state.event is KeyInputConfirmEvent) {
-                  sceneBloc.editNewTeam();
+                  if (keyBloc.state.colIndex >= keyBloc.state.options) {
+                    sceneBloc.editNewTeam();
+                  } else {
+                    sceneBloc.editTeam(
+                        sceneBloc.state.teams[keyBloc.state.colIndex]);
+                  }
                 } else {
                   sceneBloc.refresh();
+                }
+                break;
+              case TeamBuilderViewState.builder:
+                if (state.event is KeyInputCancelEvent) {
+                  sceneBloc.back(TeamBuilderViewState.team);
                 }
                 break;
               default:

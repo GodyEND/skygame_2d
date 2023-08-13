@@ -82,4 +82,8 @@ class TeamBuilderBloc extends Cubit<TeamBuilderBlocState> {
       cTeams: updatedTeams,
     ));
   }
+
+  void back(TeamBuilderViewState viewState) {
+    emit(state.copyWith(cViewState: viewState));
+  }
 }

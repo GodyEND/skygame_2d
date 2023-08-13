@@ -2,16 +2,15 @@ import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:skygame_2d/graphics/component_grid.dart';
 import 'package:skygame_2d/graphics/unit_team_component.dart';
-import 'package:skygame_2d/models/components/selectable.dart';
-import 'package:skygame_2d/models/match_unit/unit.dart';
+import 'package:skygame_2d/models/match_unit/unit_team.dart';
 import 'package:skygame_2d/utils.dart/constants.dart';
 
-class UnitCollectionComponent extends SpriteComponent with SelectableSprite {
-  List<Unit?> units;
+class ActiveUnitTeamComponent extends SpriteComponent {
+  UnitTeam team;
   bool isVisible;
 
-  UnitCollectionComponent({
-    required this.units,
+  ActiveUnitTeamComponent({
+    required this.team,
     this.isVisible = false,
     required super.size,
     Vector2? position,
@@ -27,23 +26,24 @@ class UnitCollectionComponent extends SpriteComponent with SelectableSprite {
   }
 
   Future<void> refresh() async {
-    final childWidth = (size.x - 30 - 11 * 3) / 10;
+    removeAll(children);
+
+    final childWidth = (size.x - 30 - 6 * 10) / 5;
+    final childHeight = (size.y - 30 - 3 * 10) / 2;
 
     final List<PositionComponent> _children = [];
 
-    final colLength = (units.length / 10).ceil() * 10;
-
-    for (int i = 0; i < colLength; i++) {
-      if (i < units.length && units[i] != null) {
+    for (int i = 0; i < team!.toList().length; i++) {
+      if (team[i] != null) {
         _children.add(UnitTeamComponentItem(
-          units[i]!,
-          size: Vector2(childWidth, childWidth),
+          team[i],
+          size: Vector2(childWidth, childHeight),
         ));
       } else {
         // Unused slot
         // TODO: change with placeholder graphic
         _children.add(RectangleComponent(
-          size: Vector2(childWidth, childWidth),
+          size: Vector2(childWidth, childHeight),
           paint: Paint()..color = Colors.blueGrey,
           priority: 99,
         ));
@@ -54,9 +54,9 @@ class UnitCollectionComponent extends SpriteComponent with SelectableSprite {
       children: _children,
       scrollDirection: Axis.vertical,
       size: size,
-      position: Vector2(9, 3.0),
-      itemsPerSet: 10,
-      padding: Vector2(3, 3),
+      position: Vector2(7, 7.0),
+      itemsPerSet: 5,
+      padding: Vector2(10, 10),
       priority: 99,
     ));
   }

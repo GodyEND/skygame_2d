@@ -26,6 +26,29 @@ class KeyInputBloc extends Bloc<BlocEvent, KeyInputBlocState> {
           break;
       }
     });
+    on<KeyInputCancelEvent>(
+      (event, emit) {
+        switch (state.sceneState) {
+          case SceneState.teamBuilder:
+            final scene = SceneManager.scenes.firstWhere((e) =>
+                e is TeamBuilderScene && e.ownerID == Constants.FIRST_PLAYER);
+            if (event.ownerID != state.ownerID) return;
+            switch ((scene.managedBloc as TeamBuilderBloc).state.viewState) {
+              case TeamBuilderViewState.team:
+                emit(state.copyWith(event: event));
+                break;
+              case TeamBuilderViewState.builder:
+                emit(state.copyWith(event: event));
+                break;
+              default:
+                break;
+            }
+            break;
+          default:
+            break;
+        }
+      },
+    );
     on<UpdateKeyInputsEvent>((event, emit) {
       emit(state.copyWith(
           cSceneState: event.sceneState,
