@@ -43,6 +43,8 @@ class KeyInputBlocState extends Equatable {
     );
   }
 
+  int get currentIndex => colIndex * rowLength + rowIndex;
+
   @override
   List<Object?> get props => [
         ownerID,

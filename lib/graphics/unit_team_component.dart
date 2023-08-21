@@ -18,6 +18,26 @@ class UnitTeamComponentItem extends SpriteComponent {
         );
 }
 
+class SelectableUnitTeamComponentItem extends SpriteComponent
+    with SelectableSprite {
+  final Unit? unit;
+  final int _index;
+
+  SelectableUnitTeamComponentItem(
+    this.unit, {
+    required int index,
+    required Vector2 size,
+  })  : _index = index,
+        super(
+          sprite: Sprite(unit?.select ?? Constants.images.unitTeamBG!),
+          size: size,
+          scale: Vector2.all((size.x - 6) / size.x),
+        );
+
+  @override
+  int get index => _index;
+}
+
 class UnitTeamComponent extends SpriteComponent with SelectableSprite {
   final int _index;
   final UnitTeam team;

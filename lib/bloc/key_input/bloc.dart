@@ -16,6 +16,8 @@ class KeyInputBloc extends Bloc<BlocEvent, KeyInputBlocState> {
           if (event.ownerID != state.ownerID) return;
           switch ((scene.managedBloc as TeamBuilderBloc).state.viewState) {
             case TeamBuilderViewState.team:
+            case TeamBuilderViewState.builder:
+            case TeamBuilderViewState.characterSelect:
               emit(state.copyWith(event: event));
               break;
             default:
@@ -35,9 +37,8 @@ class KeyInputBloc extends Bloc<BlocEvent, KeyInputBlocState> {
             if (event.ownerID != state.ownerID) return;
             switch ((scene.managedBloc as TeamBuilderBloc).state.viewState) {
               case TeamBuilderViewState.team:
-                emit(state.copyWith(event: event));
-                break;
               case TeamBuilderViewState.builder:
+              case TeamBuilderViewState.characterSelect:
                 emit(state.copyWith(event: event));
                 break;
               default:
@@ -85,6 +86,16 @@ class KeyInputBloc extends Bloc<BlocEvent, KeyInputBlocState> {
         emit(state.copyWith(cRowIndex: 0));
       }
     });
+    on<UpdatedKeyInputsParamsEvent>(
+      (event, emit) {
+        emit(state.copyWith(
+          cRowIndex: event.rowIndex,
+          cColIndex: event.colIndex,
+          cRowLength: event.rowLength,
+          cOptions: event.options,
+        ));
+      },
+    );
   }
 }
 
@@ -129,4 +140,17 @@ class UpdateKeyInputsEvent extends BlocEvent {
   final SceneState sceneState;
   final BlocBase? sceneBloc;
   UpdateKeyInputsEvent({required this.sceneState, this.sceneBloc});
+}
+
+class UpdatedKeyInputsParamsEvent extends BlocEvent {
+  final int rowIndex;
+  final int colIndex;
+  final int rowLength;
+  final int options;
+  UpdatedKeyInputsParamsEvent({
+    required this.rowIndex,
+    required this.colIndex,
+    required this.rowLength,
+    required this.options,
+  });
 }

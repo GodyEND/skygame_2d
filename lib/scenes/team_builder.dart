@@ -54,8 +54,11 @@ class TeamBuilderScene extends ManagedScene {
   TeamBuilderScene(this.ownerID);
   @override
   Future<void> onLoad() async {
-    teamBuilderBloc = TeamBuilderBloc(
-        InitialTeamBuilderBlocState(game.playerBlocs.first.state.player));
+    teamBuilderBloc = TeamBuilderBloc(InitialTeamBuilderBlocState(game
+        .playerBlocs
+        .firstWhere((e) => e.state.player.ownerID == ownerID)
+        .state
+        .player));
     managedBloc = teamBuilderBloc;
     SceneManager.scenes.add(this);
 
@@ -70,11 +73,7 @@ class TeamBuilderScene extends ManagedScene {
       registerSceneComponent(comp);
     }
     await addToScene(teamsCollComp);
-
-    activeTeamComp.team = teamBuilderBloc.state.selectedUnits;
     await addToScene(activeTeamComp);
-
-    collectionComp.units = teamBuilderBloc.state.player.collection;
     await addToScene(collectionComp);
   }
 
