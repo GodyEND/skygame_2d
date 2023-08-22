@@ -14,6 +14,7 @@ var teamBuilderKeys = {
     LogicalKeyboardKey.space, // Confirm
     LogicalKeyboardKey.keyC, // Cancel
     LogicalKeyboardKey.keyX, // Remove
+    LogicalKeyboardKey.numpad0, // Save
   ],
   Constants.SECOND_PLAYER: [
     // Player 2
@@ -24,6 +25,7 @@ var teamBuilderKeys = {
     LogicalKeyboardKey.enter, // Confirm
     LogicalKeyboardKey.backspace, // Cancel
     LogicalKeyboardKey.delete, // Remove
+    LogicalKeyboardKey.numpad1, // Save
   ],
 };
 
@@ -42,6 +44,7 @@ extension KeyInputExt on SkyGame2D {
     final isConfirm = keysPressed.contains(teamBuilderKeys[ownerID]![4]);
     final isCancel = keysPressed.contains(teamBuilderKeys[ownerID]![5]);
     final isRemove = keysPressed.contains(teamBuilderKeys[ownerID]![6]);
+    final isSave = keysPressed.contains(teamBuilderKeys[ownerID]![7]);
     if (isKeyDown && isUp) {
       keyBloc.add(KeyInputUpEvent(ownerID));
       return true;
@@ -62,6 +65,9 @@ extension KeyInputExt on SkyGame2D {
       return true;
     } else if (isKeyDown && isRemove) {
       keyBloc.add(KeyInputRemoveEvent(ownerID));
+      return true;
+    } else if (isKeyDown && isSave) {
+      keyBloc.add(KeyInputSaveEvent(ownerID));
       return true;
     }
     return false;

@@ -83,6 +83,21 @@ class TeamBuilderBloc extends Cubit<TeamBuilderBlocState> {
     ));
   }
 
+  void saveTeam() {
+    final updated = state.selectedUnits;
+    if (updated.id > state.teams.length) {
+      state.teams.add(updated);
+    } else {
+      final old = state.teams.firstWhere((e) => e.id == updated.id);
+      final index = state.teams.indexOf(old);
+      state.teams[index] = updated;
+    }
+    emit(state.copyWith(
+      cTeams: List<UnitTeam>.from(state.teams),
+      cViewState: TeamBuilderViewState.team,
+    ));
+  }
+
   void back(TeamBuilderViewState viewState) {
     emit(state.copyWith(cViewState: viewState));
   }

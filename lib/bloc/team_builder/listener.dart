@@ -6,7 +6,7 @@ import 'package:skygame_2d/scenes/team_builder.dart';
 import 'package:skygame_2d/utils.dart/enums.dart';
 import 'package:skygame_2d/utils.dart/extensions.dart';
 
-extension KeyInputBlocListenerExt on TeamBuilderScene {
+extension TeamBuilderBlocListenerExt on TeamBuilderScene {
   FlameBlocListener teamBuilderBlocListener() {
     return FlameBlocListener<TeamBuilderBloc, TeamBuilderBlocState>(
       onNewState: (state) async {
@@ -15,6 +15,7 @@ extension KeyInputBlocListenerExt on TeamBuilderScene {
             teamsCollComp.isVisible = true;
             activeTeamComp.isVisible = false;
             collectionComp.isVisible = false;
+            teamsCollComp.teams.value = state.teams;
             _refreshSelectedItem();
             break;
           case TeamBuilderViewState.builder: // Focus on single unit team list

@@ -82,7 +82,6 @@ class TeamBuilderScene extends ManagedScene {
     super.update(dt);
 
     if (teamBuilderBloc.state.viewState == TeamBuilderViewState.load) {
-      // TODO: set Team options
       // TODO: set animations to move menu components into positions below
       teamBuilderBloc.initialise();
     } else if (teamBuilderBloc.state.viewState == TeamBuilderViewState.team) {

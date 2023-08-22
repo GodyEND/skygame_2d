@@ -50,6 +50,26 @@ class KeyInputBloc extends Bloc<BlocEvent, KeyInputBlocState> {
         }
       },
     );
+    on<KeyInputSaveEvent>(
+      (event, emit) {
+        switch (state.sceneState) {
+          case SceneState.teamBuilder:
+            final scene = SceneManager.scenes.firstWhere((e) =>
+                e is TeamBuilderScene && e.ownerID == Constants.FIRST_PLAYER);
+            if (event.ownerID != state.ownerID) return;
+            switch ((scene.managedBloc as TeamBuilderBloc).state.viewState) {
+              case TeamBuilderViewState.builder:
+                emit(state.copyWith(event: event));
+                break;
+              default:
+                break;
+            }
+            break;
+          default:
+            break;
+        }
+      },
+    );
     on<UpdateKeyInputsEvent>((event, emit) {
       emit(state.copyWith(
           cSceneState: event.sceneState,
@@ -136,6 +156,11 @@ class KeyInputRemoveEvent extends BlocEvent {
   KeyInputRemoveEvent(this.ownerID);
 }
 
+class KeyInputSaveEvent extends BlocEvent {
+  final int ownerID;
+  KeyInputSaveEvent(this.ownerID);
+}
+
 class UpdateKeyInputsEvent extends BlocEvent {
   final SceneState sceneState;
   final BlocBase? sceneBloc;
@@ -153,4 +178,34 @@ class UpdatedKeyInputsParamsEvent extends BlocEvent {
     required this.rowLength,
     required this.options,
   });
+}
+
+class UpdatedTBTeamViewInputsEvent extends UpdatedKeyInputsParamsEvent {
+  UpdatedTBTeamViewInputsEvent({required int options})
+      : super(
+          rowIndex: 0,
+          colIndex: 0,
+          rowLength: 1,
+          options: options,
+        );
+}
+
+class UpdatedTBBuilderViewInputsEvent extends UpdatedKeyInputsParamsEvent {
+  UpdatedTBBuilderViewInputsEvent()
+      : super(
+          rowIndex: 0,
+          colIndex: 0,
+          rowLength: 5,
+          options: 10,
+        );
+}
+
+class UpdatedTBCharacterViewInputsEvent extends UpdatedKeyInputsParamsEvent {
+  UpdatedTBCharacterViewInputsEvent({int? index, required int options})
+      : super(
+          rowIndex: index == null ? 0 : index % 10,
+          colIndex: index == null ? 0 : (index / 10).floor(),
+          rowLength: 10,
+          options: options,
+        );
 }

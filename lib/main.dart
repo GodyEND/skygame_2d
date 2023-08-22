@@ -92,7 +92,7 @@ class SkyGame2D extends FlameGame with KeyboardEvents {
     // List<KeyInputBlocState> playerKeyInputStates = [];
     final teams = <UnitTeam>[];
     for (int i = 0; i < Random().nextInt(10) + 1; i++) {
-      teams.add(UnitTeam.random(0));
+      teams.add(UnitTeam.random(i + 1));
     }
     for (int i = 1; i <= Constants.PLAYER_COUNT; i++) {
       final playerState = InitialPlayerBlocState(
