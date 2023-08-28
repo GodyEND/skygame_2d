@@ -30,9 +30,7 @@ class PlayerBloc extends Bloc<BlocEvent, PlayerBlocState> {
       // state.units.add(newUnit);
 
       emit(PlayerReadyBlocState(
-        player: state.player,
-        roster: state.roster,
-      ));
+          player: state.player, roster: state.roster, keyBloc: state.keyBloc));
     });
     on<ConfirmReplacementEvent>((event, emit) {});
   }

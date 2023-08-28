@@ -6,10 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:skygame_2d/utils.dart/shader_manager.dart';
 
 mixin SelectableSprite on SpriteComponent {
+  bool isHovered = false;
   bool isSelected = false;
   bool isSelectable = true;
   double selectedBorderThickness = 10.0;
   final Vector2 unselectedScale = Vector2.all(0.75);
+  Color hoveredBorderColor = Colors.white.withOpacity(0.75);
   Color selectedBorderColor = Colors.orange.withOpacity(0.75);
   late final Vector2 offset;
   late final Vector2 unselectedPos;
@@ -35,12 +37,12 @@ mixin SelectableSprite on SpriteComponent {
     // super.render(canvas);
     // canvas.drawColor(Colors.transparent, BlendMode.multiply);
     var res = size.toRect();
-    if (isSelected) {
+    if (isSelected || isHovered) {
       final shader = ShaderManager.getOutlineShader(
         resolution: Vector2(res.width, res.height),
         img: sprite!.image,
         thickness: selectedBorderThickness,
-        borderColor: selectedBorderColor,
+        borderColor: isSelected ? selectedBorderColor : hoveredBorderColor,
         isSelectable: isSelectable,
       );
 

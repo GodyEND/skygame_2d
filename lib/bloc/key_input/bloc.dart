@@ -39,6 +39,7 @@ class KeyInputBloc extends Bloc<BlocEvent, KeyInputBlocState> {
               case TeamBuilderViewState.team:
               case TeamBuilderViewState.builder:
               case TeamBuilderViewState.characterSelect:
+              case TeamBuilderViewState.wait:
                 emit(state.copyWith(event: event));
                 break;
               default:
@@ -58,6 +59,7 @@ class KeyInputBloc extends Bloc<BlocEvent, KeyInputBlocState> {
                 e is TeamBuilderScene && e.ownerID == Constants.FIRST_PLAYER);
             if (event.ownerID != state.ownerID) return;
             switch ((scene.managedBloc as TeamBuilderBloc).state.viewState) {
+              case TeamBuilderViewState.team:
               case TeamBuilderViewState.builder:
                 emit(state.copyWith(event: event));
                 break;

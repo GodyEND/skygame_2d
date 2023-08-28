@@ -144,7 +144,7 @@ class ComponentGrid extends ClipComponent {
     super.render(canvas);
     // scrollTo selected index
     final selectedItem = scrollView.children.firstWhereOrNull(
-            (e) => e is SelectableSprite ? e.isSelected : false)
+            (e) => e is SelectableSprite ? e.isHovered : false)
         as SelectableSprite?;
     if (scrollView.children.isEmpty) return;
     // final firstItem = scrollView.children

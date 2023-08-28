@@ -1,10 +1,13 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
+import 'package:skygame_2d/bloc/team_builder/bloc.dart';
 import 'package:skygame_2d/graphics/component_grid.dart';
 import 'package:skygame_2d/models/components/selectable.dart';
 import 'package:skygame_2d/models/match_unit/unit.dart';
 import 'package:skygame_2d/models/match_unit/unit_team.dart';
+import 'package:skygame_2d/scenes/team_builder.dart';
 import 'package:skygame_2d/utils.dart/constants.dart';
+import 'package:skygame_2d/utils.dart/enums.dart';
 
 class UnitTeamComponentItem extends SpriteComponent {
   final Unit unit;
@@ -41,11 +44,13 @@ class SelectableUnitTeamComponentItem extends SpriteComponent
 class UnitTeamComponent extends SpriteComponent with SelectableSprite {
   final int _index;
   final UnitTeam team;
+  final int ownerID;
 
   UnitTeamComponent({
     required int index,
     required this.team,
     required super.size,
+    required this.ownerID,
     Vector2? position,
   })  : _index = index,
         super(
@@ -91,4 +96,19 @@ class UnitTeamComponent extends SpriteComponent with SelectableSprite {
 
   @override
   int get index => _index;
+  TextPaint options =
+      TextPaint(style: const TextStyle(fontSize: 22.0, color: Colors.white));
+  @override
+  void render(Canvas canvas) {
+    super.render(canvas);
+    final scene = SceneManager.scenes
+            .firstWhere((e) => e is TeamBuilderScene && e.ownerID == ownerID)
+        as TeamBuilderScene;
+    if (isHovered &&
+        (scene.managedBloc as TeamBuilderBloc).state.viewState ==
+            TeamBuilderViewState.team) {
+      options.render(
+          canvas, 'Edit (Space)    Select (1)', Vector2(size.x * 0.6, size.y));
+    }
+  }
 }

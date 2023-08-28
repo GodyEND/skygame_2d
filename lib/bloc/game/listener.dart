@@ -1,4 +1,3 @@
-import 'package:bloc/bloc.dart';
 import 'package:flame_bloc/flame_bloc.dart';
 import 'package:skygame_2d/bloc/events.dart';
 import 'package:skygame_2d/bloc/game/bloc.dart';
@@ -6,10 +5,8 @@ import 'package:skygame_2d/bloc/game/state.dart';
 import 'package:skygame_2d/bloc/key_input/bloc.dart';
 import 'package:skygame_2d/game/skygame_ext/scene_setup_ext.dart';
 import 'package:skygame_2d/main.dart';
-import 'package:skygame_2d/scenes/managed_scene.dart';
-import 'package:skygame_2d/scenes/team_builder.dart';
+import 'package:skygame_2d/models/match_unit/unit_team.dart';
 import 'package:skygame_2d/utils.dart/enums.dart';
-import 'package:skygame_2d/utils.dart/extensions.dart';
 
 extension SkyGame2DBlocListenerExt on SkyGame2D {
   FlameBlocListener gameBlocListener() {
@@ -25,12 +22,29 @@ extension SkyGame2DBlocListenerExt on SkyGame2D {
             case SceneState.teamBuilder:
               await setupTeamBuilder(List<int>.from(
                   playerBlocs.map<int>((e) => e.state.player.ownerID)));
-
-              keyBloc.add(UpdateKeyInputsEvent(
-                sceneState: state.sceneState,
-              ));
+              for (var playerBloc in playerBlocs) {
+                playerBloc.state.keyBloc.add(UpdateKeyInputsEvent(
+                  sceneState: state.sceneState,
+                ));
+              }
               bloc.add(GameSceneChangeCompleteEvent());
               break;
+            case SceneState.teamFormation:
+              final keys = List<int>.from(
+                  playerBlocs.map<int>((e) => e.state.player.ownerID));
+              final values = List<UnitTeam>.from(
+                  playerBlocs.map((e) => e.state.player.activeTeam));
+              final map = <int, UnitTeam>{};
+              for (int i = 0; i < keys.length; i++) {
+                map[keys[i]] = values[i];
+              }
+              await setupTeamFormation(map);
+              for (var playerBloc in playerBlocs) {
+                playerBloc.state.keyBloc.add(UpdateKeyInputsEvent(
+                  sceneState: state.sceneState,
+                ));
+              }
+              bloc.add(GameSceneChangeCompleteEvent());
             default:
               break;
           }

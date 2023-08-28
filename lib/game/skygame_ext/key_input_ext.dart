@@ -45,6 +45,10 @@ extension KeyInputExt on SkyGame2D {
     final isCancel = keysPressed.contains(teamBuilderKeys[ownerID]![5]);
     final isRemove = keysPressed.contains(teamBuilderKeys[ownerID]![6]);
     final isSave = keysPressed.contains(teamBuilderKeys[ownerID]![7]);
+    final keyBloc = playerBlocs
+        .firstWhere((e) => e.state.player.ownerID == ownerID)
+        .state
+        .keyBloc;
     if (isKeyDown && isUp) {
       keyBloc.add(KeyInputUpEvent(ownerID));
       return true;

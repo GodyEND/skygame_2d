@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:skygame_2d/bloc/events.dart';
+import 'package:skygame_2d/bloc/key_input/bloc.dart';
 import 'package:skygame_2d/game/unit.dart';
 import 'package:skygame_2d/models/player.dart';
 import 'package:skygame_2d/utils.dart/enums.dart';
@@ -10,6 +11,7 @@ class PlayerBlocState extends Equatable {
   final PlayerState state;
   final int points;
   final Map<MatchPosition, MatchUnit> roster;
+  final KeyInputBloc keyBloc;
 
   const PlayerBlocState({
     required this.player,
@@ -18,6 +20,7 @@ class PlayerBlocState extends Equatable {
     // required this.units,
     required this.roster,
     // required this.toBeReplaced,
+    required this.keyBloc,
     required this.event,
   });
 
@@ -25,6 +28,7 @@ class PlayerBlocState extends Equatable {
     PlayerState? cState,
     int? cPoints,
     Map<MatchPosition, MatchUnit>? cRoster,
+    KeyInputBloc? cKeyBloc,
     BlocEvent? cEvent,
   }) {
     return PlayerBlocState(
@@ -35,6 +39,7 @@ class PlayerBlocState extends Equatable {
       // units: units,
       roster: cRoster ?? roster,
       // toBeReplaced: toBeReplaced,
+      keyBloc: cKeyBloc ?? keyBloc,
       event: cEvent,
     );
   }
@@ -48,12 +53,13 @@ class PlayerBlocState extends Equatable {
         // units,
         roster,
         // toBeReplaced,
+        keyBloc,
         event,
       ];
 }
 
 class InitialPlayerBlocState extends PlayerBlocState {
-  const InitialPlayerBlocState(Player player)
+  const InitialPlayerBlocState(Player player, {required KeyInputBloc keyBloc})
       : super(
           player: player,
           // ownerID: ownerID,
@@ -62,6 +68,7 @@ class InitialPlayerBlocState extends PlayerBlocState {
           // units: const [],
           roster: const {},
           // toBeReplaced: const [],
+          keyBloc: keyBloc,
           event: null,
         );
 }
@@ -71,6 +78,7 @@ class PlayerReadyBlocState extends PlayerBlocState {
     required Map<MatchPosition, MatchUnit> roster,
     // required int ownerID,
     required Player player,
+    required KeyInputBloc keyBloc,
   }) : super(
           player: player,
           // ownerID: ownerID,
@@ -81,6 +89,7 @@ class PlayerReadyBlocState extends PlayerBlocState {
           // units: const [],
           roster: Map.from(roster),
           // toBeReplaced: const [],
+          keyBloc: keyBloc,
           event: (roster.values.length > 9) ? PlayerTeamReadyEvent() : null,
         );
 }

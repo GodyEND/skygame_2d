@@ -39,7 +39,7 @@ class UnitCollectionComponent extends SpriteComponent {
     units.addListener(unitsNotifier());
     await refresh();
     if (selectableChildren.isNotEmpty) {
-      selectableChildren.first.isSelected = true;
+      selectableChildren.first.isHovered = true;
     }
   }
 
@@ -47,7 +47,7 @@ class UnitCollectionComponent extends SpriteComponent {
     if (!_unitWasUpdated) return;
     // get current selectedIndex
     final currentSelectedIndex =
-        selectableChildren.firstWhereOrNull((e) => e.isSelected);
+        selectableChildren.firstWhereOrNull((e) => e.isHovered);
     removeAll(children);
     selectableChildren.clear();
     final childWidth = (size.x - 30 - 11 * 3) / 10;
@@ -63,7 +63,7 @@ class UnitCollectionComponent extends SpriteComponent {
         size: Vector2(childWidth, childWidth),
       );
       if (currentSelectedIndex != null && i == currentSelectedIndex.index) {
-        newItem.isSelected = true;
+        newItem.isHovered = true;
       }
       selectableChildren.add(newItem);
     }

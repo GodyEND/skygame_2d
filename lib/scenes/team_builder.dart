@@ -1,4 +1,7 @@
 import 'package:flame/components.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
+import 'package:skygame_2d/bloc/key_input/bloc.dart';
 import 'package:skygame_2d/bloc/key_input/listener.dart';
 import 'package:skygame_2d/bloc/team_builder/bloc.dart';
 import 'package:skygame_2d/bloc/team_builder/listener.dart';
@@ -35,10 +38,10 @@ class MenuItem extends SpriteComponent with SelectableSprite {
 class TeamBuilderScene extends ManagedScene {
   final int ownerID;
   late TeamBuilderBloc teamBuilderBloc;
+  final KeyInputBloc keyBloc;
 
   late TeamsCollectionComponent teamsCollComp;
-  final ActiveUnitTeamComponent activeTeamComp = ActiveUnitTeamComponent(
-      team: UnitTeam(-1), size: Vector2(Constants.SCREEN_WIDTH, 300));
+  late ActiveUnitTeamComponent activeTeamComp;
   final UnitCollectionComponent collectionComp = UnitCollectionComponent(
     units: [],
     size: Vector2(Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT - 60 - 300),
@@ -50,35 +53,54 @@ class TeamBuilderScene extends ManagedScene {
             50 +
             Constants.SCREEN_HEIGHT * 0.5),
   );
+  late TextComponent waitingComponent;
 
-  TeamBuilderScene(this.ownerID);
+  TeamBuilderScene(
+    this.ownerID, {
+    required this.keyBloc,
+    required super.position,
+    required super.size,
+  });
   @override
   Future<void> onLoad() async {
-    teamBuilderBloc = TeamBuilderBloc(InitialTeamBuilderBlocState(game
-        .playerBlocs
+    final playerState = game.playerBlocs
         .firstWhere((e) => e.state.player.ownerID == ownerID)
-        .state
-        .player));
+        .state;
+    teamBuilderBloc =
+        TeamBuilderBloc(InitialTeamBuilderBlocState(playerState.player));
+    activeTeamComp = ActiveUnitTeamComponent(
+        team: UnitTeam(-1),
+        size: Vector2(Constants.SCREEN_WIDTH, 300),
+        ownerID: ownerID);
     managedBloc = teamBuilderBloc;
+    waitingComponent = TextComponent(
+      text: 'Waiting...',
+      textRenderer:
+          TextPaint(style: const TextStyle(color: Colors.white, fontSize: 128)),
+      position: Vector2(size.x * 0.3, size.y * 0.45),
+    );
     SceneManager.scenes.add(this);
 
     await addToScene(teamBuilderBlocListener());
-    await addToScene(game.keyBlocListener(teamBuilderBloc));
+    await addToScene(game.keyBlocListener(keyBloc, teamBuilderBloc));
 
     teamsCollComp = TeamsCollectionComponent(
       teams: teamBuilderBloc.state.teams,
-      position: Vector2.all(0.0),
+      ownerID: ownerID,
     );
     for (var comp in teamsCollComp.menuItemList) {
       registerSceneComponent(comp);
     }
     await addToScene(teamsCollComp);
+    activeTeamComp.size = Vector2(size.x, 300);
     await addToScene(activeTeamComp);
+    collectionComp.size = Vector2(size.x, size.y * 0.5);
     await addToScene(collectionComp);
+    // await addToScene(waitingComponent);
   }
 
   @override
-  void update(double dt) {
+  void update(double dt) async {
     super.update(dt);
 
     if (teamBuilderBloc.state.viewState == TeamBuilderViewState.load) {
@@ -109,6 +131,14 @@ class TeamBuilderScene extends ManagedScene {
     }
     if (!collectionComp.isVisible) {
       collectionComp.position.y = -collectionComp.size.y;
+    }
+    if (teamBuilderBloc.state.viewState == TeamBuilderViewState.wait &&
+        !children.contains(waitingComponent)) {
+      await addToScene(waitingComponent);
+    } else if (children.contains(waitingComponent) &&
+        teamBuilderBloc.state.viewState != TeamBuilderViewState.wait) {
+      waitingComponent.removeFromParent();
+      sceneComponents.remove(waitingComponent);
     }
   }
 }

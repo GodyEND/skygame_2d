@@ -9,18 +9,16 @@ import 'package:skygame_2d/utils.dart/extensions.dart';
 class TeamsCollectionComponent extends PositionComponent {
   ValueNotifier<List<UnitTeam>> teams;
   final List<UnitTeamComponent> menuItemList = [];
+  final int ownerID;
   bool isVisible;
   bool _teamWasUpdated = true;
 
   TeamsCollectionComponent({
     required List<UnitTeam> teams,
+    required this.ownerID,
     this.isVisible = false,
-    Vector2? position,
   })  : teams = ValueNotifier<List<UnitTeam>>(teams),
-        super(
-          size: Vector2(Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT),
-          position: position,
-        );
+        super(anchor: Anchor.topLeft);
 
   @override
   void onRemove() {
@@ -39,14 +37,19 @@ class TeamsCollectionComponent extends PositionComponent {
 
     await refresh();
     if (menuItemList.isNotEmpty) {
-      menuItemList.first.isSelected = true;
+      menuItemList.first.isHovered = true;
     }
   }
 
   Future<void> refresh() async {
     if (!_teamWasUpdated) return;
+    // Set component dimensions
+    final positionedParent = parent as PositionComponent;
+    size = positionedParent.size;
     // get current selectedIndex
     final currentSelectedIndex =
+        menuItemList.firstWhereOrNull((e) => e.isHovered);
+    final currentActiveIndex =
         menuItemList.firstWhereOrNull((e) => e.isSelected);
     removeAll(children);
     menuItemList.clear();
@@ -55,9 +58,13 @@ class TeamsCollectionComponent extends PositionComponent {
       final menuItem = UnitTeamComponent(
         index: i,
         team: teams.value[i],
-        size: Vector2(1200, 180),
+        size: Vector2(size.x * 0.8, size.y * 180 / Constants.SCREEN_HEIGHT),
+        ownerID: ownerID,
       );
       if (currentSelectedIndex != null && i == currentSelectedIndex.index) {
+        menuItem.isHovered = true;
+      }
+      if (currentActiveIndex != null && i == currentActiveIndex.index) {
         menuItem.isSelected = true;
       }
       menuItemList.add(menuItem);
@@ -66,7 +73,8 @@ class TeamsCollectionComponent extends PositionComponent {
     await add(ComponentGrid(
         children: menuItemList,
         scrollDirection: Axis.vertical,
-        size: Vector2(Constants.SCREEN_WIDTH, menuItemList.length * 180.0),
+        size: Vector2(size.x,
+            menuItemList.length * size.y * 180 / Constants.SCREEN_HEIGHT),
         position: Vector2(0, 0),
         itemsPerSet: 1));
     _teamWasUpdated = false;

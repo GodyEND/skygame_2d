@@ -8,7 +8,7 @@ import 'package:skygame_2d/models/match_unit/unit.dart';
 import 'package:skygame_2d/utils.dart/enums.dart';
 
 extension KeyInputBlocListenerExt on SkyGame2D {
-  FlameBlocListener keyBlocListener(BlocBase iSceneBloc) {
+  FlameBlocListener keyBlocListener(KeyInputBloc keyBloc, BlocBase iSceneBloc) {
     return FlameBlocListener<KeyInputBloc, KeyInputBlocState>(
       onNewState: (state) {
         switch (bloc.state.sceneState) {
@@ -16,7 +16,7 @@ extension KeyInputBlocListenerExt on SkyGame2D {
             break;
           case SceneState.teamBuilder:
             final sceneBloc = iSceneBloc as TeamBuilderBloc;
-            _teamBuilderInputs(sceneBloc, state);
+            _teamBuilderInputs(keyBloc, sceneBloc, state);
             break;
           default:
             break;
@@ -26,17 +26,22 @@ extension KeyInputBlocListenerExt on SkyGame2D {
     );
   }
 
-  _teamBuilderInputs(TeamBuilderBloc sceneBloc, KeyInputBlocState state) {
+  _teamBuilderInputs(KeyInputBloc keyBloc, TeamBuilderBloc sceneBloc,
+      KeyInputBlocState state) {
+    final playerState = bloc.state.playerStates[keyBloc.state.ownerID - 1];
     switch (sceneBloc.state.viewState) {
       case TeamBuilderViewState.team:
         if (state.event is KeyInputConfirmEvent) {
-          // Switch input layout to builder
-          keyBloc.add(UpdatedTBBuilderViewInputsEvent());
           if (keyBloc.state.colIndex >= keyBloc.state.options) {
             sceneBloc.editNewTeam();
           } else {
+            // Switch input layout to builder
+            keyBloc.add(UpdatedTBBuilderViewInputsEvent());
             sceneBloc.editTeam(sceneBloc.state.teams[keyBloc.state.colIndex]);
           }
+        } else if (state.event is KeyInputSaveEvent) {
+          sceneBloc
+              .setActiveTeam(sceneBloc.state.teams[keyBloc.state.currentIndex]);
         } else {
           sceneBloc.refresh();
         }
@@ -44,8 +49,7 @@ extension KeyInputBlocListenerExt on SkyGame2D {
       case TeamBuilderViewState.builder:
         if (state.event is KeyInputCancelEvent) {
           keyBloc.add(UpdatedTBTeamViewInputsEvent(
-            options: bloc
-                .state.playerStates[keyBloc.state.ownerID].player.teams.length,
+            options: playerState.player.teams.length,
           ));
           sceneBloc.back(TeamBuilderViewState.team);
         } else if (state.event is KeyInputConfirmEvent) {
@@ -61,8 +65,7 @@ extension KeyInputBlocListenerExt on SkyGame2D {
           // find matching unit in collection
           keyBloc.add(UpdatedTBCharacterViewInputsEvent(
             index: startIndex,
-            options: bloc.state.playerStates[keyBloc.state.ownerID].player
-                .collection.length,
+            options: playerState.player.collection.length,
           ));
           sceneBloc.confirmIndex(currentIndex);
         } else if (state.event is KeyInputSaveEvent) {
@@ -88,6 +91,12 @@ extension KeyInputBlocListenerExt on SkyGame2D {
           sceneBloc.refresh();
         }
         break;
+      case TeamBuilderViewState.wait:
+        if (state.event is KeyInputCancelEvent) {
+          sceneBloc.back(TeamBuilderViewState.team);
+        } else {
+          sceneBloc.refresh();
+        }
       default:
         break;
     }

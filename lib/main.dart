@@ -16,14 +16,15 @@ import 'package:skygame_2d/bloc/player/bloc.dart';
 import 'package:skygame_2d/bloc/player/listener.dart';
 import 'package:skygame_2d/bloc/player/state.dart';
 import 'package:skygame_2d/game/skygame_ext/key_input_ext.dart';
-import 'package:skygame_2d/models/match_unit/unit_team.dart';
-import 'package:skygame_2d/models/player.dart';
-import 'package:skygame_2d/utils.dart/enums.dart';
+import 'package:skygame_2d/game/skygame_ext/scene_setup_ext.dart';
 import 'package:skygame_2d/models/fx.dart';
 import 'package:skygame_2d/models/match_unit/unit.dart';
+import 'package:skygame_2d/models/match_unit/unit_team.dart';
+import 'package:skygame_2d/models/player.dart';
 import 'package:skygame_2d/models/release.dart';
 import 'package:skygame_2d/setup.dart';
 import 'package:skygame_2d/utils.dart/constants.dart';
+import 'package:skygame_2d/utils.dart/enums.dart';
 import 'package:skygame_2d/utils.dart/shader_manager.dart';
 
 void main() async {
@@ -39,7 +40,6 @@ void main() async {
 class SkyGame2D extends FlameGame with KeyboardEvents {
   List<PlayerBloc> playerBlocs = [];
   late GameBloc bloc;
-  late KeyInputBloc keyBloc;
 
   SkyGame2D({Camera? camera}) : super(camera: camera);
 
@@ -75,28 +75,39 @@ class SkyGame2D extends FlameGame with KeyboardEvents {
           ));
         }
 
-        if (handledEvents.contains(true)) {
-          return KeyEventResult.handled;
-        }
-        return KeyEventResult.ignored;
-
       default:
         break;
+    }
+
+    if (handledEvents.contains(true)) {
+      return KeyEventResult.handled;
     }
     return KeyEventResult.ignored;
   }
 
   Future<void> _setupBlocProviders() async {
     List<FlameBlocProvider> playerBlocProviders = [];
+    List<FlameBlocProvider> playerKeyInputBlocProviders = [];
     List<PlayerBlocState> playerBlocStates = [];
     // List<KeyInputBlocState> playerKeyInputStates = [];
-    final teams = <UnitTeam>[];
-    for (int i = 0; i < Random().nextInt(10) + 1; i++) {
-      teams.add(UnitTeam.random(i + 1));
-    }
+
     for (int i = 1; i <= Constants.PLAYER_COUNT; i++) {
+      final teams = <UnitTeam>[];
+      for (int i = 0; i < Random().nextInt(10) + 1; i++) {
+        teams.add(UnitTeam.random(i + 1));
+      }
+
+      final keyBloc = KeyInputBloc(InitialKeyInputBlocState(
+        ownerID: i,
+        sceneState: SceneState.load,
+        sceneBloc: null,
+        rowLength: 1,
+        options: teams.length,
+      ));
       final playerState = InitialPlayerBlocState(
-          Player(i, teams: teams, collection: Units.all));
+        Player(i, teams: teams, collection: Units.all),
+        keyBloc: keyBloc,
+      );
       final playerBloc = PlayerBloc(playerState);
       playerBlocs.add(playerBloc);
       playerBlocStates.add(playerState);
@@ -107,21 +118,16 @@ class SkyGame2D extends FlameGame with KeyboardEvents {
       //   rowLength: Constants.TEAM_BUILDER_UNITS_PER_ROW,
       //   options: Units.all.length,
       // ));
+
       playerBlocProviders.add(FlameBlocProvider(create: () => playerBloc));
+      playerKeyInputBlocProviders.add(FlameBlocProvider(create: () => keyBloc));
     }
     bloc = GameBloc(InitialGameBlocState(playerBlocStates));
-    keyBloc = KeyInputBloc(InitialKeyInputBlocState(
-      ownerID: Constants.FIRST_PLAYER,
-      sceneState: SceneState.load,
-      sceneBloc: null,
-      rowLength: 1,
-      options: teams.length,
-    ));
 
     await add(FlameMultiBlocProvider(providers: [
       FlameBlocProvider(create: () => bloc),
       ...playerBlocProviders,
-      FlameBlocProvider(create: () => keyBloc),
+      ...playerKeyInputBlocProviders,
     ]));
 
     for (var playerBloc in playerBlocs) {
@@ -133,8 +139,19 @@ class SkyGame2D extends FlameGame with KeyboardEvents {
   @override
   void update(double dt) {
     super.update(dt);
-    if (bloc.state.sceneState == SceneState.load) {
-      bloc.add(GameSceneChangeEvent(scene: SceneState.load));
+    switch (bloc.state.sceneState) {
+      case SceneState.load:
+        bloc.add(GameSceneChangeEvent(scene: SceneState.load));
+        break;
+      case SceneState.teamBuilder:
+        if (validateTeamBuilderPlayersReady()) {
+          bloc.add(GameSceneChangeEvent(scene: SceneState.teamFormation));
+        }
+        break;
+      case SceneState.teamFormation:
+        break;
+      default:
+        break;
     }
   }
 }

@@ -35,6 +35,7 @@ extension TeamBuilderBlocListenerExt on TeamBuilderScene {
           case TeamBuilderViewState.teamName: // Focus on name text field
             break;
           case TeamBuilderViewState.wait: // disable buttons except cancel
+            _refreshSelectedItem();
             break;
           default:
             break;
@@ -49,30 +50,35 @@ extension TeamBuilderBlocListenerExt on TeamBuilderScene {
 
   void _refreshSelectedItem() {
     for (var item in teamsCollComp.menuItemList) {
+      item.isHovered = false;
       item.isSelected = false;
     }
     final item = teamsCollComp.menuItemList
-        .firstWhereOrNull((e) => e.index == game.keyBloc.state.currentIndex);
-    item?.isSelected = true;
+        .firstWhereOrNull((e) => e.index == keyBloc.state.currentIndex);
+    item?.isHovered = true;
+
+    final selected = teamsCollComp.menuItemList.firstWhereOrNull(
+        (e) => e.team.id == teamBuilderBloc.state.activeUnits?.id);
+    selected?.isSelected = true;
   }
 
   void _refreshSelectedActiveTeamItem() {
     for (var item in activeTeamComp.selectableChildren) {
-      item.isSelected = false;
+      item.isHovered = false;
     }
 
     final item = activeTeamComp.selectableChildren
-        .firstWhereOrNull((e) => e.index == game.keyBloc.state.currentIndex);
-    item?.isSelected = true;
+        .firstWhereOrNull((e) => e.index == keyBloc.state.currentIndex);
+    item?.isHovered = true;
   }
 
   void _refreshSelectedCharacterItem() {
     for (var item in collectionComp.selectableChildren) {
-      item.isSelected = false;
+      item.isHovered = false;
     }
 
     final item = collectionComp.selectableChildren
-        .firstWhereOrNull((e) => e.index == game.keyBloc.state.currentIndex);
-    item?.isSelected = true;
+        .firstWhereOrNull((e) => e.index == keyBloc.state.currentIndex);
+    item?.isHovered = true;
   }
 }
