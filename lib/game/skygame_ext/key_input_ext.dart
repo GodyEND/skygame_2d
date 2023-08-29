@@ -4,7 +4,7 @@ import 'package:skygame_2d/main.dart';
 import 'package:skygame_2d/utils.dart/enums.dart';
 import 'package:skygame_2d/utils.dart/constants.dart';
 
-var teamBuilderKeys = {
+var inputKeys = {
   Constants.FIRST_PLAYER: [
     // Player 1
     LogicalKeyboardKey.keyW, // Up
@@ -14,7 +14,7 @@ var teamBuilderKeys = {
     LogicalKeyboardKey.space, // Confirm
     LogicalKeyboardKey.keyC, // Cancel
     LogicalKeyboardKey.keyX, // Remove
-    LogicalKeyboardKey.numpad0, // Save
+    LogicalKeyboardKey.exclamation, // Save
   ],
   Constants.SECOND_PLAYER: [
     // Player 2
@@ -30,21 +30,21 @@ var teamBuilderKeys = {
 };
 
 extension KeyInputExt on SkyGame2D {
-  bool teamBuilderInput(
+  bool menuInput(
     RawKeyEvent event,
     Set<LogicalKeyboardKey> keysPressed,
     int ownerID,
   ) {
     final isKeyDown = event is RawKeyDownEvent;
 
-    final isUp = keysPressed.contains(teamBuilderKeys[ownerID]![0]);
-    final isDown = keysPressed.contains(teamBuilderKeys[ownerID]![1]);
-    final isLeft = keysPressed.contains(teamBuilderKeys[ownerID]![2]);
-    final isRight = keysPressed.contains(teamBuilderKeys[ownerID]![3]);
-    final isConfirm = keysPressed.contains(teamBuilderKeys[ownerID]![4]);
-    final isCancel = keysPressed.contains(teamBuilderKeys[ownerID]![5]);
-    final isRemove = keysPressed.contains(teamBuilderKeys[ownerID]![6]);
-    final isSave = keysPressed.contains(teamBuilderKeys[ownerID]![7]);
+    final isUp = keysPressed.contains(inputKeys[ownerID]![0]);
+    final isDown = keysPressed.contains(inputKeys[ownerID]![1]);
+    final isLeft = keysPressed.contains(inputKeys[ownerID]![2]);
+    final isRight = keysPressed.contains(inputKeys[ownerID]![3]);
+    final isConfirm = keysPressed.contains(inputKeys[ownerID]![4]);
+    final isCancel = keysPressed.contains(inputKeys[ownerID]![5]);
+    final isRemove = keysPressed.contains(inputKeys[ownerID]![6]);
+    final isSave = keysPressed.contains(inputKeys[ownerID]![7]);
     final keyBloc = playerBlocs
         .firstWhere((e) => e.state.player.ownerID == ownerID)
         .state

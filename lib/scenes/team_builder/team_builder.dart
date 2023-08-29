@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:skygame_2d/bloc/key_input/bloc.dart';
 import 'package:skygame_2d/bloc/key_input/listener.dart';
-import 'package:skygame_2d/bloc/team_builder/bloc.dart';
-import 'package:skygame_2d/bloc/team_builder/listener.dart';
-import 'package:skygame_2d/bloc/team_builder/state.dart';
+import 'package:skygame_2d/scenes/team_builder/bloc/bloc.dart';
+import 'package:skygame_2d/scenes/team_builder/bloc/listener.dart';
+import 'package:skygame_2d/scenes/team_builder/bloc/state.dart';
 import 'package:skygame_2d/graphics/teams_collection.dart';
 import 'package:skygame_2d/graphics/unit_collection.dart';
 import 'package:skygame_2d/graphics/unit_team_active_component.dart';
@@ -63,9 +63,9 @@ class TeamBuilderScene extends ManagedScene {
   });
   @override
   Future<void> onLoad() async {
-    final playerState = game.playerBlocs
-        .firstWhere((e) => e.state.player.ownerID == ownerID)
-        .state;
+    final playerBloc =
+        game.playerBlocs.firstWhere((e) => e.state.player.ownerID == ownerID);
+    final playerState = playerBloc.state;
     teamBuilderBloc =
         TeamBuilderBloc(InitialTeamBuilderBlocState(playerState.player));
     activeTeamComp = ActiveUnitTeamComponent(
@@ -82,7 +82,8 @@ class TeamBuilderScene extends ManagedScene {
     SceneManager.scenes.add(this);
 
     await addToScene(teamBuilderBlocListener());
-    await addToScene(game.keyBlocListener(keyBloc, teamBuilderBloc));
+    await addToScene(
+        game.keyBlocListener(keyBloc, playerBloc, teamBuilderBloc));
 
     teamsCollComp = TeamsCollectionComponent(
       teams: teamBuilderBloc.state.teams,
@@ -96,7 +97,6 @@ class TeamBuilderScene extends ManagedScene {
     await addToScene(activeTeamComp);
     collectionComp.size = Vector2(size.x, size.y * 0.5);
     await addToScene(collectionComp);
-    // await addToScene(waitingComponent);
   }
 
   @override

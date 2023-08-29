@@ -9,6 +9,8 @@ import 'package:skygame_2d/models/match_unit/unit_render_ext.dart';
 
 class PlayerBloc extends Bloc<BlocEvent, PlayerBlocState> {
   PlayerBloc(super.initialState) {
+    on<UpdatePlayerEvent>(
+        (event, emit) => emit(state.copyWith(cPlayer: event.player)));
     on<DefeatLeadEvent>((event, emit) {
       emit(state.copyWith(cPoints: state.points + 2));
     });

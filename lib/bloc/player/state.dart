@@ -25,6 +25,7 @@ class PlayerBlocState extends Equatable {
   });
 
   PlayerBlocState copyWith({
+    Player? cPlayer,
     PlayerState? cState,
     int? cPoints,
     Map<MatchPosition, MatchUnit>? cRoster,
@@ -32,7 +33,7 @@ class PlayerBlocState extends Equatable {
     BlocEvent? cEvent,
   }) {
     return PlayerBlocState(
-      player: player,
+      player: cPlayer ?? player,
       // ownerID: ownerID,
       state: cState ?? state,
       points: cPoints ?? points,

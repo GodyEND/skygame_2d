@@ -1,8 +1,8 @@
 import 'package:flame_bloc/flame_bloc.dart';
 import 'package:skygame_2d/bloc/events.dart';
-import 'package:skygame_2d/bloc/team_builder/bloc.dart';
-import 'package:skygame_2d/bloc/team_builder/state.dart';
-import 'package:skygame_2d/scenes/team_builder.dart';
+import 'package:skygame_2d/scenes/team_builder/bloc/bloc.dart';
+import 'package:skygame_2d/scenes/team_builder/bloc/state.dart';
+import 'package:skygame_2d/scenes/team_builder/team_builder.dart';
 import 'package:skygame_2d/utils.dart/enums.dart';
 import 'package:skygame_2d/utils.dart/extensions.dart';
 
@@ -58,7 +58,7 @@ extension TeamBuilderBlocListenerExt on TeamBuilderScene {
     item?.isHovered = true;
 
     final selected = teamsCollComp.menuItemList.firstWhereOrNull(
-        (e) => e.team.id == teamBuilderBloc.state.activeUnits?.id);
+        (e) => e.team.id == teamBuilderBloc.state.player.activeTeam?.id);
     selected?.isSelected = true;
   }
 

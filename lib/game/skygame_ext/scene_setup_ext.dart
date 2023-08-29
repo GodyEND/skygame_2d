@@ -1,10 +1,11 @@
 import 'package:flame/components.dart';
-import 'package:skygame_2d/bloc/team_builder/bloc.dart';
+import 'package:skygame_2d/scenes/team_builder/bloc/bloc.dart';
 import 'package:skygame_2d/main.dart';
 import 'package:skygame_2d/models/match_unit/unit_team.dart';
 import 'package:skygame_2d/scenes/managed_scene.dart';
 import 'package:skygame_2d/scenes/player_collection.dart';
-import 'package:skygame_2d/scenes/team_builder.dart';
+import 'package:skygame_2d/scenes/team_builder/team_builder.dart';
+import 'package:skygame_2d/scenes/team_formation_scene.dart';
 import 'package:skygame_2d/utils.dart/constants.dart';
 import 'package:skygame_2d/utils.dart/enums.dart';
 

@@ -1,8 +1,9 @@
 import 'package:bloc/bloc.dart';
 import 'package:skygame_2d/bloc/events.dart';
-import 'package:skygame_2d/bloc/team_builder/state.dart';
+import 'package:skygame_2d/scenes/team_builder/bloc/state.dart';
 import 'package:skygame_2d/models/match_unit/unit.dart';
 import 'package:skygame_2d/models/match_unit/unit_team.dart';
+import 'package:skygame_2d/models/player.dart';
 import 'package:skygame_2d/utils.dart/enums.dart';
 import 'package:skygame_2d/utils.dart/extensions.dart';
 
@@ -98,9 +99,9 @@ class TeamBuilderBloc extends Cubit<TeamBuilderBlocState> {
     ));
   }
 
-  void setActiveTeam(UnitTeam team) {
+  void setActiveTeam(Player player) {
     emit(state.copyWith(
-      cActiveUnits: team,
+      cPlayer: player,
       cViewState: TeamBuilderViewState.wait,
     ));
   }

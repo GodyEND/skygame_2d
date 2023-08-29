@@ -1,10 +1,16 @@
 import 'package:skygame_2d/bloc/events.dart';
 import 'package:skygame_2d/bloc/game/state.dart';
 import 'package:skygame_2d/game/unit.dart';
+import 'package:skygame_2d/models/player.dart';
 import 'package:skygame_2d/utils.dart/enums.dart';
 import 'package:skygame_2d/models/match_unit/unit.dart';
 
 abstract class GameBlocEvent extends BlocEvent {}
+
+class UpdatePlayerEvent extends GameBlocEvent {
+  final Player player;
+  UpdatePlayerEvent(this.player);
+}
 
 class DefeatLeadEvent extends GameBlocEvent {}
 

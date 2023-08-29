@@ -8,7 +8,6 @@ import 'package:skygame_2d/utils.dart/enums.dart';
 class TeamBuilderBlocState extends Equatable {
   final Player player;
   final List<UnitTeam> teams;
-  final UnitTeam? activeUnits;
   final UnitTeam selectedUnits;
   final List<Unit> collection;
   final TeamBuilderViewState viewState;
@@ -18,7 +17,6 @@ class TeamBuilderBlocState extends Equatable {
   const TeamBuilderBlocState({
     required this.player,
     required this.teams,
-    this.activeUnits,
     required this.selectedUnits,
     required this.collection,
     required this.viewState,
@@ -27,8 +25,8 @@ class TeamBuilderBlocState extends Equatable {
   });
 
   TeamBuilderBlocState copyWith({
+    Player? cPlayer,
     List<UnitTeam>? cTeams,
-    UnitTeam? cActiveUnits,
     UnitTeam? cSelectedUnits,
     List<Unit>? cCollection,
     TeamBuilderViewState? cViewState,
@@ -36,9 +34,8 @@ class TeamBuilderBlocState extends Equatable {
     BlocEvent? event,
   }) {
     return TeamBuilderBlocState(
-      player: player,
+      player: cPlayer ?? player,
       teams: cTeams ?? teams,
-      activeUnits: cActiveUnits ?? activeUnits,
       selectedUnits: cSelectedUnits ?? selectedUnits,
       collection: cCollection ?? collection,
       viewState: cViewState ?? viewState,
@@ -51,7 +48,6 @@ class TeamBuilderBlocState extends Equatable {
   List<Object?> get props => [
         player,
         teams,
-        activeUnits,
         selectedUnits,
         collection,
         viewState,
@@ -78,7 +74,6 @@ class EditNewTeamBuilderBlocState extends TeamBuilderBlocState {
       : super(
           player: state.player,
           teams: state.teams,
-          activeUnits: state.activeUnits,
           selectedUnits: UnitTeam(state.teams.length + 1),
           collection: state.collection,
           viewState: TeamBuilderViewState.builder,
@@ -91,7 +86,6 @@ class EditTeamBuilderBlocState extends TeamBuilderBlocState {
       : super(
           player: state.player,
           teams: state.teams,
-          activeUnits: state.activeUnits,
           selectedUnits: UnitTeam(team.id, list: team.toList()),
           collection: state.collection,
           viewState: TeamBuilderViewState.builder,

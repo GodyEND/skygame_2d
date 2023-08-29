@@ -67,14 +67,14 @@ class SkyGame2D extends FlameGame with KeyboardEvents {
     final List<bool> handledEvents = [];
     switch (bloc.state.sceneState) {
       case SceneState.teamBuilder:
+      case SceneState.teamFormation:
         for (var playerBloc in playerBlocs) {
-          handledEvents.add(teamBuilderInput(
+          handledEvents.add(menuInput(
             event,
             keysPressed,
             playerBloc.state.player.ownerID,
           ));
         }
-
       default:
         break;
     }

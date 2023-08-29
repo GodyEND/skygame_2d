@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:flame/components.dart';
 import 'package:skygame_2d/main.dart';
-import 'package:skygame_2d/scenes/team_builder.dart';
+import 'package:skygame_2d/scenes/team_builder/team_builder.dart';
 
 /// NOTE: Do not forget to set managedBloc
 abstract class ManagedScene extends PositionComponent

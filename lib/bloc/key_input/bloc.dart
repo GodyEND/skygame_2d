@@ -1,18 +1,17 @@
 import 'package:bloc/bloc.dart';
 import 'package:skygame_2d/bloc/events.dart';
 import 'package:skygame_2d/bloc/key_input/state.dart';
-import 'package:skygame_2d/bloc/team_builder/bloc.dart';
-import 'package:skygame_2d/scenes/team_builder.dart';
+import 'package:skygame_2d/scenes/team_builder/bloc/bloc.dart';
+import 'package:skygame_2d/scenes/team_builder/team_builder.dart';
 import 'package:skygame_2d/utils.dart/enums.dart';
-import 'package:skygame_2d/utils.dart/constants.dart';
 
 class KeyInputBloc extends Bloc<BlocEvent, KeyInputBlocState> {
   KeyInputBloc(KeyInputBlocState initialState) : super(initialState) {
     on<KeyInputConfirmEvent>((event, emit) {
       switch (state.sceneState) {
         case SceneState.teamBuilder:
-          final scene = SceneManager.scenes.firstWhere((e) =>
-              e is TeamBuilderScene && e.ownerID == Constants.FIRST_PLAYER);
+          final scene = SceneManager.scenes.firstWhere(
+              (e) => e is TeamBuilderScene && e.ownerID == state.ownerID);
           if (event.ownerID != state.ownerID) return;
           switch ((scene.managedBloc as TeamBuilderBloc).state.viewState) {
             case TeamBuilderViewState.team:
@@ -32,8 +31,8 @@ class KeyInputBloc extends Bloc<BlocEvent, KeyInputBlocState> {
       (event, emit) {
         switch (state.sceneState) {
           case SceneState.teamBuilder:
-            final scene = SceneManager.scenes.firstWhere((e) =>
-                e is TeamBuilderScene && e.ownerID == Constants.FIRST_PLAYER);
+            final scene = SceneManager.scenes.firstWhere(
+                (e) => e is TeamBuilderScene && e.ownerID == state.ownerID);
             if (event.ownerID != state.ownerID) return;
             switch ((scene.managedBloc as TeamBuilderBloc).state.viewState) {
               case TeamBuilderViewState.team:
@@ -55,8 +54,8 @@ class KeyInputBloc extends Bloc<BlocEvent, KeyInputBlocState> {
       (event, emit) {
         switch (state.sceneState) {
           case SceneState.teamBuilder:
-            final scene = SceneManager.scenes.firstWhere((e) =>
-                e is TeamBuilderScene && e.ownerID == Constants.FIRST_PLAYER);
+            final scene = SceneManager.scenes.firstWhere(
+                (e) => e is TeamBuilderScene && e.ownerID == state.ownerID);
             if (event.ownerID != state.ownerID) return;
             switch ((scene.managedBloc as TeamBuilderBloc).state.viewState) {
               case TeamBuilderViewState.team:
