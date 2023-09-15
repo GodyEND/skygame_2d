@@ -10,7 +10,7 @@ class PlayerBlocState extends Equatable {
   final BlocEvent? event;
   final PlayerState state;
   final int points;
-  final Map<MatchPosition, MatchUnit> roster;
+  final Map<MatchPosition, MatchUnit?> roster;
   final KeyInputBloc keyBloc;
 
   const PlayerBlocState({
@@ -28,7 +28,7 @@ class PlayerBlocState extends Equatable {
     Player? cPlayer,
     PlayerState? cState,
     int? cPoints,
-    Map<MatchPosition, MatchUnit>? cRoster,
+    Map<MatchPosition, MatchUnit?>? cRoster,
     KeyInputBloc? cKeyBloc,
     BlocEvent? cEvent,
   }) {
@@ -76,7 +76,7 @@ class InitialPlayerBlocState extends PlayerBlocState {
 
 class PlayerReadyBlocState extends PlayerBlocState {
   PlayerReadyBlocState({
-    required Map<MatchPosition, MatchUnit> roster,
+    required Map<MatchPosition, MatchUnit?> roster,
     // required int ownerID,
     required Player player,
     required KeyInputBloc keyBloc,

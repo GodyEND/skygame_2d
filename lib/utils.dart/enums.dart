@@ -87,3 +87,10 @@ enum TeamBuilderViewState {
   teamName,
   wait,
 }
+
+enum TeamFormationViewState {
+  load,
+  formation,
+  characterSelect,
+  wait,
+}

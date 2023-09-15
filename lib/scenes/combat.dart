@@ -6,7 +6,7 @@ import 'package:flame/src/game/flame_game.dart';
 import 'package:flame_bloc/flame_bloc.dart';
 import 'package:skygame_2d/bloc/combat/bloc.dart';
 import 'package:skygame_2d/bloc/combat/listener.dart';
-import 'package:skygame_2d/game/skygame_ext/game_combat_ext.dart';
+import 'package:skygame_2d/game_ext/game_combat_ext.dart';
 import 'package:skygame_2d/game/unit.dart';
 import 'package:skygame_2d/graphics/animations.dart';
 import 'package:skygame_2d/main.dart';

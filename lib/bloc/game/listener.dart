@@ -3,7 +3,7 @@ import 'package:skygame_2d/bloc/events.dart';
 import 'package:skygame_2d/bloc/game/bloc.dart';
 import 'package:skygame_2d/bloc/game/state.dart';
 import 'package:skygame_2d/bloc/key_input/bloc.dart';
-import 'package:skygame_2d/game/skygame_ext/scene_setup_ext.dart';
+import 'package:skygame_2d/game_ext/scene_setup_ext.dart';
 import 'package:skygame_2d/main.dart';
 import 'package:skygame_2d/models/match_unit/unit_team.dart';
 import 'package:skygame_2d/utils.dart/enums.dart';
@@ -45,6 +45,11 @@ extension SkyGame2DBlocListenerExt on SkyGame2D {
                 ));
               }
               bloc.add(GameSceneChangeCompleteEvent());
+              break;
+            case SceneState.combat:
+              await setupCombat();
+              bloc.add(GameSceneChangeCompleteEvent());
+              break;
             default:
               break;
           }

@@ -15,8 +15,8 @@ import 'package:skygame_2d/bloc/key_input/state.dart';
 import 'package:skygame_2d/bloc/player/bloc.dart';
 import 'package:skygame_2d/bloc/player/listener.dart';
 import 'package:skygame_2d/bloc/player/state.dart';
-import 'package:skygame_2d/game/skygame_ext/key_input_ext.dart';
-import 'package:skygame_2d/game/skygame_ext/scene_setup_ext.dart';
+import 'package:skygame_2d/game_ext/key_input_ext.dart';
+import 'package:skygame_2d/game_ext/scene_setup_ext.dart';
 import 'package:skygame_2d/models/fx.dart';
 import 'package:skygame_2d/models/match_unit/unit.dart';
 import 'package:skygame_2d/models/match_unit/unit_team.dart';
@@ -105,7 +105,12 @@ class SkyGame2D extends FlameGame with KeyboardEvents {
         options: teams.length,
       ));
       final playerState = InitialPlayerBlocState(
-        Player(i, teams: teams, collection: Units.all),
+        Player(
+          i,
+          teams: teams,
+          collection: Units.all,
+          formation: const [],
+        ),
         keyBloc: keyBloc,
       );
       final playerBloc = PlayerBloc(playerState);
@@ -149,6 +154,11 @@ class SkyGame2D extends FlameGame with KeyboardEvents {
         }
         break;
       case SceneState.teamFormation:
+        if (validateFormationPlayersReady()) {
+          bloc.add(GameSceneChangeEvent(scene: SceneState.combat));
+        }
+        break;
+      case SceneState.combat:
         break;
       default:
         break;

@@ -3,6 +3,8 @@ import 'package:skygame_2d/bloc/events.dart';
 import 'package:skygame_2d/bloc/key_input/state.dart';
 import 'package:skygame_2d/scenes/team_builder/bloc/bloc.dart';
 import 'package:skygame_2d/scenes/team_builder/team_builder.dart';
+import 'package:skygame_2d/scenes/team_formation/bloc/bloc.dart';
+import 'package:skygame_2d/scenes/team_formation/team_formation_scene.dart';
 import 'package:skygame_2d/utils.dart/enums.dart';
 
 class KeyInputBloc extends Bloc<BlocEvent, KeyInputBlocState> {
@@ -23,6 +25,18 @@ class KeyInputBloc extends Bloc<BlocEvent, KeyInputBlocState> {
               break;
           }
           break;
+        case SceneState.teamFormation:
+          final scene = SceneManager.scenes.firstWhere(
+              (e) => e is TeamFormationScene && e.ownerID == state.ownerID);
+          if (event.ownerID != state.ownerID) return;
+          switch ((scene.managedBloc as TeamFormationBloc).state.viewState) {
+            case TeamFormationViewState.formation:
+            case TeamFormationViewState.characterSelect:
+              emit(state.copyWith(event: event));
+              break;
+            default:
+              break;
+          }
         default:
           break;
       }
@@ -78,17 +92,67 @@ class KeyInputBloc extends Bloc<BlocEvent, KeyInputBlocState> {
           event: event));
     });
     on<KeyInputUpEvent>((event, emit) {
-      if (state.colIndex <= 0) return;
       if (event.ownerID != state.ownerID) return;
-      emit(state.copyWith(cColIndex: state.colIndex - 1));
+      switch (state.sceneState) {
+        case SceneState.teamFormation:
+          final scene = SceneManager.scenes.firstWhere(
+              (e) => e is TeamFormationScene && e.ownerID == state.ownerID);
+          if (event.ownerID != state.ownerID) return;
+          switch ((scene.managedBloc as TeamFormationBloc).state.viewState) {
+            case TeamFormationViewState.formation:
+              if (state.rowIndex <= 0) return;
+              if (state.rowIndex == 1) {
+                emit(state.copyWith(cRowIndex: state.rowIndex - 1));
+              } else {
+                emit(state.copyWith(cRowIndex: state.rowIndex - 2));
+              }
+              break;
+            default:
+              if (state.colIndex <= 0) return;
+
+              emit(state.copyWith(cColIndex: state.colIndex - 1));
+              break;
+          }
+        default:
+          if (state.colIndex <= 0) return;
+          emit(state.copyWith(cColIndex: state.colIndex - 1));
+          break;
+      }
     });
 
     on<KeyInputDownEvent>((event, emit) {
-      if (state.colIndex >= (state.options / state.rowLength).ceil() - 1) {
-        return;
-      }
       if (event.ownerID != state.ownerID) return;
-      emit(state.copyWith(cColIndex: state.colIndex + 1));
+      switch (state.sceneState) {
+        case SceneState.teamFormation:
+          final scene = SceneManager.scenes.firstWhere(
+              (e) => e is TeamFormationScene && e.ownerID == state.ownerID);
+          if (event.ownerID != state.ownerID) return;
+          switch ((scene.managedBloc as TeamFormationBloc).state.viewState) {
+            case TeamFormationViewState.formation:
+              if (state.rowIndex >= state.options - 2) return;
+              if (state.rowIndex == 0) {
+                emit(state.copyWith(cRowIndex: state.rowIndex + 1));
+              } else {
+                emit(state.copyWith(cRowIndex: state.rowIndex + 2));
+              }
+              break;
+            default:
+              if (state.colIndex >=
+                  (state.options / state.rowLength).ceil() - 1) {
+                return;
+              }
+              if (event.ownerID != state.ownerID) return;
+              emit(state.copyWith(cColIndex: state.colIndex + 1));
+              break;
+          }
+        default:
+          if (state.colIndex >= (state.options / state.rowLength).ceil() - 1) {
+            return;
+          }
+          if (event.ownerID != state.ownerID) return;
+          emit(state.copyWith(cColIndex: state.colIndex + 1));
+          break;
+      }
     });
 
     on<KeyInputLeftEvent>((event, emit) {
@@ -208,5 +272,25 @@ class UpdatedTBCharacterViewInputsEvent extends UpdatedKeyInputsParamsEvent {
           colIndex: index == null ? 0 : (index / 10).floor(),
           rowLength: 10,
           options: options,
+        );
+}
+
+class UpdatedFormationInputsEvent extends UpdatedKeyInputsParamsEvent {
+  UpdatedFormationInputsEvent()
+      : super(
+          rowIndex: 0,
+          colIndex: 0,
+          rowLength: 5,
+          options: 5,
+        );
+}
+
+class UpdatedFormationCharInputsEvent extends UpdatedKeyInputsParamsEvent {
+  UpdatedFormationCharInputsEvent()
+      : super(
+          rowIndex: 0,
+          colIndex: 0,
+          rowLength: 5,
+          options: 10,
         );
 }

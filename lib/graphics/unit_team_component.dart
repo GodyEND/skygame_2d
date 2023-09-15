@@ -30,11 +30,13 @@ class SelectableUnitTeamComponentItem extends SpriteComponent
     this.unit, {
     required int index,
     required Vector2 size,
+    Vector2? position,
   })  : _index = index,
         super(
           sprite: Sprite(unit?.select ?? Constants.images.unitTeamBG!),
           size: size,
           scale: Vector2.all((size.x - 6) / size.x),
+          position: position,
         );
 
   @override

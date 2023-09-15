@@ -40,6 +40,7 @@ class TextureImages {
 
   Image? outlineTex;
   Image? unitTeamBG;
+  Image? formationBG;
   TextureImages() {
     init();
   }
@@ -47,8 +48,10 @@ class TextureImages {
   Future<void> init() async {
     final data = await rootBundle.load('$_dir/outline_tex.png');
     outlineTex = await loadImage(Uint8List.view(data.buffer));
-    final data2 = await rootBundle.load('$_dir/unit_team_bg.png');
-    unitTeamBG = await loadImage(Uint8List.view(data2.buffer));
+    final data2 = await rootBundle.load('$_dir/formation_bg.jpg');
+    formationBG = await loadImage(Uint8List.view(data2.buffer));
+    final data3 = await rootBundle.load('$_dir/unit_team_bg.png');
+    unitTeamBG = await loadImage(Uint8List.view(data3.buffer));
   }
 
   Future<Image> loadImage(Uint8List img) async {

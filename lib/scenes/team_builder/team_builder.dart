@@ -1,6 +1,5 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
 import 'package:skygame_2d/bloc/key_input/bloc.dart';
 import 'package:skygame_2d/bloc/key_input/listener.dart';
 import 'package:skygame_2d/scenes/team_builder/bloc/bloc.dart';
@@ -9,7 +8,6 @@ import 'package:skygame_2d/scenes/team_builder/bloc/state.dart';
 import 'package:skygame_2d/graphics/teams_collection.dart';
 import 'package:skygame_2d/graphics/unit_collection.dart';
 import 'package:skygame_2d/graphics/unit_team_active_component.dart';
-import 'package:skygame_2d/models/components/selectable.dart';
 import 'package:skygame_2d/models/match_unit/unit_team.dart';
 import 'package:skygame_2d/scenes/managed_scene.dart';
 import 'package:skygame_2d/utils.dart/constants.dart';
@@ -17,22 +15,6 @@ import 'package:skygame_2d/utils.dart/enums.dart';
 
 class SceneManager {
   static List<ManagedScene> scenes = [];
-}
-
-class MenuItem extends SpriteComponent with SelectableSprite {
-  // final Image? background;
-  final int _index;
-  final Sprite foreground;
-  MenuItem({
-    required int index,
-    required this.foreground,
-    required super.position,
-    required super.size,
-  })  : _index = index,
-        super(sprite: foreground);
-
-  @override
-  int get index => _index;
 }
 
 class TeamBuilderScene extends ManagedScene {
@@ -69,9 +51,7 @@ class TeamBuilderScene extends ManagedScene {
     teamBuilderBloc =
         TeamBuilderBloc(InitialTeamBuilderBlocState(playerState.player));
     activeTeamComp = ActiveUnitTeamComponent(
-        team: UnitTeam(-1),
-        size: Vector2(Constants.SCREEN_WIDTH, 300),
-        ownerID: ownerID);
+        team: UnitTeam(-1), size: Vector2(size.x, 300), ownerID: ownerID);
     managedBloc = teamBuilderBloc;
     waitingComponent = TextComponent(
       text: 'Waiting...',
@@ -93,10 +73,18 @@ class TeamBuilderScene extends ManagedScene {
       registerSceneComponent(comp);
     }
     await addToScene(teamsCollComp);
-    activeTeamComp.size = Vector2(size.x, 300);
+    // activeTeamComp.size = Vector2(size.x, 300);
     await addToScene(activeTeamComp);
+    activeTeamComp.selectableChildren.first.isHovered = true;
     collectionComp.size = Vector2(size.x, size.y * 0.5);
     await addToScene(collectionComp);
+  }
+
+  @override
+  void onRemove() async {
+    // TODO: implement onRemove
+    super.onRemove();
+    await clearScene();
   }
 
   @override

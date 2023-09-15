@@ -1,9 +1,9 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
-import 'package:skygame_2d/scenes/team_builder/bloc/bloc.dart';
 import 'package:skygame_2d/graphics/component_grid.dart';
 import 'package:skygame_2d/graphics/unit_team_component.dart';
 import 'package:skygame_2d/models/match_unit/unit_team.dart';
+import 'package:skygame_2d/scenes/team_builder/bloc/bloc.dart';
 import 'package:skygame_2d/scenes/team_builder/team_builder.dart';
 import 'package:skygame_2d/utils.dart/constants.dart';
 import 'package:skygame_2d/utils.dart/enums.dart';
@@ -44,7 +44,6 @@ class ActiveUnitTeamComponent extends SpriteComponent {
 
     team.addListener(teamNotifier());
     await refresh();
-    selectableChildren.first.isHovered = true;
   }
 
   Future<void> refresh() async {
@@ -88,14 +87,16 @@ class ActiveUnitTeamComponent extends SpriteComponent {
   @override
   void render(Canvas canvas) async {
     super.render(canvas);
-    final scene = SceneManager.scenes
-            .firstWhere((e) => e is TeamBuilderScene && e.ownerID == ownerID)
-        as TeamBuilderScene;
-    if (isVisible &&
-        (scene.managedBloc as TeamBuilderBloc).state.viewState ==
-            TeamBuilderViewState.builder) {
-      options.render(
-          canvas, 'Edit (Space)    Save (1)', Vector2(size.x * 0.6, size.y));
+    if (isVisible) {
+      for (var scene in SceneManager.scenes) {
+        if (scene.managedBloc is TeamBuilderBloc) {
+          if ((scene.managedBloc as TeamBuilderBloc).state.viewState ==
+              TeamBuilderViewState.builder) {
+            options.render(canvas, 'Edit (Space)    Save (1)',
+                Vector2(size.x * 0.6, size.y));
+          }
+        }
+      }
     }
     await refresh();
   }
