@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:skygame_2d/bloc/combat/events.dart';
 import 'package:skygame_2d/bloc/events.dart';
 import 'package:skygame_2d/bloc/game/state.dart';
 import 'package:skygame_2d/utils.dart/enums.dart';
@@ -17,7 +18,7 @@ class GameBloc extends Bloc<BlocEvent, GameBlocState> {
         emit(state.copyWith(cSceneState: SceneState.combat));
       }
     });
-    on<CombatTurnEnd>((event, emit) => emit(
+    on<CombatTurnEndEvent>((event, emit) => emit(
         state.copyWith(cSceneState: state.sceneState, cTurn: state.turn + 1)));
     on<GameSceneChangeEvent>((event, emit) =>
         emit(state.copyWith(event: event, cSceneState: event.scene)));

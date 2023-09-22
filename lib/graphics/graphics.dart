@@ -4,11 +4,9 @@ import 'dart:ui' as ui;
 
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
-import 'package:skygame_2d/game/game.dart';
 import 'package:skygame_2d/game/stage.dart';
-import 'package:skygame_2d/utils.dart/enums.dart';
-import 'package:skygame_2d/setup.dart';
 import 'package:skygame_2d/utils.dart/constants.dart';
+import 'package:skygame_2d/utils.dart/enums.dart';
 
 // Keys
 const String SCORE_TEXT = 'score_text';
@@ -54,67 +52,79 @@ class GraphicsManager {
   // GameManager.spriteList[SCORE_TEXT] = createScoreHUDText();
   // }
 
-  // static SpriteComponent createUnitSprite(
-  //     int ownerID, MatchPosition unitPos, ui.Image image) {
-  //   final scale =
-  //       Vector2((ownerID == Constants.FIRST_PLAYER) ? 1.0 : -1.0, 1.0);
-  //   return SpriteComponent(
-  //       size: Vector2(80, 80),
-  //       scale: scale,
-  //       position: Stage.positions(ownerID)[unitPos],
-  //       sprite: Sprite(image),
-  //       anchor: Anchor.center);
-  // }
+  static SpriteComponent createUnitSprite(
+      int ownerID, MatchPosition unitPos, ui.Image image) {
+    final scale =
+        Vector2((ownerID != Constants.FIRST_PLAYER) ? 1.0 : -1.0, 1.0);
+    return SpriteComponent(
+        size: Vector2(80, 80),
+        scale: scale,
+        position: Stage.positions(ownerID)[unitPos],
+        sprite: Sprite(image),
+        anchor: Anchor.center);
+  }
 
-  // static SpriteComponent createUnitProfile(
-  //     int ownerID, MatchPosition unitPos, ui.Image image,
-  //     {Vector2? overrideSize}) {
-  //   var size = Vector2(100, 100);
+  static SpriteComponent createUnitProfile(
+      int ownerID, MatchPosition unitPos, ui.Image image,
+      {Vector2? overrideSize}) {
+    var size = Vector2(100, 100);
 
-  //   if (unitPos == MatchPosition.leftLink ||
-  //       unitPos == MatchPosition.rightLink) {
-  //     size = Vector2(70, 70);
-  //   }
-  //   final scale =
-  //       Vector2((ownerID == Constants.SECOND_PLAYER) ? 1.0 : -1.0, 1.0);
-  //   return SpriteComponent(
-  //     size: overrideSize ?? size,
-  //     scale: scale,
-  //     position: Stage.hudPositions[unitPos],
-  //     sprite: Sprite(image),
-  //   );
-  // }
+    if (unitPos == MatchPosition.leftLink ||
+        unitPos == MatchPosition.rightLink) {
+      size = Vector2(70, 70);
+    }
+    final scale =
+        Vector2((ownerID == Constants.SECOND_PLAYER) ? 1.0 : -1.0, 1.0);
+    return SpriteComponent(
+      size: overrideSize ?? size,
+      scale: scale,
+      position: Stage.hudPositions(ownerID)[unitPos],
+      sprite: Sprite(image),
+    );
+  }
 
-  // static TextComponent createScoreHUDText() {
-  //   return TextComponent(
-  //     anchor: Anchor.center,
-  //     priority: Constants.HUD_TEXT_PRIORITY,
-  //     position: Vector2(Constants.SCREEN_CENTER.x, 100),
-  //     textRenderer: TextPaint(
-  //       style: TextStyle(
-  //           fontWeight: FontWeight.w900,
-  //           inherit: true,
-  //           fontSize: 64,
-  //           color: Colors.white,
-  //           shadows: _stroke(Colors.black, 3)),
-  //     ),
-  //   );
-  // }
+  static TextComponent createScoreHUDText() {
+    return TextComponent(
+      anchor: Anchor.center,
+      priority: Constants.HUD_TEXT_PRIORITY,
+      position: Vector2(Constants.SCREEN_CENTER.x, 100),
+      textRenderer: TextPaint(
+        style: TextStyle(
+            fontWeight: FontWeight.w900,
+            inherit: true,
+            fontSize: 64,
+            color: Colors.white,
+            shadows: _stroke(Colors.black, 3)),
+      ),
+    );
+  }
 
-  // static TextComponent get createHUDText {
-  //   return TextComponent(
-  //     anchor: Anchor.center,
-  //     priority: Constants.HUD_TEXT_PRIORITY,
-  //     textRenderer: TextPaint(
-  //       style: TextStyle(
-  //           fontWeight: FontWeight.w900,
-  //           inherit: true,
-  //           fontSize: 16,
-  //           color: Colors.white,
-  //           shadows: _stroke(Colors.black, 1)),
-  //     ),
-  //   );
-  // }
+  static TextComponent get createHUDText {
+    return TextComponent(
+      anchor: Anchor.center,
+      priority: Constants.HUD_TEXT_PRIORITY,
+      textRenderer: TextPaint(
+        style: TextStyle(
+            fontWeight: FontWeight.w900,
+            inherit: true,
+            fontSize: 16,
+            color: Colors.white,
+            shadows: _stroke(Colors.black, 1)),
+      ),
+    );
+  }
+
+  static SpriteComponent createStage(ui.Image image) {
+    return SpriteComponent(
+      size: Vector2(Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT),
+      position: Vector2(
+        Constants.SCREEN_WIDTH * 0.5,
+        Constants.SCREEN_HEIGHT * 0.5,
+      ),
+      anchor: Anchor.center,
+      sprite: Sprite(image),
+    );
+  }
 
   // static TextComponent get createDamageText {
   //   return TextComponent(
@@ -131,74 +141,74 @@ class GraphicsManager {
   //   );
   // }
 
-  // static TextComponent get createChargeText {
-  //   return TextComponent(
-  //     text: '',
-  //     anchor: Anchor.center,
-  //     textRenderer: TextPaint(
-  //       style: TextStyle(
-  //           fontWeight: FontWeight.w900,
-  //           fontSize: 20,
-  //           inherit: true,
-  //           color: Colors.blue,
-  //           shadows: _stroke(Colors.white, 1)),
-  //     ),
-  //   );
-  // }
+  static TextComponent get createChargeText {
+    return TextComponent(
+      text: '',
+      anchor: Anchor.center,
+      textRenderer: TextPaint(
+        style: TextStyle(
+            fontWeight: FontWeight.w900,
+            fontSize: 20,
+            inherit: true,
+            color: Colors.blue,
+            shadows: _stroke(Colors.white, 1)),
+      ),
+    );
+  }
 
-  // static RectangleComponent createHealthBar() {
-  //   final sprite = RectangleComponent(size: Vector2(300, 25));
-  //   sprite.setColor(Colors.green);
-  //   sprite.priority = 2;
-  //   return sprite;
-  // }
+  static RectangleComponent createHealthBar() {
+    final sprite = RectangleComponent(size: Vector2(300, 25));
+    sprite.setColor(Colors.green);
+    sprite.priority = 2;
+    return sprite;
+  }
 
-  // static RectangleComponent createHealthBarBG() {
-  //   final sprite = RectangleComponent(size: Vector2(300, 25));
-  //   sprite.setColor(Colors.black);
-  //   sprite.priority = 1;
-  //   return sprite;
-  // }
+  static RectangleComponent createHealthBarBG() {
+    final sprite = RectangleComponent(size: Vector2(300, 25));
+    sprite.setColor(Colors.black);
+    sprite.priority = 1;
+    return sprite;
+  }
 
-  // static RectangleComponent createChargeBar() {
-  //   final sprite = RectangleComponent(size: Vector2(0, 12));
-  //   sprite.setColor(Colors.blue);
-  //   sprite.priority = 2;
-  //   return sprite;
-  // }
+  static RectangleComponent createChargeBar() {
+    final sprite = RectangleComponent(size: Vector2(0, 12));
+    sprite.setColor(Colors.blue);
+    sprite.priority = 2;
+    return sprite;
+  }
 
-  // static RectangleComponent createChargeBarBG() {
-  //   final sprite = RectangleComponent(size: Vector2(300, 12));
-  //   sprite.setColor(Colors.grey.shade500);
-  //   sprite.priority = 1;
-  //   return sprite;
-  // }
+  static RectangleComponent createChargeBarBG() {
+    final sprite = RectangleComponent(size: Vector2(300, 12));
+    sprite.setColor(Colors.grey.shade500);
+    sprite.priority = 1;
+    return sprite;
+  }
 
-  // static RectangleComponent createChargeSeparator() {
-  //   final sprite = RectangleComponent(size: Vector2(3, 12));
-  //   sprite.setColor(Colors.black);
-  //   sprite.priority = 3;
-  //   return sprite;
-  // }
+  static RectangleComponent createChargeSeparator() {
+    final sprite = RectangleComponent(size: Vector2(3, 12));
+    sprite.setColor(Colors.black);
+    sprite.priority = 3;
+    return sprite;
+  }
 
-  // static List<Shadow> _stroke(Color c, double thickness) {
-  //   return [
-  //     Shadow(
-  //         // bottomLeft
-  //         offset: Offset(-thickness, -thickness),
-  //         color: c),
-  //     Shadow(
-  //         // bottomRight
-  //         offset: Offset(thickness, -thickness),
-  //         color: c),
-  //     Shadow(
-  //         // topRight
-  //         offset: Offset(thickness, thickness),
-  //         color: c),
-  //     Shadow(
-  //         // topLeft
-  //         offset: Offset(-thickness, thickness),
-  //         color: c),
-  //   ];
-  // }
+  static List<Shadow> _stroke(Color c, double thickness) {
+    return [
+      Shadow(
+          // bottomLeft
+          offset: Offset(-thickness, -thickness),
+          color: c),
+      Shadow(
+          // bottomRight
+          offset: Offset(thickness, -thickness),
+          color: c),
+      Shadow(
+          // topRight
+          offset: Offset(thickness, thickness),
+          color: c),
+      Shadow(
+          // topLeft
+          offset: Offset(-thickness, thickness),
+          color: c),
+    ];
+  }
 }

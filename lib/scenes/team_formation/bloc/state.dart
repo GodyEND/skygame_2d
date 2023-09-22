@@ -81,6 +81,6 @@ class ConfirmedCharacterTFState extends TeamFormationBlocState {
           characterOptions: characterOptions,
           viewState: TeamFormationViewState.formation,
           editedPosIndex: null,
-          event: ConfirmTFEvent(),
+          event: ConfirmTFEvent(oldState.player.ownerID),
         );
 }

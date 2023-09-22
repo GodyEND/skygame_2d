@@ -4,8 +4,8 @@ import 'package:flame/components.dart';
 import 'package:skygame_2d/utils.dart/enums.dart';
 import 'package:skygame_2d/utils.dart/constants.dart';
 
-Vector2 get _lead1Pos => Vector2(400, 700);
-Vector2 get _lead2Pos => Vector2(680, 700);
+Vector2 get _lead1Pos => Vector2(400, 850);
+Vector2 get _lead2Pos => Vector2(Constants.SCREEN_WIDTH - 400, 850);
 
 const double _topRowY = 200;
 const double _midRowY = 300;
@@ -26,6 +26,11 @@ class Stage {
     return _rightPositions;
   }
 
+  static Map<MatchPosition, Vector2> hudPositions(int ownerID) {
+    if (ownerID == Constants.FIRST_PLAYER) return _leftHUDPositions;
+    return _rightHUDPositions;
+  }
+
   static Map<CombatPosition, Vector2> zones(int ownerID) {
     if (ownerID == Constants.FIRST_PLAYER) return _leftZones;
     return _rightZones;
@@ -37,7 +42,7 @@ class Stage {
   };
 
   static final Map<CombatPosition, Vector2> _rightZones = {
-    CombatPosition.challenger: _lead1Pos,
+    CombatPosition.challenger: _lead2Pos,
     CombatPosition.hitbox: _lead1Pos,
   };
 
@@ -48,29 +53,26 @@ class Stage {
         _lead1Pos + Vector2(_frontRowSpacingX, -_frontRowSpacingY),
     MatchPosition.rightAce:
         _lead1Pos + Vector2(-_frontRowSpacingX, _frontRowSpacingY),
-    // MatchPosition.leftLink: _lead1Pos +
-    //     Vector2(frontRowSpace.x * 0.5, frontRowSpace.y * 0.5) -
-    //     Vector2(4 * spriteHeight.x, spriteHeight.y * 0.5),
-    // MatchPosition.rightLink: _lead1Pos +
-    //     Vector2(frontRowSpace.x * 0.5, frontRowSpace.y * 0.5) -
-    //     Vector2(4 * spriteHeight.x, spriteHeight.y * 0.5) -
-    //     frontRowSpace,
+    MatchPosition.leftLink: _lead1Pos +
+        Vector2(_frontRowSpacingX * 0.5, -_frontRowSpacingY * 0.5) -
+        Vector2(250, 0),
+    MatchPosition.rightLink: _lead1Pos +
+        Vector2(_frontRowSpacingX * 0.5, _frontRowSpacingY * 0.5) -
+        Vector2(420, 0),
   };
   // Right Player Constants
-
   static final Map<MatchPosition, Vector2> _rightPositions = {
     MatchPosition.lead: _lead2Pos,
     MatchPosition.leftAce:
         _lead2Pos + Vector2(_frontRowSpacingX, _frontRowSpacingY),
     MatchPosition.rightAce:
         _lead2Pos + Vector2(-_frontRowSpacingX, -_frontRowSpacingY),
-    // MatchPosition.leftLink: _lead2Pos +
-    //     Vector2(frontRowSpace.x * 0.5, frontRowSpace.y * 0.5) -
-    //     Vector2(4 * spriteHeight.x, spriteHeight.y * 0.5),
-    // MatchPosition.rightLink: _lead1Pos +
-    //     Vector2(frontRowSpace.x * 0.5, frontRowSpace.y * 0.5) -
-    //     Vector2(4 * spriteHeight.x, spriteHeight.y * 0.5) -
-    //     frontRowSpace,
+    MatchPosition.leftLink: _lead2Pos -
+        Vector2(_frontRowSpacingX * 0.5, -_frontRowSpacingY * 0.5) +
+        Vector2(420, 0),
+    MatchPosition.rightLink: _lead2Pos -
+        Vector2(_frontRowSpacingX * 0.5, _frontRowSpacingY * 0.5) +
+        Vector2(250, 0),
   };
 
   static Vector2 get hudResolution =>
@@ -79,20 +81,20 @@ class Stage {
       Vector2(Constants.SCREEN_WIDTH * 0.12, Constants.SCREEN_HEIGHT * 0.12);
   static Vector2 get hudLead2Pos =>
       Vector2(Constants.SCREEN_WIDTH * 0.88, Constants.SCREEN_HEIGHT * 0.12);
-  static Map<MatchPosition, Vector2> get hudPositions => {
+  static Map<MatchPosition, Vector2> get _leftHUDPositions => {
         MatchPosition.lead: hudLeadPos,
         MatchPosition.leftAce: hudLeadPos + Vector2(75, -hudResolution.y),
         MatchPosition.rightAce: hudLeadPos + Vector2(-75, hudResolution.y),
         MatchPosition.leftLink:
             hudLeadPos + Vector2(-30, -hudResolution.y + 25),
         MatchPosition.rightLink: hudLeadPos + Vector2(-105, 25),
+      };
+  static Map<MatchPosition, Vector2> get _rightHUDPositions => {
         MatchPosition.lead: hudLead2Pos,
         MatchPosition.leftAce: hudLead2Pos + Vector2(75, hudResolution.y),
         MatchPosition.rightAce: hudLead2Pos + Vector2(-75, -hudResolution.y),
         MatchPosition.leftLink: hudLead2Pos + Vector2(105, 25),
         MatchPosition.rightLink:
             hudLead2Pos + Vector2(30, -hudResolution.y + 25),
-        // MatchPosition.p1Combatant: Vector2(735, 820),
-        // MatchPosition.p2Combatant: Vector2(1165, 820),
       };
 }

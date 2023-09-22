@@ -46,6 +46,7 @@ extension TeamFormationBlocListenerExt on TeamFormationScene {
       comp.selectedIndex.value = keyBloc.state.currentIndex;
     }
     if (event is ConfirmTFEvent) {
+      if (event.ownerID != ownerID) return;
       playerBloc.add(UpdatePlayerFormationEvent(
         List<Unit?>.from(teamFormationBloc.state.formation),
         List<Unit>.from(

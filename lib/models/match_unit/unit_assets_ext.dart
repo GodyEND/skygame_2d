@@ -1,16 +1,10 @@
 import 'package:flame/game.dart';
-import 'package:skygame_2d/game/game.dart';
 import 'package:skygame_2d/game/helper.dart';
 import 'package:skygame_2d/game/stage.dart';
 import 'package:skygame_2d/main.dart';
 import 'package:skygame_2d/models/match_unit/unit_assets.dart';
 
 extension UnitAssetsExt on MatchUnitAssets {
-  void addToGame() {
-    // GameManager.context.add(sprite);
-    // GameManager.context.add(hud);
-  }
-
   void refresh() {
     hud.refresh(parent.position);
     sprite.position =

@@ -35,8 +35,8 @@ class TeamFormationScene extends ManagedScene {
 
   @override
   Future<void> onLoad() async {
-    final playerBloc =
-        game.playerBlocs.firstWhere((e) => e.state.player.ownerID == ownerID);
+    // final playerBloc =
+    //     game.playerBlocs.firstWhere((e) => e.state.player.ownerID == ownerID);
     final playerState = playerBloc.state;
 
     teamFormationBloc =

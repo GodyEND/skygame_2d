@@ -1,21 +1,16 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:skygame_2d/game/helper.dart';
-import 'package:skygame_2d/game/stage.dart';
 import 'package:skygame_2d/game/trackers.dart';
 import 'package:skygame_2d/game/unit.dart';
+import 'package:skygame_2d/models/match_unit/unit_assets_ext.dart';
+import 'package:skygame_2d/utils.dart/constants.dart';
 // import 'package:skygame_2d/main.dart';
 import 'package:skygame_2d/utils.dart/enums.dart';
-import 'package:skygame_2d/models/match_unit/unit_assets_ext.dart';
-import 'package:skygame_2d/setup.dart';
-import 'package:skygame_2d/utils.dart/constants.dart';
 
 class GameManager {
-  late Stage stage;
   static Map<String, Component> spriteList = {};
   // static late SkyGame2D context;
-  SceneState state = SceneState.load;
-  CombatState combatState = CombatState.attack;
   GameManager();
   // final List<Command> _commandQ = [];
 
@@ -53,64 +48,8 @@ class GameManager {
   // }
 
   void setup() {
-    // player1.setUnit(this, BrawlType.lead, Unit.fromRAND());
-    // player1.setUnit(this, BrawlType.leftAce, Unit.fromRAND());
-    // player1.setUnit(this, BrawlType.rightAce, Unit.fromRAND());
-    // player1.setUnit(this, BrawlType.leftLink, Unit.fromRAND());
-    // player1.setUnit(this, BrawlType.rightLink, Unit.fromRAND());
-    // player1.setUnit(this, BrawlType.reserve1, Unit.fromRAND());
-    // player1.setUnit(this, BrawlType.reserve2, Unit.fromRAND());
-    // player1.setUnit(this, BrawlType.reserve3, Unit.fromRAND());
-
-    // player2.setUnit(this, BrawlType.lead, Unit.fromRAND());
-    // player2.setUnit(this, BrawlType.leftAce, Unit.fromRAND());
-    // player2.setUnit(this, BrawlType.rightAce, Unit.fromRAND());
-    // player2.setUnit(this, BrawlType.leftLink, Unit.fromRAND());
-    // player2.setUnit(this, BrawlType.rightLink, Unit.fromRAND());
-    // player2.setUnit(this, BrawlType.reserve1, Unit.fromRAND());
-    // player2.setUnit(this, BrawlType.reserve2, Unit.fromRAND());
-    // player2.setUnit(this, BrawlType.reserve3, Unit.fromRAND());
-
-    stage = Stage('Arcanelle', Sprites.gMaps[0]);
-    _prepareUnits();
-    // (spriteList[SCORE_TEXT]! as TextComponent).text =
-    //     '${player1.points} : ${player2.points}';
     setBrawlQ;
-    state = SceneState.combat;
-  }
-
-  void _prepareUnits() {
-    // final p1Lead = player1.roster[BrawlType.lead]!;
-    // p1Lead.asset.addToGame();
-    // field[MatchPosition.p1Lead] = p1Lead;
-    // final p1LeftAce = player1.roster[BrawlType.leftAce]!;
-    // p1LeftAce.asset.addToGame();
-    // field[MatchPosition.p1LeftAce] = p1LeftAce;
-    // final p1RightAce = player1.roster[BrawlType.rightAce]!;
-    // p1RightAce.asset.addToGame();
-    // field[MatchPosition.p1RightAce] = p1RightAce;
-    // final p1LeftLink = player1.roster[BrawlType.leftLink]!;
-    // p1LeftLink.asset.addToGame();
-    // field[MatchPosition.p1LeftLink] = p1LeftLink;
-    // final p1RightLink = player1.roster[BrawlType.rightLink]!;
-    // p1RightLink.asset.addToGame();
-    // field[MatchPosition.p1RightLink] = p1RightLink;
-
-    // final p2Lead = player2.roster[BrawlType.lead]!;
-    // p2Lead.asset.addToGame();
-    // field[MatchPosition.p2Lead] = p2Lead;
-    // final p2LeftAce = player2.roster[BrawlType.leftAce]!;
-    // p2LeftAce.asset.addToGame();
-    // field[MatchPosition.p2LeftAce] = p2LeftAce;
-    // final p2RightAce = player2.roster[BrawlType.rightAce]!;
-    // p2RightAce.asset.addToGame();
-    // field[MatchPosition.p2RightAce] = p2RightAce;
-    // final p2LeftLink = player2.roster[BrawlType.leftLink]!;
-    // p2LeftLink.asset.addToGame();
-    // field[MatchPosition.p2LeftLink] = p2LeftLink;
-    // final p2RightLink = player2.roster[BrawlType.rightLink]!;
-    // p2RightLink.asset.addToGame();
-    // field[MatchPosition.p2RightLink] = p2RightLink;
+    // state = SceneState.combat;
   }
 
   MatchUnit get active {
@@ -226,8 +165,6 @@ class GameManager {
   }
 
   void cleanup(double dt) {
-    // (spriteList[SCORE_TEXT]! as TextComponent).text =
-    //     '${player1.points} : ${player2.points}';
     for (var unit in units) {
       unit.asset.refresh();
     }

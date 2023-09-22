@@ -11,7 +11,6 @@ extension TeamFormationKeyInputExt on SkyGame2D {
       TeamFormationBloc sceneBloc,
       PlayerBloc playerBloc,
       KeyInputBlocState state) {
-    // final playerState = bloc.state.playerStates[keyBloc.state.ownerID - 1];
     switch (sceneBloc.state.viewState) {
       case TeamFormationViewState.formation:
         if (state.event is KeyInputConfirmEvent) {
@@ -26,7 +25,8 @@ extension TeamFormationKeyInputExt on SkyGame2D {
 
       case TeamFormationViewState.characterSelect:
         if (state.event is KeyInputConfirmEvent) {
-          if (keyBloc.state.currentIndex < keyBloc.state.options) {
+          if (keyBloc.state.currentIndex <
+              sceneBloc.state.characterOptions.length) {
             final unit =
                 sceneBloc.state.characterOptions[keyBloc.state.currentIndex];
             sceneBloc.confirmCharacter(unit);

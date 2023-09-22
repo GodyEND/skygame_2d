@@ -1,30 +1,64 @@
 import 'dart:async';
 
 import 'package:flame/components.dart';
-import 'package:flame/input.dart';
-import 'package:flame/src/game/flame_game.dart';
-import 'package:flame_bloc/flame_bloc.dart';
 import 'package:skygame_2d/bloc/combat/bloc.dart';
 import 'package:skygame_2d/bloc/combat/listener.dart';
-import 'package:skygame_2d/game_ext/game_combat_ext.dart';
+import 'package:skygame_2d/bloc/combat/state.dart';
+import 'package:skygame_2d/bloc/key_input/listener.dart';
+import 'package:skygame_2d/bloc/player/state.dart';
+import 'package:skygame_2d/game/helper.dart';
+import 'package:skygame_2d/game/stage.dart';
 import 'package:skygame_2d/game/unit.dart';
+import 'package:skygame_2d/game_ext/game_combat_ext.dart';
 import 'package:skygame_2d/graphics/animations.dart';
-import 'package:skygame_2d/main.dart';
-import 'package:skygame_2d/utils.dart/enums.dart';
+import 'package:skygame_2d/graphics/graphics.dart';
+import 'package:skygame_2d/models/player.dart';
 import 'package:skygame_2d/scenes/managed_scene.dart';
+import 'package:skygame_2d/setup.dart';
 import 'package:skygame_2d/utils.dart/constants.dart';
+import 'package:skygame_2d/utils.dart/enums.dart';
 
 class CombatScene extends ManagedScene {
   late CombatBloc combatBloc;
+  late TextComponent score;
+  late List<PlayerBlocState> playerStates;
 
   @override
   FutureOr<void> onLoad() async {
-    combatBloc = CombatBloc();
-    await addToScene(FlameMultiBlocProvider(providers: [
-      FlameBlocProvider(create: () => combatBloc),
-    ]));
+    final stage = Stage('Arcanelle', Sprites.gMaps[0]);
+    playerStates =
+        game.playerBlocs.map<PlayerBlocState>((e) => e.state).toList();
+    combatBloc = CombatBloc(
+        initialState: InitialCombatBlocState(
+      players: game.playerBlocs.map<Player>((e) => e.state.player).toList(),
+      playerStates: playerStates,
+      stage: stage,
+    ));
+    managedBloc = combatBloc;
+    for (var playerBloc in game.playerBlocs) {
+      await addToScene(game.keyBlocListener(
+          playerBloc.state.keyBloc, playerBloc, combatBloc));
+    }
     await addToScene(combatBlocListener(game.bloc, combatBloc));
-    return super.onLoad();
+
+    // Stage
+    await addToScene(GraphicsManager.createStage(stage.bg));
+    // HUD & Units
+    List<MapEntry<MatchPosition, MatchUnit?>> units = [];
+
+    for (var entry in combatBloc.state.field.values.toList()) {
+      units.addAll(entry.entries.toList());
+    }
+    for (var posMap in units) {
+      if (MatchHelper.isField(posMap.key) && posMap.value != null) {
+        await addToScene(posMap.value!.asset.sprite);
+        await addToScene(posMap.value!.asset.hud);
+      }
+    }
+
+    score = GraphicsManager.createScoreHUDText()
+      ..text = '${playerStates[0].points} : ${playerStates[1].points}';
+    await addToScene(score);
   }
 
   @override

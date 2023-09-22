@@ -27,18 +27,18 @@ class UnitHUDComponent extends PositionComponent {
     required Vector2 size,
   }) : super(size: size) {
     anchor = Anchor.topLeft;
-    position = Stage.hudPositions[matchPosition] ?? Vector2(0, 0);
+    position = Stage.hudPositions(ownerID)[matchPosition] ?? Vector2(0, 0);
 
     // Create Sprites
-    // profile =
-    //     GraphicsManager.createUnitProfile(ownerID, matchPosition, profileImage);
-    // healthbar = GraphicsManager.createHealthBar();
-    // healthbarBG = GraphicsManager.createHealthBarBG();
-    // chargebar = GraphicsManager.createChargeBar();
-    // chargebarBG = GraphicsManager.createChargeBarBG();
+    profile =
+        GraphicsManager.createUnitProfile(ownerID, matchPosition, profileImage);
+    healthbar = GraphicsManager.createHealthBar();
+    healthbarBG = GraphicsManager.createHealthBarBG();
+    chargebar = GraphicsManager.createChargeBar();
+    chargebarBG = GraphicsManager.createChargeBarBG();
     // // Text
-    // hpText = GraphicsManager.createHUDText;
-    // chargeText = GraphicsManager.createHUDText;
+    hpText = GraphicsManager.createHUDText;
+    chargeText = GraphicsManager.createHUDText;
     // Set sprite positions
     add(profile);
     add(healthbarBG);
@@ -57,7 +57,7 @@ class UnitHUDComponent extends PositionComponent {
 
   void get _setHUDPosition {
     if (matchPosition.index > MatchPosition.rightLink.index) return;
-    final hudPos = Stage.hudPositions[matchPosition]!;
+    final hudPos = Stage.hudPositions(ownerID)[matchPosition]!;
     final isP1 = ownerID == Constants.FIRST_PLAYER;
     position = hudPos;
     final childAnchor = (isP1) ? Anchor.topLeft : Anchor.topRight;
@@ -94,6 +94,15 @@ class UnitHUDComponent extends PositionComponent {
       healthbar.setOpacity(1);
       chargebarBG.setOpacity(1);
       chargebar.setOpacity(1);
+    } else if (MatchHelper.isField(matchPosition)) {
+      profile.setOpacity(1);
+      healthbarBG.setOpacity(0);
+      healthbar.setOpacity(0);
+      chargebarBG.setOpacity(0);
+      chargebar.setOpacity(0);
+      chargeSeparator.clear();
+      hpText.text = '';
+      chargeText.text = '';
     } else {
       profile.setOpacity(0);
       healthbarBG.setOpacity(0);

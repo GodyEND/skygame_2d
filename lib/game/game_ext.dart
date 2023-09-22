@@ -1,5 +1,4 @@
 import 'package:skygame_2d/game/game.dart';
-import 'package:skygame_2d/utils.dart/enums.dart';
 
 extension GameManagerExt on GameManager {
   // bool get player1ValidateLoss {

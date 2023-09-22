@@ -73,7 +73,6 @@ class TeamBuilderScene extends ManagedScene {
       registerSceneComponent(comp);
     }
     await addToScene(teamsCollComp);
-    // activeTeamComp.size = Vector2(size.x, 300);
     await addToScene(activeTeamComp);
     activeTeamComp.selectableChildren.first.isHovered = true;
     collectionComp.size = Vector2(size.x, size.y * 0.5);

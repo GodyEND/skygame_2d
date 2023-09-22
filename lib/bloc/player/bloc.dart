@@ -19,72 +19,55 @@ class PlayerBloc extends Bloc<BlocEvent, PlayerBlocState> {
     on<DefeatAceEvent>((event, emit) {
       emit(state.copyWith(cPoints: state.points + 1));
     });
-    on<SetPlayerUnitEvent>((event, emit) {
-      final newUnit = MatchUnit(
-        event.unit,
-        id: event.position.index +
-            (event.ownerID - 1) * MatchPosition.values.length,
-        ownerID: event.ownerID,
-        position: event.position,
-        target: MatchHelper.getDefaultTarget(event.position),
-        links: const [],
-      );
-      newUnit.addMatchAssets();
-      state.roster[event.position] = newUnit;
-      // state.units.add(newUnit);
-
-      emit(PlayerReadyBlocState(
-          player: state.player, roster: state.roster, keyBloc: state.keyBloc));
-    });
     on<UpdatePlayerFormationEvent>(((event, emit) {
       emit(state.copyWith(cRoster: {
         MatchPosition.lead: generateMatchUnit(
-          unit: event.formation[0]!,
+          unit: event.formation[0],
           matchPosition: MatchPosition.lead,
           ownerID: state.player.ownerID,
         ),
         MatchPosition.leftAce: generateMatchUnit(
-          unit: event.formation[1]!,
+          unit: event.formation[1],
           matchPosition: MatchPosition.leftAce,
           ownerID: state.player.ownerID,
         ),
         MatchPosition.rightAce: generateMatchUnit(
-          unit: event.formation[2]!,
+          unit: event.formation[2],
           matchPosition: MatchPosition.rightAce,
           ownerID: state.player.ownerID,
         ),
         MatchPosition.leftLink: generateMatchUnit(
-          unit: event.formation[3]!,
+          unit: event.formation[3],
           matchPosition: MatchPosition.leftLink,
           ownerID: state.player.ownerID,
         ),
         MatchPosition.rightLink: generateMatchUnit(
-          unit: event.formation[4]!,
+          unit: event.formation[4],
           matchPosition: MatchPosition.rightLink,
           ownerID: state.player.ownerID,
         ),
         MatchPosition.reserve1: generateReserveUnit(
-          unit: event.formation[5],
+          unit: event.reserve[0],
           matchPosition: MatchPosition.reserve1,
           ownerID: state.player.ownerID,
         ),
         MatchPosition.reserve2: generateReserveUnit(
-          unit: event.formation[6],
+          unit: event.reserve[1],
           matchPosition: MatchPosition.reserve2,
           ownerID: state.player.ownerID,
         ),
         MatchPosition.reserve3: generateReserveUnit(
-          unit: event.formation[7],
+          unit: event.reserve[2],
           matchPosition: MatchPosition.reserve3,
           ownerID: state.player.ownerID,
         ),
         MatchPosition.reserve4: generateReserveUnit(
-          unit: event.formation[8],
+          unit: event.reserve[3],
           matchPosition: MatchPosition.reserve4,
           ownerID: state.player.ownerID,
         ),
         MatchPosition.reserve5: generateReserveUnit(
-          unit: event.formation[9],
+          unit: event.reserve[4],
           matchPosition: MatchPosition.reserve5,
           ownerID: state.player.ownerID,
         ),
@@ -93,11 +76,12 @@ class PlayerBloc extends Bloc<BlocEvent, PlayerBlocState> {
     on<ConfirmReplacementEvent>((event, emit) {});
   }
 
-  MatchUnit generateMatchUnit({
-    required Unit unit,
+  MatchUnit? generateMatchUnit({
+    required Unit? unit,
     required MatchPosition matchPosition,
     required int ownerID,
   }) {
+    if (unit == null) return null;
     final newUnit = MatchUnit(
       unit,
       id: matchPosition.index + (ownerID - 1) * MatchPosition.values.length,

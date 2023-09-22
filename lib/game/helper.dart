@@ -52,6 +52,14 @@ class MatchHelper {
         type == MatchPosition.rightAce);
   }
 
+  static bool isField(MatchPosition type) {
+    return (type == MatchPosition.lead ||
+        type == MatchPosition.leftAce ||
+        type == MatchPosition.rightAce ||
+        type == MatchPosition.leftLink ||
+        type == MatchPosition.rightLink);
+  }
+
   static int getOpponent(int ownerID) {
     return ownerID == 1 ? Constants.SECOND_PLAYER : Constants.FIRST_PLAYER;
   }

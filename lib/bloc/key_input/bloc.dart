@@ -91,6 +91,11 @@ class KeyInputBloc extends Bloc<BlocEvent, KeyInputBlocState> {
           cSceneBloc: event.sceneBloc,
           event: event));
     });
+    // TODO:
+    on<KeyInputRemoveEvent>(
+      (event, emit) => {},
+    );
+
     on<KeyInputUpEvent>((event, emit) {
       if (event.ownerID != state.ownerID) return;
       switch (state.sceneState) {

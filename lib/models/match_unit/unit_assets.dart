@@ -11,7 +11,7 @@ class MatchUnitAssets {
 // Hud asset
   final UnitHUDComponent hud;
 
-  final Map<String, Component> infoList;
+  // final Map<String, Component> infoList;
   ValueNotifier<UnitAniState> animationState = ValueNotifier(UnitAniState.idle);
   ValueNotifier<Function()> animationListener = ValueNotifier(() {});
   Function() prevListener = () {};
@@ -19,7 +19,7 @@ class MatchUnitAssets {
   MatchUnitAssets({
     required this.sprite,
     required this.hud,
-    required this.infoList,
+    // required this.infoList,
     required this.parent,
   }) {
     animationListener.addListener(manageAnimationStateListener);

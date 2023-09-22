@@ -2,15 +2,11 @@ import 'package:skygame_2d/utils.dart/enums.dart';
 
 abstract class BlocEvent {}
 
-abstract class CombatBlocEvent extends BlocEvent {}
-
 class EmptyEvent extends BlocEvent {}
 
 class ClearEvent extends BlocEvent {}
 
 class PlayerTeamReadyEvent extends BlocEvent {}
-
-class CombatTurnEnd extends CombatBlocEvent {}
 
 class GameSceneChangeEvent extends BlocEvent {
   final SceneState scene;

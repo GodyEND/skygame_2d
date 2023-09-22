@@ -110,6 +110,8 @@ class SkyGame2D extends FlameGame with KeyboardEvents {
           teams: teams,
           collection: Units.all,
           formation: const [],
+          matchFormation: const [],
+          matchReserve: const [],
         ),
         keyBloc: keyBloc,
       );

@@ -31,7 +31,7 @@ class Sprites {
 
   static Image q(String query) {
     // TODO: error handling
-    return _list['$query.png']!;
+    return Flame.images.fromCache('$query.png');
   }
 
   static List<Image> get gChar => List<Image>.from(_list.entries
