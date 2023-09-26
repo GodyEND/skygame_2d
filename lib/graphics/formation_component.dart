@@ -4,7 +4,8 @@ import 'package:skygame_2d/models/components/selectable.dart';
 import 'package:skygame_2d/models/match_unit/unit.dart';
 import 'package:skygame_2d/utils.dart/constants.dart';
 
-class FormationComponent extends SpriteComponent with SelectableSprite {
+class FormationComponent extends SpriteComponent
+    with SelectableSprite, HasVisibility {
   final int ownerID;
   final int _index;
   bool _wasUpdated = true;
@@ -12,6 +13,7 @@ class FormationComponent extends SpriteComponent with SelectableSprite {
   final ValueNotifier<Unit?> unit;
 
   FormationComponent({
+    ComponentKey? key,
     required int index,
     required this.ownerID,
     required super.size,
@@ -22,9 +24,12 @@ class FormationComponent extends SpriteComponent with SelectableSprite {
         selectedIndex = ValueNotifier(0),
         unit = ValueNotifier(unit),
         super(
+          key: key,
           sprite: Sprite(unit?.select ?? Constants.images.unitTeamBG!),
           position: position,
-        );
+        ) {
+    isVisible = false;
+  }
 
   @override
   int get index => _index;

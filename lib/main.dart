@@ -41,7 +41,10 @@ class SkyGame2D extends FlameGame with KeyboardEvents {
   List<PlayerBloc> playerBlocs = [];
   late GameBloc bloc;
 
-  SkyGame2D({Camera? camera}) : super(camera: camera);
+  SkyGame2D({Camera? camera}) : super(oldCamera: camera);
+
+  @override
+  bool get debugMode => true;
 
   @override
   Future<void> onLoad() async {

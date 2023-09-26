@@ -1,22 +1,35 @@
 import 'dart:async';
 
 import 'package:flame/components.dart';
+import 'package:flame/layout.dart';
 import 'package:skygame_2d/bloc/combat/bloc.dart';
+import 'package:skygame_2d/bloc/combat/events.dart';
 import 'package:skygame_2d/bloc/combat/listener.dart';
 import 'package:skygame_2d/bloc/combat/state.dart';
 import 'package:skygame_2d/bloc/key_input/listener.dart';
 import 'package:skygame_2d/bloc/player/state.dart';
+import 'package:skygame_2d/game/combat_ui/brawl_q.dart';
 import 'package:skygame_2d/game/helper.dart';
 import 'package:skygame_2d/game/stage.dart';
 import 'package:skygame_2d/game/unit.dart';
 import 'package:skygame_2d/game_ext/game_combat_ext.dart';
 import 'package:skygame_2d/graphics/animations.dart';
 import 'package:skygame_2d/graphics/graphics.dart';
+import 'package:skygame_2d/models/match_unit/unit.dart';
 import 'package:skygame_2d/models/player.dart';
 import 'package:skygame_2d/scenes/managed_scene.dart';
 import 'package:skygame_2d/setup.dart';
 import 'package:skygame_2d/utils.dart/constants.dart';
 import 'package:skygame_2d/utils.dart/enums.dart';
+
+enum CombatComponentKey {
+  queue,
+  stage;
+
+  String asKey() {
+    return 'combat_$name';
+  }
+}
 
 class CombatScene extends ManagedScene {
   late CombatBloc combatBloc;
@@ -56,16 +69,38 @@ class CombatScene extends ManagedScene {
       }
     }
 
-    score = GraphicsManager.createScoreHUDText()
-      ..text = '${playerStates[0].points} : ${playerStates[1].points}';
-    await addToScene(score);
+    await addToScene(GraphicsManager.createScoreHUDText()
+      ..text = '${playerStates[0].points} : ${playerStates[1].points}');
+    await addToScene(BrawlQComponent(
+      combatBloc.state.exeQ,
+      key: ComponentKey.named(CombatComponentKey.queue.asKey()),
+    ));
   }
 
+  double elapsed = 0.0;
   @override
   void update(double dt) {
     super.update(dt);
     gameCombat(dt * Constants.ANI_SPEED);
 
+    elapsed += dt;
+    if (elapsed > 5) {
+      final queueComp =
+          game.findByKeyName<BrawlQComponent>(CombatComponentKey.queue.asKey());
+      queueComp?.animatedQ.value = combatBloc.state.exeQ;
+      List<MatchUnit?> units = [];
+      for (var player in combatBloc.state.players) {
+        units.add(player.matchFormation[0]);
+        units.add(player.matchFormation[1]);
+        units.add(player.matchFormation[2]);
+        units.add(player.matchFormation[3]);
+        units.add(player.matchFormation[4]);
+      }
+      final List<MatchUnit> updated =
+          List<MatchUnit>.from(units.where((e) => e != null).toList());
+      combatBloc
+          .add(UpdateExeQEvent(units: updated, oldQ: combatBloc.state.exeQ));
+    }
     switch (combatBloc.state.combatState) {
       // case SceneState.replace:
       // if (game.player1.toBeReplaced != null) {

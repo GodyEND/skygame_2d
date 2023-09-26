@@ -9,24 +9,26 @@ import 'package:skygame_2d/utils.dart/constants.dart';
 import 'package:skygame_2d/utils.dart/enums.dart';
 import 'package:skygame_2d/utils.dart/extensions.dart';
 
-class ActiveUnitTeamComponent extends SpriteComponent {
+class ActiveUnitTeamComponent extends SpriteComponent with HasVisibility {
   ValueNotifier<UnitTeam> team;
-  bool isVisible;
   bool _teamWasUpdated = true;
   final int ownerID;
   final List<SelectableUnitTeamComponentItem> selectableChildren = [];
 
   ActiveUnitTeamComponent({
+    ComponentKey? key,
     required UnitTeam team,
-    this.isVisible = false,
     required super.size,
     required this.ownerID,
     Vector2? position,
   })  : team = ValueNotifier<UnitTeam>(team),
         super(
+          key: key,
           sprite: Sprite(Constants.images.unitTeamBG!),
           position: position,
-        );
+        ) {
+    isVisible = false;
+  }
 
   @override
   void onRemove() {

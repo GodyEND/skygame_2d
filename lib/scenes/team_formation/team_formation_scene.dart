@@ -1,6 +1,7 @@
 import 'package:flame/components.dart';
 import 'package:flame/experimental.dart';
 import 'package:flame/extensions.dart';
+import 'package:flame/layout.dart';
 import 'package:flutter/material.dart';
 import 'package:skygame_2d/bloc/key_input/bloc.dart';
 import 'package:skygame_2d/bloc/key_input/listener.dart';
@@ -16,13 +17,21 @@ import 'package:skygame_2d/scenes/team_formation/bloc/state.dart';
 import 'package:skygame_2d/utils.dart/constants.dart';
 import 'package:skygame_2d/utils.dart/enums.dart';
 
+enum TFComponentKeys {
+  team,
+  formation,
+  waiting;
+
+  String asKey(int ownerID) {
+    return 'tf_${name}_$ownerID';
+  }
+}
+
 class TeamFormationScene extends ManagedScene {
   final int ownerID;
   late TeamFormationBloc teamFormationBloc;
   final KeyInputBloc keyBloc;
   final PlayerBloc playerBloc;
-  late ActiveUnitTeamComponent teamComp;
-  late TextComponent waitingComponent;
   final List<FormationComponent> formationComponents = [];
 
   TeamFormationScene(
@@ -35,8 +44,6 @@ class TeamFormationScene extends ManagedScene {
 
   @override
   Future<void> onLoad() async {
-    // final playerBloc =
-    //     game.playerBlocs.firstWhere((e) => e.state.player.ownerID == ownerID);
     final playerState = playerBloc.state;
 
     teamFormationBloc =
@@ -49,19 +56,6 @@ class TeamFormationScene extends ManagedScene {
         .toList();
     final unitTeam =
         UnitTeam(playerBloc.state.player.activeTeam!.id, list: options);
-    teamComp = ActiveUnitTeamComponent(
-      team: unitTeam,
-      size: Vector2(size.x, 300),
-      position: Vector2(0.0, size.y * 0.65),
-      ownerID: ownerID,
-    );
-
-    waitingComponent = TextComponent(
-      text: 'Waiting...',
-      textRenderer:
-          TextPaint(style: const TextStyle(color: Colors.white, fontSize: 128)),
-      position: Vector2(size.x * 0.3, size.y * 0.45),
-    );
 
     SceneManager.scenes.add(this);
     final widthDiffPer = size.x / Constants.SCREEN_WIDTH;
@@ -99,7 +93,13 @@ class TeamFormationScene extends ManagedScene {
         game.keyBlocListener(keyBloc, playerBloc, teamFormationBloc));
     keyBloc.add(UpdatedFormationInputsEvent());
 
-    await addToScene(teamComp);
+    await addToScene(ActiveUnitTeamComponent(
+      key: ComponentKey.named(TFComponentKeys.team.asKey(ownerID)),
+      team: unitTeam,
+      size: Vector2(size.x, 300),
+      position: Vector2(0.0, size.y * 0.65),
+      ownerID: ownerID,
+    ));
 
     for (int i = 0; i < 5; i++) {
       final formationComponent = FormationComponent(
@@ -113,7 +113,18 @@ class TeamFormationScene extends ManagedScene {
       formationComponents.add(formationComponent);
       await addToScene(formationComponent);
     }
-    await addToScene(waitingComponent);
+    await addToScene(AlignComponent(
+        child: VisibleWrapperComponent(
+          key: ComponentKey.named(TFComponentKeys.waiting.asKey(ownerID)),
+          child: TextComponent(
+            text: 'Waiting...',
+            textRenderer: TextPaint(
+                style: const TextStyle(color: Colors.white, fontSize: 128)),
+            anchor: Anchor.center,
+          ),
+        ),
+        alignment: Anchor.center)
+      ..position.y += 100);
   }
 
   @override
@@ -122,14 +133,6 @@ class TeamFormationScene extends ManagedScene {
     if (teamFormationBloc.state.viewState == TeamFormationViewState.load) {
       // TODO: set animations to move menu components into positions below
       teamFormationBloc.initialise();
-    }
-    if (teamFormationBloc.state.viewState == TeamFormationViewState.wait &&
-        !children.contains(waitingComponent)) {
-      await addToScene(waitingComponent);
-    } else if (children.contains(waitingComponent) &&
-        teamFormationBloc.state.viewState != TeamFormationViewState.wait) {
-      waitingComponent.removeFromParent();
-      sceneComponents.remove(waitingComponent);
     }
   }
 

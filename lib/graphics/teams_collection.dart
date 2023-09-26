@@ -6,19 +6,20 @@ import 'package:skygame_2d/models/match_unit/unit_team.dart';
 import 'package:skygame_2d/utils.dart/constants.dart';
 import 'package:skygame_2d/utils.dart/extensions.dart';
 
-class TeamsCollectionComponent extends PositionComponent {
+class TeamsCollectionComponent extends PositionComponent with HasVisibility {
   ValueNotifier<List<UnitTeam>> teams;
   final List<UnitTeamComponent> menuItemList = [];
   final int ownerID;
-  bool isVisible;
   bool _teamWasUpdated = true;
 
   TeamsCollectionComponent({
+    ComponentKey? key,
     required List<UnitTeam> teams,
     required this.ownerID,
-    this.isVisible = false,
   })  : teams = ValueNotifier<List<UnitTeam>>(teams),
-        super(anchor: Anchor.topLeft);
+        super(key: key, anchor: Anchor.topLeft) {
+    isVisible = false;
+  }
 
   @override
   void onRemove() {

@@ -110,6 +110,7 @@ extension SceneSetupExt on SkyGame2D {
         break;
       }
     }
+
     return playersReady;
   }
 }

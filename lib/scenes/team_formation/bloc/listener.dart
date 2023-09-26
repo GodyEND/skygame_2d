@@ -1,7 +1,9 @@
 import 'package:flame_bloc/flame_bloc.dart';
 import 'package:skygame_2d/bloc/events.dart';
+import 'package:skygame_2d/graphics/unit_team_active_component.dart';
 import 'package:skygame_2d/models/match_unit/unit.dart';
 import 'package:skygame_2d/models/match_unit/unit_team.dart';
+import 'package:skygame_2d/scenes/team_builder/team_builder.dart';
 import 'package:skygame_2d/scenes/team_formation/bloc/bloc.dart';
 import 'package:skygame_2d/scenes/team_formation/bloc/event.dart';
 import 'package:skygame_2d/scenes/team_formation/bloc/state.dart';
@@ -13,8 +15,17 @@ extension TeamFormationBlocListenerExt on TeamFormationScene {
   FlameBlocListener teamFormationBlocListener() {
     return FlameBlocListener<TeamFormationBloc, TeamFormationBlocState>(
       onNewState: (state) async {
+        final teamComp = game.findByKeyName<ActiveUnitTeamComponent>(
+            TFComponentKeys.team.asKey(ownerID));
+        final waitComp = game.findByKeyName<VisibleWrapperComponent>(
+            TFComponentKeys.waiting.asKey(ownerID));
         switch (state.viewState) {
           case TeamFormationViewState.formation: // Focus on team list
+            teamComp?.isVisible = false;
+            for (var comp in formationComponents) {
+              comp.isVisible = true;
+            }
+            waitComp?.isVisible = false;
             _refreshSelectedItem(event: state.event);
             if (_isReady()) {
               teamFormationBloc.playerReady();
@@ -22,9 +33,19 @@ extension TeamFormationBlocListenerExt on TeamFormationScene {
             break;
           case TeamFormationViewState
                 .characterSelect: // Focus on single unit team list
+            teamComp?.isVisible = true;
+            for (var comp in formationComponents) {
+              comp.isVisible = true;
+            }
+            waitComp?.isVisible = false;
             _refreshSelectedCharacterItem();
             break;
           case TeamFormationViewState.wait: // disable buttons except cancel
+            teamComp?.isVisible = true;
+            for (var comp in formationComponents) {
+              comp.isVisible = true;
+            }
+            waitComp?.isVisible = true;
             _refreshSelectedItem();
             break;
           default:
@@ -53,17 +74,23 @@ extension TeamFormationBlocListenerExt on TeamFormationScene {
           teamFormationBloc.state.characterOptions,
         ),
       ));
-      teamComp.team.value =
-          UnitTeam(-1, list: teamFormationBloc.state.characterOptions);
+      game
+          .findByKeyName<ActiveUnitTeamComponent>(
+              TFComponentKeys.team.asKey(ownerID))
+          ?.team
+          .value = UnitTeam(-1, list: teamFormationBloc.state.characterOptions);
     }
   }
 
   void _refreshSelectedCharacterItem() {
-    for (var item in teamComp.selectableChildren) {
+    final teamComp = game.findByKeyName<ActiveUnitTeamComponent>(
+        TFComponentKeys.team.asKey(ownerID));
+    teamComp?.isVisible = true;
+    for (var item in teamComp?.selectableChildren ?? []) {
       item.isHovered = false;
     }
 
-    final item = teamComp.selectableChildren
+    final item = teamComp?.selectableChildren
         .firstWhereOrNull((e) => e.index == keyBloc.state.currentIndex);
     item?.isHovered = true;
   }

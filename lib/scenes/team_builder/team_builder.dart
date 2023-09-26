@@ -1,4 +1,5 @@
 import 'package:flame/components.dart';
+import 'package:flame/layout.dart';
 import 'package:flutter/material.dart';
 import 'package:skygame_2d/bloc/key_input/bloc.dart';
 import 'package:skygame_2d/bloc/key_input/listener.dart';
@@ -17,25 +18,31 @@ class SceneManager {
   static List<ManagedScene> scenes = [];
 }
 
+class VisibleWrapperComponent extends PositionComponent with HasVisibility {
+  VisibleWrapperComponent({required Component child, ComponentKey? key})
+      : super(
+          children: [child],
+          key: key,
+        ) {
+    isVisible = false;
+  }
+}
+
+enum TBComponentKeys {
+  teams,
+  active,
+  collection,
+  waiting;
+
+  String asKey(int ownerID) {
+    return 'tb_${name}_$ownerID';
+  }
+}
+
 class TeamBuilderScene extends ManagedScene {
   final int ownerID;
   late TeamBuilderBloc teamBuilderBloc;
   final KeyInputBloc keyBloc;
-
-  late TeamsCollectionComponent teamsCollComp;
-  late ActiveUnitTeamComponent activeTeamComp;
-  final UnitCollectionComponent collectionComp = UnitCollectionComponent(
-    units: [],
-    size: Vector2(Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT - 60 - 300),
-    position: Vector2(
-        0,
-        Constants.SCREEN_HEIGHT +
-            50 +
-            200 +
-            50 +
-            Constants.SCREEN_HEIGHT * 0.5),
-  );
-  late TextComponent waitingComponent;
 
   TeamBuilderScene(
     this.ownerID, {
@@ -50,33 +57,57 @@ class TeamBuilderScene extends ManagedScene {
     final playerState = playerBloc.state;
     teamBuilderBloc =
         TeamBuilderBloc(InitialTeamBuilderBlocState(playerState.player));
-    activeTeamComp = ActiveUnitTeamComponent(
-        team: UnitTeam(-1), size: Vector2(size.x, 300), ownerID: ownerID);
+
     managedBloc = teamBuilderBloc;
-    waitingComponent = TextComponent(
-      text: 'Waiting...',
-      textRenderer:
-          TextPaint(style: const TextStyle(color: Colors.white, fontSize: 128)),
-      position: Vector2(size.x * 0.3, size.y * 0.45),
-    );
+
     SceneManager.scenes.add(this);
 
     await addToScene(teamBuilderBlocListener());
     await addToScene(
         game.keyBlocListener(keyBloc, playerBloc, teamBuilderBloc));
 
-    teamsCollComp = TeamsCollectionComponent(
+    await addToScene(ActiveUnitTeamComponent(
+        key: ComponentKey.named(TBComponentKeys.active.asKey(ownerID)),
+        team: UnitTeam(-1),
+        size: Vector2(size.x, 300),
+        ownerID: ownerID));
+
+    await addToScene(TeamsCollectionComponent(
+      key: ComponentKey.named(TBComponentKeys.teams.asKey(ownerID)),
       teams: teamBuilderBloc.state.teams,
       ownerID: ownerID,
-    );
-    for (var comp in teamsCollComp.menuItemList) {
+    ));
+    for (var comp in game
+            .findByKey<TeamsCollectionComponent>(
+                ComponentKey.named(TBComponentKeys.teams.asKey(ownerID)))
+            ?.menuItemList ??
+        []) {
       registerSceneComponent(comp);
     }
-    await addToScene(teamsCollComp);
-    await addToScene(activeTeamComp);
-    activeTeamComp.selectableChildren.first.isHovered = true;
-    collectionComp.size = Vector2(size.x, size.y * 0.5);
-    await addToScene(collectionComp);
+    await addToScene(UnitCollectionComponent(
+      key: ComponentKey.named(TBComponentKeys.collection.asKey(ownerID)),
+      units: [],
+      size: Vector2(Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT - 60 - 300),
+      position: Vector2(
+          0,
+          Constants.SCREEN_HEIGHT +
+              50 +
+              200 +
+              50 +
+              Constants.SCREEN_HEIGHT * 0.5),
+    )..size = Vector2(size.x, size.y * 0.5));
+    await addToScene(AlignComponent(
+        child: VisibleWrapperComponent(
+          key: ComponentKey.named(TBComponentKeys.waiting.asKey(ownerID)),
+          child: TextComponent(
+            text: 'Waiting...',
+            textRenderer: TextPaint(
+                style: const TextStyle(color: Colors.white, fontSize: 128)),
+            anchor: Anchor.center,
+          ),
+        ),
+        alignment: Anchor.center)
+      ..position.y += 100);
   }
 
   @override
@@ -94,38 +125,33 @@ class TeamBuilderScene extends ManagedScene {
       // TODO: set animations to move menu components into positions below
       teamBuilderBloc.initialise();
     } else if (teamBuilderBloc.state.viewState == TeamBuilderViewState.team) {
-      teamsCollComp.position.y = 0.0;
+      game
+          .findByKey<TeamsCollectionComponent>(
+              ComponentKey.named(TBComponentKeys.teams.asKey(ownerID)))
+          ?.position
+          .y = 0.0;
     } else if (teamBuilderBloc.state.viewState ==
         TeamBuilderViewState.builder) {
-      teamsCollComp.position.y = Constants.SCREEN_HEIGHT * 0.25 -
-          180 * teamsCollComp.menuItemList.length;
-      activeTeamComp.position.y =
-          Constants.SCREEN_HEIGHT * 0.5 - activeTeamComp.size.y * 0.5;
-      collectionComp.position.y = Constants.SCREEN_HEIGHT * 0.75;
+      final teamComp = game.findByKey<TeamsCollectionComponent>(
+          ComponentKey.named(TBComponentKeys.teams.asKey(ownerID)));
+      teamComp?.position.y =
+          Constants.SCREEN_HEIGHT * 0.25 - 180 * teamComp.menuItemList.length;
+      final activeComp = game.findByKey<ActiveUnitTeamComponent>(
+          ComponentKey.named(TBComponentKeys.active.asKey(ownerID)));
+      activeComp?.position.y =
+          Constants.SCREEN_HEIGHT * 0.5 - activeComp.size.y * 0.5;
+      final collectionComp = game.findByKey<UnitCollectionComponent>(
+          ComponentKey.named(TBComponentKeys.collection.asKey(ownerID)));
+      collectionComp?.position.y = Constants.SCREEN_HEIGHT * 0.75;
     } else if (teamBuilderBloc.state.viewState ==
         TeamBuilderViewState.characterSelect) {
-      activeTeamComp.position.y = 30.0;
-      collectionComp.position.y =
-          (activeTeamComp.position.y) + (activeTeamComp.size.y) + 30.0;
-    }
-
-    // MARK: Hide elements
-    if (!teamsCollComp.isVisible) {
-      teamsCollComp.position.y = -teamsCollComp.size.y;
-    }
-    if (!activeTeamComp.isVisible) {
-      activeTeamComp.position.y = -activeTeamComp.size.y;
-    }
-    if (!collectionComp.isVisible) {
-      collectionComp.position.y = -collectionComp.size.y;
-    }
-    if (teamBuilderBloc.state.viewState == TeamBuilderViewState.wait &&
-        !children.contains(waitingComponent)) {
-      await addToScene(waitingComponent);
-    } else if (children.contains(waitingComponent) &&
-        teamBuilderBloc.state.viewState != TeamBuilderViewState.wait) {
-      waitingComponent.removeFromParent();
-      sceneComponents.remove(waitingComponent);
+      final activeComp = game.findByKey<ActiveUnitTeamComponent>(
+          ComponentKey.named(TBComponentKeys.active.asKey(ownerID)));
+      final collectionComp = game.findByKey<UnitCollectionComponent>(
+          ComponentKey.named(TBComponentKeys.collection.asKey(ownerID)));
+      activeComp?.position.y = 30.0;
+      collectionComp?.position.y =
+          (activeComp?.position.y ?? 0.0) + (activeComp?.size.y ?? 0.0) + 30.0;
     }
   }
 }

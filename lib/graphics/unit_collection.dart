@@ -6,22 +6,24 @@ import 'package:skygame_2d/models/match_unit/unit.dart';
 import 'package:skygame_2d/utils.dart/constants.dart';
 import 'package:skygame_2d/utils.dart/extensions.dart';
 
-class UnitCollectionComponent extends SpriteComponent {
+class UnitCollectionComponent extends SpriteComponent with HasVisibility {
   ValueNotifier<List<Unit?>> units;
-  bool isVisible;
   bool _unitWasUpdated = true;
   final List<SelectableUnitTeamComponentItem> selectableChildren = [];
 
   UnitCollectionComponent({
+    ComponentKey? key,
     required List<Unit?> units,
-    this.isVisible = false,
     required super.size,
     Vector2? position,
   })  : units = ValueNotifier<List<Unit?>>(units),
         super(
+          key: key,
           sprite: Sprite(Constants.images.unitTeamBG!),
           position: position,
-        );
+        ) {
+    isVisible = false;
+  }
 
   @override
   void onRemove() {

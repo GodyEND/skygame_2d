@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:skygame_2d/bloc/player/state.dart';
+import 'package:skygame_2d/game/game.dart';
+import 'package:skygame_2d/game/helper.dart';
 import 'package:skygame_2d/game/stage.dart';
 import 'package:skygame_2d/game/unit.dart';
 import 'package:skygame_2d/models/player.dart';
@@ -42,12 +44,13 @@ class CombatBlocState extends Equatable {
     bool clearAttacker = false,
     bool clearDefender = false,
     Map<int, Map<MatchPosition, MatchUnit?>>? cField,
+    List<MatchUnit>? cExeQ,
   }) {
     return CombatBlocState(
       combatState: cCombatState ?? combatState,
       combatEvent: cCombatEvent ?? combatEvent,
       turn: cTurn ?? turn,
-      exeQ: exeQ,
+      exeQ: cExeQ ?? exeQ,
       prevExeQ: prevExeQ,
       attacker: cAttacker ?? ((clearAttacker) ? null : attacker),
       defender: cDefender ?? ((clearDefender) ? null : defender),
@@ -80,7 +83,7 @@ class InitialCombatBlocState extends CombatBlocState {
           turn: 1,
           combatState: CombatState.attack,
           combatEvent: CombatEventResult.none,
-          exeQ: const [],
+          exeQ: generateExeQ(players),
           prevExeQ: ValueNotifier([]),
           players: players,
           stage: stage,
@@ -100,4 +103,19 @@ Map<int, Map<MatchPosition, MatchUnit?>> generateField(
         .roster;
   }
   return fieldMap;
+}
+
+List<MatchUnit> generateExeQ(
+  List<Player> players,
+) {
+  List<MatchUnit> result = [];
+  for (var player in players) {
+    result.addAll(List<MatchUnit>.from((player.matchFormation
+        .where((e) =>
+            MatchHelper.isFrontrow(e?.position ?? MatchPosition.defeated))
+        .toList())));
+  }
+  result.sort((a, b) => b.current.stats[StatType.execution]
+      .compareTo(a.current.stats[StatType.execution]));
+  return result;
 }

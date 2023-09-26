@@ -50,7 +50,7 @@ class UpdateExeQEvent extends CombatBlocEvent {
     sorted = List<MatchUnit>.from(units);
     sorted.sort((a, b) => b.current.stats[StatType.execution]
         .compareTo(a.current.stats[StatType.execution]));
-    exeQ = _next(oldQ);
+    exeQ = _next(List.from(oldQ));
   }
 
   List<MatchUnit> _next(List<MatchUnit> currentQ) {

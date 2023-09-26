@@ -20,7 +20,7 @@ class PlayerBloc extends Bloc<BlocEvent, PlayerBlocState> {
       emit(state.copyWith(cPoints: state.points + 1));
     });
     on<UpdatePlayerFormationEvent>(((event, emit) {
-      emit(state.copyWith(cRoster: {
+      final updatedRoster = {
         MatchPosition.lead: generateMatchUnit(
           unit: event.formation[0],
           matchPosition: MatchPosition.lead,
@@ -71,7 +71,30 @@ class PlayerBloc extends Bloc<BlocEvent, PlayerBlocState> {
           matchPosition: MatchPosition.reserve5,
           ownerID: state.player.ownerID,
         ),
-      }));
+      };
+
+      final updatedMatchFormation = List<MatchUnit>.from([
+        updatedRoster[MatchPosition.lead],
+        updatedRoster[MatchPosition.leftAce],
+        updatedRoster[MatchPosition.rightAce],
+        updatedRoster[MatchPosition.leftLink],
+        updatedRoster[MatchPosition.rightLink],
+      ].where((e) => e != null).toList());
+
+      final updatedMatchReserve = List<MatchUnit>.from([
+        updatedRoster[MatchPosition.reserve1],
+        updatedRoster[MatchPosition.reserve2],
+        updatedRoster[MatchPosition.reserve3],
+        updatedRoster[MatchPosition.reserve4],
+        updatedRoster[MatchPosition.reserve5],
+      ].where((e) => e != null).toList());
+      emit(state.copyWith(
+        cRoster: updatedRoster,
+        cPlayer: state.player.copyWith(
+          cMatchFormation: updatedMatchFormation,
+          cMatchReserve: updatedMatchReserve,
+        ),
+      ));
     }));
     on<ConfirmReplacementEvent>((event, emit) {});
   }

@@ -1,28 +1,84 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flame/components.dart';
-import 'package:flame/effects.dart';
 import 'package:flame/experimental.dart';
 import 'package:flame/extensions.dart';
 import 'package:flutter/material.dart';
-import 'package:skygame_2d/game/game.dart';
 import 'package:skygame_2d/game/helper.dart';
 import 'package:skygame_2d/game/unit.dart';
+import 'package:skygame_2d/graphics/graphics.dart';
 import 'package:skygame_2d/utils.dart/constants.dart';
-import 'package:skygame_2d/utils.dart/extensions.dart';
 
-class _ActiveQIcon {
-  final int id;
-  final SpriteComponent comp;
-  _ActiveQIcon(this.id, this.comp);
+class UnitQComponent extends PositionComponent with HasVisibility {
+  ValueNotifier<MatchUnit> unit;
+  int index;
+  late SpriteComponent icon;
+  late RectangleComponent badge;
+
+  UnitQComponent(this.index, MatchUnit unit, {ComponentKey? key})
+      : unit = ValueNotifier(unit),
+        super(key: key) {
+    icon = GraphicsManager.createUnitProfile(this.unit.value.ownerID,
+        this.unit.value.position, this.unit.value.character.profile);
+    icon.position = Vector2.all(0.0);
+    icon.anchor = Anchor.center;
+    icon.size = Vector2.all(55);
+    add(icon);
+
+    badge = RectangleComponent(
+      anchor: Anchor.center,
+      size: Vector2.all(16),
+      position: Vector2(0, 45),
+      paint: Paint()
+        ..color =
+            MatchHelper.isLeftTeam(this.unit.value) ? Colors.blue : Colors.red,
+    );
+    add(badge);
+
+    position = Vector2(index * 80 + 40, 40.0);
+  }
+
+  @override
+  FutureOr<void> onLoad() {
+    unit.addListener(unitChanged);
+    return super.onLoad();
+  }
+
+  @override
+  void onRemove() {
+    unit.removeListener(unitChanged);
+    super.onRemove();
+  }
+
+  Future<void> unitChanged() async {
+    icon.sprite = Sprite(unit.value.character.profile);
+
+    badge.paint.color =
+        MatchHelper.isLeftTeam(unit.value) ? Colors.blue : Colors.red;
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+
+    final double startPos = index * 80 + 40;
+    final double goal = index * 80 - 40;
+    if (position.x < goal) {
+      position.x = startPos - dt * 26 * Constants.ANI_SPEED;
+    } else {
+      position.x = position.x - dt * 26 * Constants.ANI_SPEED;
+    }
+  }
 }
 
 class BrawlQComponent extends PositionComponent {
   final ValueNotifier<List<MatchUnit>> animatedQ;
-  final GameManager game;
+  List<MatchUnit> currentQ = [];
+  List<UnitQComponent> iconQ = [];
 
-  BrawlQComponent(this.game, this.animatedQ) {
+  BrawlQComponent(List<MatchUnit> aniQ, {ComponentKey? key})
+      : animatedQ = ValueNotifier(aniQ),
+        super(key: key) {
     add(main);
     add(RectangleComponent(
       anchor: Anchor.center,
@@ -31,6 +87,12 @@ class BrawlQComponent extends PositionComponent {
     ));
     position = Vector2(Constants.SCREEN_CENTER.x, 200);
 
+    final renderedUnits = _getRenderedUnits;
+    for (int i = 0; i < renderedUnits.length; i++) {
+      final newIconComp = UnitQComponent(i, renderedUnits[i]);
+      iconQ.add(newIconComp);
+      main.add(newIconComp);
+    }
     onQueueChange();
   }
 
@@ -49,136 +111,45 @@ class BrawlQComponent extends PositionComponent {
     return super.onLoad();
   }
 
+  @override
+  void onRemove() {
+    animatedQ.removeListener(onQueueChange);
+    super.onRemove();
+  }
+
   List<MatchUnit> get _getRenderedUnits {
     final List<MatchUnit> result = animatedQ.value
         .where((e) => MatchHelper.isFrontrow(e.position))
         .toList();
 
     while (result.length < 7) {
-      final orderedList = GameManager.executionOrder(game.units)
-          .where((e) => MatchHelper.isFrontrow(e.position))
-          .toList();
-      result.addAll(orderedList);
+      result.addAll(animatedQ.value);
     }
     return result;
   }
 
   final Map<int, SpriteComponent> reusable = {};
-  // ignore: library_private_types_in_public_api
-  List<_ActiveQIcon> activeComps = [];
 
   Future<void> onQueueChange() async {
     var renderedUnits = _getRenderedUnits;
-    final activeIds = renderedUnits.map<int>((e) => e.id).toList();
-    final removableComps = <_ActiveQIcon>[];
-    for (var active in activeComps) {
-      if (active.comp.position.x <= main.position.x - 25) {
-        removableComps.add(active);
-        main.remove(active.comp);
-      } else if (!activeIds.contains(active.id) &&
-          !removableComps.contains(active)) {
-        removableComps.add(active);
-        main.remove(active.comp);
-      }
-    }
-    for (var removable in removableComps) {
-      activeComps.remove(removable);
-    }
-    removableComps.clear();
-
-    List<_ActiveQIcon?> orderedComps = [];
-    for (int j = 0; j < renderedUnits.length; j++) {
-      orderedComps.add(activeComps.firstWhereOrNull((e) =>
-          e.id == renderedUnits[j].id && orderedComps.contains(e) == false));
-    }
-
-    activeComps =
-        List<_ActiveQIcon>.from(orderedComps.where((e) => e != null).toList());
-    for (int i = 0;
-        i < min(renderedUnits.length, Constants.COMBAT_Q_LENGTH);
-        i++) {
-      final currentUnitID = renderedUnits[i].id;
-      final idOcc =
-          renderedUnits.where((e) => e.id == currentUnitID).toList().length;
-      final activeIDOcc =
-          activeComps.where((e) => e.id == currentUnitID).toList().length;
-
-      if (activeComps.length > i && activeComps[i].id == currentUnitID) {
-        if (activeComps[i].comp.position.x > main.position.x + i * 100) {
-          activeComps[i].comp.position = main.position + Vector2(i * 100, 50);
-        }
-        continue;
-      } else if (idOcc <= activeIDOcc) {
-        final modComp = activeComps
-            .getRange(i, activeComps.length)
-            .toList()
-            .firstWhereOrNull((e) => e.id == currentUnitID);
-        if (modComp != null) {
-          modComp.comp.position = main.position + Vector2(i * 100, 50);
-          final removableRange =
-              activeComps.getRange(i, activeComps.indexOf(modComp)).toList();
-          for (int j = 0; j < removableRange.length; j++) {
-            removableComps.add(removableRange[j]);
-          }
-          for (var removable in removableComps) {
-            if (main.contains(removable.comp)) {
-              main.remove(removable.comp);
-            }
-            activeComps.remove(removable);
-          }
-        } else {
-          _addNewIcon(renderedUnits[i], Vector2(i * 100, 50));
-        }
+    for (int i = 0; i < renderedUnits.length; i++) {
+      if (i < iconQ.length) {
+        iconQ[i].unit.value = renderedUnits[i];
       } else {
-        _addNewIcon(renderedUnits[i], Vector2(i * 100, 50));
+        final newIconComp = UnitQComponent(i, renderedUnits[i]);
+        iconQ.add(newIconComp);
+        main.add(newIconComp);
       }
     }
-    if (activeComps.length != Constants.COMBAT_Q_LENGTH) {
-      final currentIDs = activeComps.map<int>((e) => e.id).toList();
-      currentIDs.sort();
-      final finalIDs =
-          activeIds.getRange(0, Constants.COMBAT_Q_LENGTH).toList();
-      finalIDs.sort();
-      int redoCounter = 0;
-      for (int i = 0; i < currentIDs.length; i++) {
-        if (i - redoCounter >= finalIDs.length ||
-            currentIDs[i] != finalIDs[i - redoCounter]) {
-          final removable =
-              activeComps.firstWhere((e) => e.id == currentIDs[i]);
-          if (main.contains(removable.comp)) {
-            main.remove(removable.comp);
-          }
-          activeComps.remove(removable);
-          redoCounter += 1;
-        }
-      }
+
+    @override
+    void update(double dt) {
+      // TODO: implement update
+      super.update(dt);
+      // Type IconComponent
+      // Type QUnitComponent
+      // exchangable unit profile
+      // update list when animation complete
     }
-  }
-
-  _addNewIcon(MatchUnit unit, Vector2 offset) {
-    // final icon = GraphicsManager.createUnitProfile(
-    //     unit.ownerID, unit.position, unit.character.profile);
-    // icon.position = main.position + offset;
-    // icon.anchor = Anchor.center;
-    // icon.size = Vector2.all(55);
-
-    final ownerBadge = RectangleComponent(
-      anchor: Anchor.center,
-      size: Vector2.all(16),
-      position: Vector2(28.5, 65),
-      paint: Paint()
-        ..color = MatchHelper.isLeftTeam(unit) ? Colors.blue : Colors.red,
-    );
-    // icon.add(ownerBadge);
-
-    final eff = MoveEffect.to(
-      Vector2(-30, 50),
-      // TODO: use dt
-      EffectController(speed: 34.0 * Constants.ANI_SPEED.toDouble()),
-    );
-    // icon.add(eff);
-
-    // activeComps.add(_ActiveQIcon(unit.id, icon));
-    // main.add(icon);
   }
 }
