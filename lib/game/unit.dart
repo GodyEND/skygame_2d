@@ -18,7 +18,6 @@ class MatchUnit extends Equatable {
   final MatchUnitData initial;
 
   // Release currentRelease;
-  // final List<Command> actionQ = [];
   final List<EventNotation> eventQ = [];
 
   // Live Settings
@@ -52,11 +51,11 @@ class MatchUnit extends Equatable {
         '${current.stats[StatType.hp]} / ${initial.stats[StatType.hp]}';
     asset.hud.chargeText.text = '${current.stats[StatType.storage]}';
     // TODO: listener
-    if (asset.animationState.value.index > UnitAniState.knockback.index) {
-      updateHealthBar(dt);
-      updateChargeBar(dt);
-      updateChargeBarSeparator(dt);
-    }
+    // if (asset.animationState.value.index > UnitAniState.knockback.index) {
+    updateHealthBar(dt);
+    updateChargeBar(dt);
+    updateChargeBarSeparator(dt);
+    // }
     asset.hud.setOpacity();
   }
 

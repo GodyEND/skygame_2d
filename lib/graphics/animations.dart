@@ -1,6 +1,5 @@
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
-import 'package:skygame_2d/game/game.dart';
 import 'package:skygame_2d/game/unit.dart';
 import 'package:skygame_2d/graphics/graphics.dart';
 import 'package:skygame_2d/graphics/unit_animations.dart';
@@ -8,9 +7,10 @@ import 'package:skygame_2d/utils.dart/enums.dart';
 import 'package:skygame_2d/utils.dart/constants.dart';
 
 class AnimationsManager {
-  static void animateEventText(double dt, CombatEventResult event) {
+  static void animateEventText(
+      double dt, CombatEventResult event, TextComponent textComp) {
     // Setup Animation
-    final sprite = GameManager.spriteList[EVENT_TEXT]! as TextComponent;
+    final sprite = textComp;
     sprite.text = event.name.toUpperCase();
     sprite.scale = Vector2.all(0.0);
     sprite.position = Constants.SCREEN_CENTER + Vector2(0, 50);

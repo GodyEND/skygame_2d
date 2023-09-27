@@ -30,7 +30,7 @@ enum SceneState {
   end,
 }
 
-enum CombatState { attack, release, guard, swap, retreat, fx }
+enum CombatState { attack, release, guard, swap, retreat, fx, none }
 
 enum PlayerState { waiting, replace, ready }
 

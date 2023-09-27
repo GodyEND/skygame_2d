@@ -17,8 +17,6 @@ extension UnitAssetsExt on MatchUnitAssets {
   }
 
   void removeFromGame(SkyGame2D gameContext) {
-    MatchHelper.remove(gameContext, sprite);
-    MatchHelper.remove(gameContext, hud);
     animationListener.removeListener(parent.asset.manageAnimationStateListener);
   }
 

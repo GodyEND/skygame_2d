@@ -1,5 +1,5 @@
+import 'package:skygame_2d/bloc/combat/state.dart';
 import 'package:skygame_2d/game/unit.dart';
-import 'package:skygame_2d/game/game.dart';
 import 'package:skygame_2d/utils.dart/enums.dart';
 import 'package:skygame_2d/abilities/release.dart';
 
@@ -8,7 +8,7 @@ abstract class Release {
   final String text;
   final ReleaseType type;
   final double damage;
-  void action(MatchUnit user, GameManager game);
+  void action(MatchUnit user, CombatBlocState state);
 
   Release(
     this.name, {

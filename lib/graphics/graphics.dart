@@ -5,6 +5,7 @@ import 'dart:ui' as ui;
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:skygame_2d/game/stage.dart';
+import 'package:skygame_2d/main.dart';
 import 'package:skygame_2d/utils.dart/constants.dart';
 import 'package:skygame_2d/utils.dart/enums.dart';
 
@@ -36,18 +37,21 @@ class GraphicsManager {
   //   }
 
   // Load Texts
-  // GameManager.spriteList[EVENT_TEXT] = TextComponent(
-  //   text: '',
-  //   anchor: Anchor.center,
-  //   textRenderer: TextPaint(
-  //     style: TextStyle(
-  //         fontWeight: FontWeight.w900,
-  //         fontSize: 40,
-  //         inherit: true,
-  //         color: Colors.white,
-  //         shadows: _stroke(Colors.black, 3)),
-  //   ),
-  // );
+  static TextComponent createEventText(ComponentKey? key) {
+    return TextComponent(
+      text: '',
+      key: key,
+      anchor: Anchor.center,
+      textRenderer: TextPaint(
+        style: TextStyle(
+            fontWeight: FontWeight.w900,
+            fontSize: 40,
+            inherit: true,
+            color: Colors.white,
+            shadows: _stroke(Colors.black, 3)),
+      ),
+    );
+  }
 
   // GameManager.spriteList[SCORE_TEXT] = createScoreHUDText();
   // }

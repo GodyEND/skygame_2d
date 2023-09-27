@@ -1,7 +1,6 @@
 import 'dart:math';
-import 'package:skygame_2d/game/helper.dart';
+import 'package:skygame_2d/bloc/combat/state.dart';
 import 'package:skygame_2d/game/unit.dart';
-import 'package:skygame_2d/game/game.dart';
 import 'package:skygame_2d/utils.dart/enums.dart';
 import 'package:skygame_2d/utils.dart/constants.dart';
 
@@ -35,10 +34,8 @@ class Simulator {
     return 1.0;
   }
 
-  static CombatEventResult combatEventResult(GameManager game) {
-    final attacker = game.active;
-    final opponentID = MatchHelper.getOpponent(attacker.ownerID);
-    final defender = GameManager.field(opponentID)[attacker.target]!;
+  static CombatEventResult combatEventResult(
+      CombatBlocState state, MatchUnit attacker, MatchUnit defender) {
     CombatEventResult result = CombatEventResult.hit;
     // Check for Hit
     double hitChance = attacker.current.bes.values[BESType.hit]! -
@@ -115,10 +112,10 @@ class Simulator {
   }
 
   static void calculateDamage(
-      GameManager game, MatchUnit attacker, MatchUnit defender) {
+      CombatEventResult combatEvent, MatchUnit attacker, MatchUnit defender) {
     attacker.incomingDamage = 0;
     defender.incomingDamage = 0;
-    switch (game.currentEvent) {
+    switch (combatEvent) {
       case CombatEventResult.hit:
         final acc = attacker.current.bes.values[BESType.hit]!.toInt();
         final rng = Random().nextInt(acc);
@@ -155,9 +152,9 @@ class Simulator {
       case CombatEventResult.block:
       case CombatEventResult.stagger:
       case CombatEventResult.overwhelm:
-        final blockMod = (game.currentEvent == CombatEventResult.stagger)
+        final blockMod = (combatEvent == CombatEventResult.stagger)
             ? 1.2
-            : (game.currentEvent == CombatEventResult.overwhelm)
+            : (combatEvent == CombatEventResult.overwhelm)
                 ? 1 / 1.2
                 : 1;
         final blockPow =
@@ -174,11 +171,20 @@ class Simulator {
     }
   }
 
-  static setCharge(GameManager game, MatchUnit attacker, MatchUnit defender) {
+  static void applyDamage(MatchUnit attacker, MatchUnit defender) {
+    attacker.current.stats.values[StatType.hp] =
+        max(0, attacker.current.stats[StatType.hp] - attacker.incomingDamage);
+
+    defender.current.stats.values[StatType.hp] =
+        max(0, defender.current.stats[StatType.hp] - defender.incomingDamage);
+  }
+
+  static void setCharge(
+      CombatEventResult combatEvent, MatchUnit attacker, MatchUnit defender) {
     attacker.incomingCharge = 0;
     defender.incomingCharge = 0;
 
-    switch (game.currentEvent) {
+    switch (combatEvent) {
       case CombatEventResult.hit:
         final charge = attacker.current.stats[StatType.charge].toInt();
         attacker.incomingCharge = charge;
@@ -196,7 +202,7 @@ class Simulator {
       case CombatEventResult.crit:
       case CombatEventResult.lethal:
         final charge = (attacker.current.stats[StatType.charge] *
-                ((game.currentEvent == CombatEventResult.crit) ? 1.5 : 2))
+                ((combatEvent == CombatEventResult.crit) ? 1.5 : 2))
             .toInt();
         attacker.incomingCharge = charge;
         attacker.current.stats.values[StatType.storage] =
@@ -212,14 +218,14 @@ class Simulator {
             (attacker.current.stats[StatType.storage].toInt() + chargeA)
                 .toDouble();
 
-        final chargeFactor = (game.currentEvent == CombatEventResult.block)
+        final chargeFactor = (combatEvent == CombatEventResult.block)
             ? 0.25
-            : (game.currentEvent == CombatEventResult.stagger)
+            : (combatEvent == CombatEventResult.stagger)
                 ? 0.25 * 1.5
                 : 0.25 / 1.5;
         final chargeD =
             (defender.current.stats[StatType.charge] * chargeFactor).toInt();
-        if (game.currentEvent == CombatEventResult.stagger) {}
+        if (combatEvent == CombatEventResult.stagger) {}
         defender.incomingCharge = chargeD;
         defender.current.stats.values[StatType.storage] =
             (defender.current.stats[StatType.storage].toInt() + chargeD)

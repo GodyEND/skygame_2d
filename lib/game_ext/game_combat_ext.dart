@@ -1,19 +1,14 @@
-import 'dart:math';
-
-import 'package:skygame_2d/game/game.dart';
-import 'package:skygame_2d/game/helper.dart';
-import 'package:skygame_2d/game/simulation.dart';
-import 'package:skygame_2d/graphics/animations.dart';
-import 'package:skygame_2d/graphics/unit_animations.dart';
-import 'package:skygame_2d/main.dart';
-import 'package:skygame_2d/utils.dart/enums.dart';
+import 'package:skygame_2d/bloc/combat/events.dart';
 import 'package:skygame_2d/scenes/combat.dart';
-import 'package:skygame_2d/utils.dart/constants.dart';
+import 'package:skygame_2d/utils.dart/enums.dart';
 
 extension GameCombatExt on CombatScene {
   void gameCombat(double dt) {
     switch (combatBloc.state.combatState) {
       case CombatState.attack:
+        if (combatBloc.state.event is SimulateCombatEvent) {
+          combatBloc.add(FireCombatAnimationEvent(dt: dt, game: game));
+        }
         break;
       default:
         break;
@@ -27,19 +22,7 @@ extension GameCombatExt on CombatScene {
       //     return;
       //   }
 
-      //   combatBloc.state.currentEvent = Simulator.combatEventResult(game);
-      //   // game.currentEvent = CombatEventResult.dodge;
       //   AnimationsManager.animateEventText(dt, combatBloc.state.currentEvent);
-
-      //   // Simulate Combat
-      //   Simulator.calculateDamage(game,combatBloc.state.attacker!, combatBloc.state.defender!);
-      //   Simulator.setCharge(game, combatBloc.state.attacker!, combatBloc.state.defender!);
-      //   // TEST DAMAGE
-      //   defender!.current.stats.values[StatType.hp] = max(0,
-      //       defender!.current.stats[StatType.hp] - defender!.incomingDamage);
-
-      //   attacker!.current.stats.values[StatType.hp] = max(0,
-      //       attacker!.current.stats[StatType.hp] - attacker!.incomingDamage);
 
       //   // Fire Combat Animation
       //   if (attacker!.position != MatchPosition.defeated &&

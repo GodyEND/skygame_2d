@@ -1,7 +1,7 @@
 import 'package:skygame_2d/abilities/event.dart';
+import 'package:skygame_2d/bloc/combat/state.dart';
 import 'package:skygame_2d/game/helper.dart';
 import 'package:skygame_2d/game/unit.dart';
-import 'package:skygame_2d/game/game.dart';
 import 'package:skygame_2d/game/trackers.dart';
 import 'package:skygame_2d/utils.dart/enums.dart';
 import 'package:skygame_2d/models/release.dart';
@@ -16,12 +16,12 @@ class Release1 extends Release {
         );
 
   @override
-  void action(MatchUnit user, GameManager game) async {
+  void action(MatchUnit user, CombatBlocState state) async {
     final targetLocations = [user.target];
     targetLocations.addAll(MatchHelper.getLinkRef(user.target));
 
     for (var targetLocation in targetLocations) {
-      final target = GameManager.field(user.ownerID)[targetLocation];
+      final target = state.field[user.ownerID]?[targetLocation];
       if (target == null) continue;
 
       // TODO: if user attack hit
@@ -46,7 +46,7 @@ class Release2 extends Release {
         );
 
   @override
-  void action(MatchUnit user, GameManager game) {
+  void action(MatchUnit user, CombatBlocState state) {
     user.current.stats.values[StatType.attack] =
         user.current.stats[StatType.attack] * 1.3;
     user.current.stats.values[StatType.defense] =
@@ -63,7 +63,7 @@ class Release3 extends Release {
         );
 
   @override
-  void action(MatchUnit user, GameManager game) {}
+  void action(MatchUnit user, CombatBlocState state) {}
 }
 
 class Release4 extends Release {
@@ -75,7 +75,7 @@ class Release4 extends Release {
         );
 
   @override
-  void action(MatchUnit user, GameManager game) {}
+  void action(MatchUnit user, CombatBlocState state) {}
 }
 
 class Release5 extends Release {
@@ -87,5 +87,5 @@ class Release5 extends Release {
         );
 
   @override
-  void action(MatchUnit user, GameManager game) {}
+  void action(MatchUnit user, CombatBlocState state) {}
 }

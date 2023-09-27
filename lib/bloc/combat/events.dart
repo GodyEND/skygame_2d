@@ -1,44 +1,25 @@
 import 'package:skygame_2d/bloc/events.dart';
 import 'package:skygame_2d/game/helper.dart';
 import 'package:skygame_2d/game/unit.dart';
+import 'package:skygame_2d/main.dart';
 import 'package:skygame_2d/utils.dart/enums.dart';
 
 abstract class CombatBlocEvent extends BlocEvent {}
 
-class CombatTurnEndEvent extends CombatBlocEvent {}
+class StartCombatEvent extends CombatBlocEvent {}
 
-class SetExeQEvent extends CombatBlocEvent {
-  late List<MatchUnit> exeQ;
-  // late List<MatchUnit> prevQ;
-  SetExeQEvent(List<MatchUnit> units) {
-    // int? lastActiveID;
-    exeQ = List<MatchUnit>.from(units);
+class SetupAttackerEvent extends CombatBlocEvent {}
 
-    // if (units.isNotEmpty) {
-    //   lastActiveID = active.id;
-    // }
-    // brawlQ.clear();
-    // brawlQ.addAll(units);
-    exeQ.sort((a, b) => b.current.stats[StatType.execution]
-        .compareTo(a.current.stats[StatType.execution]));
-    // MatchUnit? lastFrontrow;
-    // if (lastActiveID != null) {
-    //   while (active.id != lastActiveID) {
-    //     if (MatchHelper.isFrontrow(active.position)) {
-    //       lastFrontrow = active;
-    //     }
-    //     brawlQ.removeAt(0);
-    //   }
-    // }
-    exeQ.removeWhere((e) => !MatchHelper.isFrontrow(e.position));
+class SimulateCombatEvent extends CombatBlocEvent {
+  final MatchUnit attacker;
+  final MatchUnit defender;
+  SimulateCombatEvent({required this.attacker, required this.defender});
+}
 
-    // final prevList = [
-    //   lastFrontrow ??
-    //       brawlQ.lastWhere((e) => MatchHelper.isFrontrow(e.position))
-    // ];
-    // prevList.addAll(brawlQ);
-    // prevBrawlQ.value = prevList;
-  }
+class FireCombatAnimationEvent extends CombatBlocEvent {
+  final double dt;
+  final SkyGame2D game;
+  FireCombatAnimationEvent({required this.dt, required this.game});
 }
 
 class UpdateExeQEvent extends CombatBlocEvent {

@@ -13,9 +13,7 @@ import 'package:skygame_2d/game/helper.dart';
 import 'package:skygame_2d/game/stage.dart';
 import 'package:skygame_2d/game/unit.dart';
 import 'package:skygame_2d/game_ext/game_combat_ext.dart';
-import 'package:skygame_2d/graphics/animations.dart';
 import 'package:skygame_2d/graphics/graphics.dart';
-import 'package:skygame_2d/models/match_unit/unit.dart';
 import 'package:skygame_2d/models/player.dart';
 import 'package:skygame_2d/scenes/managed_scene.dart';
 import 'package:skygame_2d/setup.dart';
@@ -24,7 +22,8 @@ import 'package:skygame_2d/utils.dart/enums.dart';
 
 enum CombatComponentKey {
   queue,
-  stage;
+  stage,
+  combatEvent;
 
   String asKey() {
     return 'combat_$name';
@@ -75,70 +74,60 @@ class CombatScene extends ManagedScene {
       combatBloc.state.exeQ,
       key: ComponentKey.named(CombatComponentKey.queue.asKey()),
     ));
+
+    await addToScene(GraphicsManager.createEventText(
+        ComponentKey.named(CombatComponentKey.combatEvent.asKey())));
+
+    combatBloc.add(StartCombatEvent());
   }
 
-  double elapsed = 0.0;
   @override
   void update(double dt) {
     super.update(dt);
     gameCombat(dt * Constants.ANI_SPEED);
 
-    elapsed += dt;
-    if (elapsed > 5) {
-      final queueComp =
-          game.findByKeyName<BrawlQComponent>(CombatComponentKey.queue.asKey());
-      queueComp?.animatedQ.value = combatBloc.state.exeQ;
-      List<MatchUnit?> units = [];
-      for (var player in combatBloc.state.players) {
-        units.add(player.matchFormation[0]);
-        units.add(player.matchFormation[1]);
-        units.add(player.matchFormation[2]);
-        units.add(player.matchFormation[3]);
-        units.add(player.matchFormation[4]);
-      }
-      final List<MatchUnit> updated =
-          List<MatchUnit>.from(units.where((e) => e != null).toList());
-      combatBloc
-          .add(UpdateExeQEvent(units: updated, oldQ: combatBloc.state.exeQ));
-    }
-    switch (combatBloc.state.combatState) {
-      // case SceneState.replace:
-      // if (game.player1.toBeReplaced != null) {
-      //   game.replaceFrontrow(game.player1.toBeReplaced!);
-      // }
-      // if (game.player2.toBeReplaced != null) {
-      //   game.replaceFrontrow(game.player2.toBeReplaced!);
-      // }
-      //break;
-      // case SceneState.replaceWing:
-      // case SceneState.replaceSupport:
-      // if (game.player1.toBeReplaced != null) {
-      //   game.setReplacement(Owner.p1);
-      //   game.replaceFrontrow(game.player1.toBeReplaced!,
-      //       inReplacement: game.player1.confirmedReplacement);
-      // }
-      // if (game.player2.toBeReplaced != null) {
-      //   game.setReplacement(Owner.p2);
-      //   game.replaceFrontrow(game.player2.toBeReplaced!,
-      //       inReplacement: game.player2.confirmedReplacement);
-      // }
-      //   break;
-      // case SceneState.replaceReserve:
-      // if (game.player1.toBeReplaced != null) {
-      //   game.replaceFrontrow(game.player1.toBeReplaced!,
-      //       inReplacement: MatchPosition.none);
-      // }
-      // if (game.player2.toBeReplaced != null) {
-      //   game.replaceFrontrow(game.player2.toBeReplaced!,
-      //       inReplacement: MatchPosition.none);
-      // }
-      //     break;
-      //   case SceneState.end:
-      //     print('MATCH ENDED');
-      //     break;
-      default:
-        break;
-    }
+    //   final queueComp =
+    //       game.findByKeyName<BrawlQComponent>(CombatComponentKey.queue.asKey());
+    //   queueComp?.animatedQ.value = combatBloc.state.exeQ;
+
+    // switch (combatBloc.state.combatState) {
+    // case SceneState.replace:
+    // if (game.player1.toBeReplaced != null) {
+    //   game.replaceFrontrow(game.player1.toBeReplaced!);
+    // }
+    // if (game.player2.toBeReplaced != null) {
+    //   game.replaceFrontrow(game.player2.toBeReplaced!);
+    // }
+    //break;
+    // case SceneState.replaceWing:
+    // case SceneState.replaceSupport:
+    // if (game.player1.toBeReplaced != null) {
+    //   game.setReplacement(Owner.p1);
+    //   game.replaceFrontrow(game.player1.toBeReplaced!,
+    //       inReplacement: game.player1.confirmedReplacement);
+    // }
+    // if (game.player2.toBeReplaced != null) {
+    //   game.setReplacement(Owner.p2);
+    //   game.replaceFrontrow(game.player2.toBeReplaced!,
+    //       inReplacement: game.player2.confirmedReplacement);
+    // }
+    //   break;
+    // case SceneState.replaceReserve:
+    // if (game.player1.toBeReplaced != null) {
+    //   game.replaceFrontrow(game.player1.toBeReplaced!,
+    //       inReplacement: MatchPosition.none);
+    // }
+    // if (game.player2.toBeReplaced != null) {
+    //   game.replaceFrontrow(game.player2.toBeReplaced!,
+    //       inReplacement: MatchPosition.none);
+    // }
+    //     break;
+    //   case SceneState.end:
+    //     print('MATCH ENDED');
+    //     break;
+    //   default:
+    //     break;
+    // }
 
     // switch (game.state) {
     //   case SceneState.replace:
@@ -159,10 +148,10 @@ class CombatScene extends ManagedScene {
   // MatchUnit? attacker;
   // MatchUnit? defender;
 
-  Function() renderCombatAnimation(double dt, CombatEventResult event,
-          MatchUnit unit, bool isAttacker) =>
-      () => AnimationsManager.animateCombat(dt, event, unit,
-          isAttacker: isAttacker);
+  // Function() renderCombatAnimation(double dt, CombatEventResult event,
+  //         MatchUnit unit, bool isAttacker) =>
+  //     () => AnimationsManager.animateCombat(dt, event, unit,
+  //         isAttacker: isAttacker);
 
   //     break;
   //   case CombatState.release:

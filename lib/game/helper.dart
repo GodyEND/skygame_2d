@@ -1,9 +1,7 @@
-import 'package:flame/components.dart';
-import 'package:skygame_2d/game/game.dart';
+import 'package:skygame_2d/bloc/combat/state.dart';
 import 'package:skygame_2d/game/unit.dart';
-import 'package:skygame_2d/main.dart';
-import 'package:skygame_2d/utils.dart/enums.dart';
 import 'package:skygame_2d/utils.dart/constants.dart';
+import 'package:skygame_2d/utils.dart/enums.dart';
 
 class MatchHelper {
   static MatchPosition getDefaultTarget(MatchPosition position) {
@@ -19,13 +17,14 @@ class MatchHelper {
     }
   }
 
-  static MatchUnit getTarget(GameManager game, MatchUnit attacker) {
-    final opponentID = MatchHelper.getOpponent(attacker.ownerID);
-    var currentTarget = GameManager.field(opponentID)[attacker.target];
+  static MatchUnit getTarget(
+      MatchUnit attacker, Map<int, Map<MatchPosition, MatchUnit?>> field) {
+    final opponentID = getOpponent(attacker.ownerID);
+    var currentTarget = field[opponentID]?[attacker.target];
     if (currentTarget == null ||
         currentTarget.position == MatchPosition.defeated) {
       const newTargetPos = MatchPosition.lead;
-      currentTarget = GameManager.field(opponentID)[newTargetPos];
+      currentTarget = field[opponentID]?[newTargetPos];
       attacker.target = newTargetPos;
     }
     return currentTarget!;
@@ -64,44 +63,33 @@ class MatchHelper {
     return ownerID == 1 ? Constants.SECOND_PLAYER : Constants.FIRST_PLAYER;
   }
 
-  static bool remove(SkyGame2D gameContext, Component c) {
-    if (gameContext.contains(c)) {
-      gameContext.remove(c);
-      return true;
-    }
-    return false;
+  static List<MatchUnit> getUnits(int ownerID, CombatBlocState state) {
+    List<MatchUnit?> result = [];
+
+    result.add(state.field[ownerID]?[MatchPosition.lead]);
+    result.add(state.field[ownerID]?[MatchPosition.leftAce]);
+    result.add(state.field[ownerID]?[MatchPosition.rightAce]);
+    result.add(state.field[ownerID]?[MatchPosition.leftLink]);
+    result.add(state.field[ownerID]?[MatchPosition.rightLink]);
+    return List<MatchUnit>.from(result.where((e) => e != null).toList());
   }
 
-  static bool removeAll(SkyGame2D gameContext, List<Component> cList) {
-    List<bool> hasRemoved = [];
-    for (var c in cList) {
-      hasRemoved.add(remove(gameContext, c));
-    }
-    return hasRemoved.contains(true);
-  }
-
-  static List<MatchUnit> getOpposingUnits(int ownerID) {
-    List<MatchUnit?> opponents = [];
+  static List<MatchUnit> getOpposingUnits(int ownerID, CombatBlocState state) {
     final opponentID = (ownerID == Constants.FIRST_PLAYER)
         ? Constants.SECOND_PLAYER
         : Constants.FIRST_PLAYER;
-    opponents.add(GameManager.field(opponentID)[MatchPosition.lead]);
-    opponents.add(GameManager.field(opponentID)[MatchPosition.leftAce]);
-    opponents.add(GameManager.field(opponentID)[MatchPosition.rightAce]);
-    opponents.add(GameManager.field(opponentID)[MatchPosition.leftLink]);
-    opponents.add(GameManager.field(opponentID)[MatchPosition.rightLink]);
-    return List<MatchUnit>.from(opponents.where((e) => e != null).toList());
+    return getUnits(opponentID, state);
   }
 
-  static int getUnitPoints(MatchPosition type) {
-    switch (type) {
-      case MatchPosition.lead:
-        return 2;
-      case MatchPosition.leftAce:
-      case MatchPosition.rightAce:
-        return 1;
-      default:
-        return 0;
-    }
-  }
+  // static int getUnitPoints(MatchPosition type) {
+  //   switch (type) {
+  //     case MatchPosition.lead:
+  //       return 2;
+  //     case MatchPosition.leftAce:
+  //     case MatchPosition.rightAce:
+  //       return 1;
+  //     default:
+  //       return 0;
+  //   }
+  // }
 }

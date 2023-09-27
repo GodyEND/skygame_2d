@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:skygame_2d/bloc/combat/bloc.dart';
+import 'package:skygame_2d/bloc/combat/state.dart';
 import 'package:skygame_2d/game/helper.dart';
 import 'package:skygame_2d/game/unit.dart';
 import 'package:skygame_2d/game/game.dart';
@@ -18,12 +20,12 @@ class FX1 extends FX {
         );
 
   @override
-  void action(MatchUnit user, GameManager game) {
-    final notation = game.fxTracker.firstWhereOrNull(
+  void action(MatchUnit user, CombatBlocState state) {
+    final notation = state.fxTracker.firstWhereOrNull(
         (e) => e.fx == this && e.userID == user.id && e.targetID == -1);
     if (notation != null) return;
     user.incomingDamage = 0;
-    game.fxTracker.add(FXNotation(this, user.id, -1, game.turn));
+    state.fxTracker.add(FXNotation(this, user.id, -1, state.turn));
   }
 }
 
@@ -36,9 +38,9 @@ class FX2 extends FX {
         );
 
   @override
-  void action(MatchUnit user, GameManager game) {
-    final targets = game.units;
-    final notation = game.fxTracker.firstWhereOrNull(
+  void action(MatchUnit user, CombatBlocState state) {
+    final targets = state.allUnits;
+    final notation = state.fxTracker.firstWhereOrNull(
         (e) => e.fx == this && e.userID == user.id && e.targetID == -1);
     if (notation != null) return;
     for (var target in targets) {
@@ -47,7 +49,7 @@ class FX2 extends FX {
       target.current.bes.values[BESType.evasion] =
           target.current.bes.values[BESType.evasion]! - 25;
     }
-    game.fxTracker.add(FXNotation(this, user.id, -1, game.turn));
+    state.fxTracker.add(FXNotation(this, user.id, -1, state.turn));
   }
 }
 
@@ -60,9 +62,9 @@ class FX3 extends FX {
         );
 
   @override
-  void action(MatchUnit user, GameManager game) {
+  void action(MatchUnit user, CombatBlocState state) {
     // NOTE: Do not know if this needs to be tracked
-    final targets = MatchHelper.getOpposingUnits(user.ownerID);
+    final targets = MatchHelper.getOpposingUnits(user.ownerID, state);
     for (var target in targets) {
       target.current.stats.values[StatType.storage] =
           max(0.0, target.current.stats[StatType.storage] - 50);
@@ -79,26 +81,26 @@ class FX4 extends FX {
         );
 
   @override
-  void action(MatchUnit user, GameManager game) {
-    final targets = GameManager.field(user.ownerID)[user.position]?.links;
+  void action(MatchUnit user, CombatBlocState state) {
+    final targets = state.field[user.ownerID]?[user.position]?.links;
     if (targets == null) return;
     if (targets.isEmpty) return;
     for (var link in targets) {
       final opponentID = MatchHelper.getOpponent(user.ownerID);
-      final target = GameManager.field(opponentID)[link]!;
-      final notation = game.fxTracker.firstWhereOrNull((e) =>
-          e.fx == this && e.userID == user.id && e.targetID == target.id);
-      if (notation != null && notation.turn + 2 < game.turn) {
+      final target = state.field[opponentID]?[link]!;
+      final notation = state.fxTracker.firstWhereOrNull((e) =>
+          e.fx == this && e.userID == user.id && e.targetID == target?.id);
+      if (notation != null && notation.turn + 2 < state.turn) {
         continue;
       } else if (notation != null) {
-        game.fxTracker.remove(notation);
+        state.fxTracker.remove(notation);
       }
-      target.current.stats.values[StatType.hp] = min(
+      target?.current.stats.values[StatType.hp] = min(
           target.current.stats[StatType.hp] + 30,
           target.initial.stats[StatType.hp] + 30);
-      target.current.stats.values[StatType.storage] =
+      target?.current.stats.values[StatType.storage] =
           target.current.stats[StatType.storage] + 30;
-      game.fxTracker.add(FXNotation(this, user.id, target.id, game.turn));
+      state.fxTracker.add(FXNotation(this, user.id, target!.id, state.turn));
     }
   }
 }
@@ -112,20 +114,20 @@ class FX5 extends FX {
         );
 
   @override
-  void action(MatchUnit user, GameManager game) {
-    final targets = GameManager.field(user.ownerID)[user.position]?.links;
+  void action(MatchUnit user, CombatBlocState state) {
+    final targets = state.field[user.ownerID]?[user.position]?.links;
 
     if (targets == null) return;
     if (targets.isEmpty) return;
     for (var link in targets) {
       final opponentID = MatchHelper.getOpponent(user.ownerID);
-      final target = GameManager.field(opponentID)[link]!;
-      final notation = game.fxTracker.firstWhereOrNull((e) =>
+      final target = state.field[opponentID]![link]!;
+      final notation = state.fxTracker.firstWhereOrNull((e) =>
           e.fx == this && e.userID == user.id && e.targetID == target.id);
       if (notation != null) continue;
       target.current.stats.values[StatType.execution] =
           target.current.stats[StatType.execution] + 50.0;
-      game.fxTracker.add(FXNotation(this, user.id, target.id, game.turn));
+      state.fxTracker.add(FXNotation(this, user.id, target.id, state.turn));
     }
   }
 }

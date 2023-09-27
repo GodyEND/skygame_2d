@@ -1,6 +1,6 @@
 import 'package:skygame_2d/abilities/fx.dart';
+import 'package:skygame_2d/bloc/combat/state.dart';
 import 'package:skygame_2d/game/unit.dart';
-import 'package:skygame_2d/game/game.dart';
 import 'package:skygame_2d/utils.dart/enums.dart';
 
 abstract class FX {
@@ -8,7 +8,7 @@ abstract class FX {
   final String text;
   final FXType type;
   bool isActive = true;
-  void action(MatchUnit user, GameManager game);
+  void action(MatchUnit user, CombatBlocState state);
 
   FX(this.name, {required this.type, required this.text}) {
     FXs.add(this);

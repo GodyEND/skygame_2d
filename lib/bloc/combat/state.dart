@@ -1,9 +1,9 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
+import 'package:skygame_2d/bloc/events.dart';
 import 'package:skygame_2d/bloc/player/state.dart';
-import 'package:skygame_2d/game/game.dart';
 import 'package:skygame_2d/game/helper.dart';
 import 'package:skygame_2d/game/stage.dart';
+import 'package:skygame_2d/game/trackers.dart';
 import 'package:skygame_2d/game/unit.dart';
 import 'package:skygame_2d/models/player.dart';
 import 'package:skygame_2d/utils.dart/enums.dart';
@@ -15,24 +15,28 @@ class CombatBlocState extends Equatable {
 // Combat
   final int turn;
   final List<MatchUnit> exeQ;
-  final ValueNotifier<List<MatchUnit>> prevExeQ;
+  // final ValueNotifier<List<MatchUnit>> prevExeQ;
   final CombatEventResult combatEvent;
   // Management
   final Stage stage;
   final List<Player> players;
   final Map<int, Map<MatchPosition, MatchUnit?>> field;
+  final List<FXNotation> fxTracker;
+  final BlocEvent? event;
 
   const CombatBlocState({
     required this.combatState,
     required this.combatEvent,
     required this.turn,
     required this.exeQ,
-    required this.prevExeQ,
+    // required this.prevExeQ,
     this.attacker,
     this.defender,
     required this.stage,
     required this.players,
     required this.field,
+    required this.fxTracker,
+    this.event,
   });
 
   CombatBlocState copyWith({
@@ -45,18 +49,22 @@ class CombatBlocState extends Equatable {
     bool clearDefender = false,
     Map<int, Map<MatchPosition, MatchUnit?>>? cField,
     List<MatchUnit>? cExeQ,
+    List<FXNotation>? cFXTracker,
+    BlocEvent? cEvent,
   }) {
     return CombatBlocState(
       combatState: cCombatState ?? combatState,
       combatEvent: cCombatEvent ?? combatEvent,
       turn: cTurn ?? turn,
       exeQ: cExeQ ?? exeQ,
-      prevExeQ: prevExeQ,
+      // prevExeQ: prevExeQ,
       attacker: cAttacker ?? ((clearAttacker) ? null : attacker),
       defender: cDefender ?? ((clearDefender) ? null : defender),
       stage: stage,
       players: players,
       field: cField ?? field,
+      fxTracker: cFXTracker ?? fxTracker,
+      event: cEvent,
     );
   }
 
@@ -65,13 +73,23 @@ class CombatBlocState extends Equatable {
         combatState,
         turn,
         exeQ,
-        prevExeQ,
+        // prevExeQ,
         attacker,
         defender,
         stage,
         players,
         field,
+        fxTracker,
+        event,
       ];
+
+  List<MatchUnit> get allUnits {
+    List<MatchUnit> results = [];
+    for (var player in players) {
+      results.addAll(MatchHelper.getUnits(player.ownerID, this));
+    }
+    return results;
+  }
 }
 
 class InitialCombatBlocState extends CombatBlocState {
@@ -84,10 +102,11 @@ class InitialCombatBlocState extends CombatBlocState {
           combatState: CombatState.attack,
           combatEvent: CombatEventResult.none,
           exeQ: generateExeQ(players),
-          prevExeQ: ValueNotifier([]),
+          // prevExeQ: ValueNotifier([]),
           players: players,
           stage: stage,
           field: generateField(players, playerStates),
+          fxTracker: const [],
         );
 }
 
