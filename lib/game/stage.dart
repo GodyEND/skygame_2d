@@ -4,14 +4,14 @@ import 'package:flame/components.dart';
 import 'package:skygame_2d/utils.dart/enums.dart';
 import 'package:skygame_2d/utils.dart/constants.dart';
 
-Vector2 get _lead1Pos => Vector2(400, 850);
-Vector2 get _lead2Pos => Vector2(Constants.SCREEN_WIDTH - 400, 850);
+Vector2 get _lead1Pos => Vector2(400, _midRowY);
+Vector2 get _lead2Pos => Vector2(Constants.SCREEN_WIDTH - 400, _midRowY);
 
-const double _topRowY = 200;
-const double _midRowY = 300;
-const double _bottomRowY = 400;
-const double _challengeX = 400;
-const double _hitX = 600;
+const double _topRowY = 780;
+const double _midRowY = 880;
+const double _bottomRowY = 980;
+const double _challengeX = 500;
+// const double _hitX = Constants.SCREEN_CENTER.x;
 const double _frontRowSpacingX = 200;
 const double _frontRowSpacingY = 100;
 const double _backRowSpacingY = 50;
@@ -37,22 +37,22 @@ class Stage {
   }
 
   static final Map<CombatPosition, Vector2> _leftZones = {
-    CombatPosition.challenger: _lead1Pos,
-    CombatPosition.hitbox: _lead1Pos,
+    CombatPosition.challenger: Vector2(_challengeX, _midRowY),
+    CombatPosition.hitbox: Vector2(Constants.SCREEN_CENTER.x - 40, _midRowY),
   };
 
   static final Map<CombatPosition, Vector2> _rightZones = {
-    CombatPosition.challenger: _lead2Pos,
-    CombatPosition.hitbox: _lead1Pos,
+    CombatPosition.challenger:
+        Vector2(Constants.SCREEN_WIDTH - _challengeX, _midRowY),
+    CombatPosition.hitbox: Vector2(Constants.SCREEN_CENTER.x + 40, _midRowY),
   };
 
   // Left Player Constants
   static final Map<MatchPosition, Vector2> _leftPositions = {
     MatchPosition.lead: _lead1Pos,
-    MatchPosition.leftAce:
-        _lead1Pos + Vector2(_frontRowSpacingX, -_frontRowSpacingY),
+    MatchPosition.leftAce: Vector2(350 + _frontRowSpacingX, _topRowY),
     MatchPosition.rightAce:
-        _lead1Pos + Vector2(-_frontRowSpacingX, _frontRowSpacingY),
+        Vector2(_lead1Pos.x - _frontRowSpacingX, _bottomRowY),
     MatchPosition.leftLink: _lead1Pos +
         Vector2(_frontRowSpacingX * 0.5, -_frontRowSpacingY * 0.5) -
         Vector2(250, 0),
@@ -64,9 +64,9 @@ class Stage {
   static final Map<MatchPosition, Vector2> _rightPositions = {
     MatchPosition.lead: _lead2Pos,
     MatchPosition.leftAce:
-        _lead2Pos + Vector2(_frontRowSpacingX, _frontRowSpacingY),
+        Vector2(_lead2Pos.x + _frontRowSpacingX, _bottomRowY),
     MatchPosition.rightAce:
-        _lead2Pos + Vector2(-_frontRowSpacingX, -_frontRowSpacingY),
+        Vector2(Constants.SCREEN_WIDTH - (350 + _frontRowSpacingX), _topRowY),
     MatchPosition.leftLink: _lead2Pos -
         Vector2(_frontRowSpacingX * 0.5, -_frontRowSpacingY * 0.5) +
         Vector2(420, 0),

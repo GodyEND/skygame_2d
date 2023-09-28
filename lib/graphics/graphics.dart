@@ -5,7 +5,6 @@ import 'dart:ui' as ui;
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:skygame_2d/game/stage.dart';
-import 'package:skygame_2d/main.dart';
 import 'package:skygame_2d/utils.dart/constants.dart';
 import 'package:skygame_2d/utils.dart/enums.dart';
 
@@ -37,10 +36,9 @@ class GraphicsManager {
   //   }
 
   // Load Texts
-  static TextComponent createEventText(ComponentKey? key) {
+  static TextComponent get createEventText {
     return TextComponent(
       text: '',
-      key: key,
       anchor: Anchor.center,
       textRenderer: TextPaint(
         style: TextStyle(
@@ -130,20 +128,20 @@ class GraphicsManager {
     );
   }
 
-  // static TextComponent get createDamageText {
-  //   return TextComponent(
-  //     scale: Vector2(0, 0),
-  //     anchor: Anchor.center,
-  //     textRenderer: TextPaint(
-  //       style: TextStyle(
-  //           fontWeight: FontWeight.w900,
-  //           inherit: true,
-  //           fontSize: 28,
-  //           color: Colors.red,
-  //           shadows: _stroke(Colors.white, 1)),
-  //     ),
-  //   );
-  // }
+  static TextComponent get createDamageText {
+    return TextComponent(
+      scale: Vector2(0, 0),
+      anchor: Anchor.center,
+      textRenderer: TextPaint(
+        style: TextStyle(
+            fontWeight: FontWeight.w900,
+            inherit: true,
+            fontSize: 28,
+            color: Colors.red,
+            shadows: _stroke(Colors.white, 1)),
+      ),
+    );
+  }
 
   static TextComponent get createChargeText {
     return TextComponent(

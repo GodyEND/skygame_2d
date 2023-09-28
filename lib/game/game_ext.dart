@@ -1,6 +1,6 @@
 import 'package:skygame_2d/game/game.dart';
 
-extension GameManagerExt on GameManager {
+// extension GameManagerExt on GameManager {
   // bool get player1ValidateLoss {
   //   if ((field[MatchPosition.p1Lead] == null ||
   //           field[MatchPosition.p1Lead]!.position == MatchPosition.defeated) &&
@@ -30,4 +30,4 @@ extension GameManagerExt on GameManager {
   //   }
   //   return false;
   // }
-}
+// }

@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flame/components.dart';
-import 'package:flame/layout.dart';
 import 'package:skygame_2d/bloc/combat/bloc.dart';
 import 'package:skygame_2d/bloc/combat/events.dart';
 import 'package:skygame_2d/bloc/combat/listener.dart';
@@ -16,6 +15,7 @@ import 'package:skygame_2d/game_ext/game_combat_ext.dart';
 import 'package:skygame_2d/graphics/graphics.dart';
 import 'package:skygame_2d/models/player.dart';
 import 'package:skygame_2d/scenes/managed_scene.dart';
+import 'package:skygame_2d/scenes/team_builder/team_builder.dart';
 import 'package:skygame_2d/setup.dart';
 import 'package:skygame_2d/utils.dart/constants.dart';
 import 'package:skygame_2d/utils.dart/enums.dart';
@@ -47,6 +47,7 @@ class CombatScene extends ManagedScene {
       stage: stage,
     ));
     managedBloc = combatBloc;
+    SceneManager.scenes.add(this);
     for (var playerBloc in game.playerBlocs) {
       await addToScene(game.keyBlocListener(
           playerBloc.state.keyBloc, playerBloc, combatBloc));
@@ -71,12 +72,9 @@ class CombatScene extends ManagedScene {
     await addToScene(GraphicsManager.createScoreHUDText()
       ..text = '${playerStates[0].points} : ${playerStates[1].points}');
     await addToScene(BrawlQComponent(
-      combatBloc.state.exeQ,
+      List<MatchUnit>.from(combatBloc.state.exeQ),
       key: ComponentKey.named(CombatComponentKey.queue.asKey()),
     ));
-
-    await addToScene(GraphicsManager.createEventText(
-        ComponentKey.named(CombatComponentKey.combatEvent.asKey())));
 
     combatBloc.add(StartCombatEvent());
   }
@@ -85,10 +83,6 @@ class CombatScene extends ManagedScene {
   void update(double dt) {
     super.update(dt);
     gameCombat(dt * Constants.ANI_SPEED);
-
-    //   final queueComp =
-    //       game.findByKeyName<BrawlQComponent>(CombatComponentKey.queue.asKey());
-    //   queueComp?.animatedQ.value = combatBloc.state.exeQ;
 
     // switch (combatBloc.state.combatState) {
     // case SceneState.replace:
@@ -144,14 +138,6 @@ class CombatScene extends ManagedScene {
     //     break;
     // }
   }
-
-  // MatchUnit? attacker;
-  // MatchUnit? defender;
-
-  // Function() renderCombatAnimation(double dt, CombatEventResult event,
-  //         MatchUnit unit, bool isAttacker) =>
-  //     () => AnimationsManager.animateCombat(dt, event, unit,
-  //         isAttacker: isAttacker);
 
   //     break;
   //   case CombatState.release:

@@ -22,6 +22,8 @@ class FireCombatAnimationEvent extends CombatBlocEvent {
   FireCombatAnimationEvent({required this.dt, required this.game});
 }
 
+class CombatAnimationEndEvent extends CombatBlocEvent {}
+
 class UpdateExeQEvent extends CombatBlocEvent {
   late List<MatchUnit> exeQ;
   final List<MatchUnit> units;

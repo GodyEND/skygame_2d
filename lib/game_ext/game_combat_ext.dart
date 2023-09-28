@@ -1,4 +1,6 @@
 import 'package:skygame_2d/bloc/combat/events.dart';
+import 'package:skygame_2d/game/combat_ui/brawl_q.dart';
+import 'package:skygame_2d/game/helper.dart';
 import 'package:skygame_2d/scenes/combat.dart';
 import 'package:skygame_2d/utils.dart/enums.dart';
 
@@ -8,6 +10,14 @@ extension GameCombatExt on CombatScene {
       case CombatState.attack:
         if (combatBloc.state.event is SimulateCombatEvent) {
           combatBloc.add(FireCombatAnimationEvent(dt: dt, game: game));
+        } else if (combatBloc.state.event is UpdateExeQEvent) {
+          final queueComp = game
+              .findByKeyName<BrawlQComponent>(CombatComponentKey.queue.asKey());
+          queueComp?.units = combatBloc.state.allUnits
+              .where((e) => MatchHelper.isFrontrow(e.position))
+              .toList();
+          queueComp?.animatedQ.value = List.from(combatBloc.state.exeQ);
+          combatBloc.add(SetupAttackerEvent());
         }
         break;
       default:

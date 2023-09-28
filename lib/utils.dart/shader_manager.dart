@@ -5,7 +5,7 @@ import 'package:flame/components.dart';
 import 'package:skygame_2d/utils.dart/constants.dart';
 
 class ShaderManager {
-  static Map<String, FragmentProgram> _shaders = {};
+  static final Map<String, FragmentProgram> _shaders = {};
 
   static Future<bool> loadShaders() async {
     try {

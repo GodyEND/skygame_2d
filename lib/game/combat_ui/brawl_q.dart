@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flame/components.dart';
+import 'package:flame/effects.dart';
 import 'package:flame/experimental.dart';
 import 'package:flame/extensions.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,7 @@ import 'package:skygame_2d/game/helper.dart';
 import 'package:skygame_2d/game/unit.dart';
 import 'package:skygame_2d/graphics/graphics.dart';
 import 'package:skygame_2d/utils.dart/constants.dart';
+import 'package:skygame_2d/utils.dart/enums.dart';
 
 class UnitQComponent extends PositionComponent with HasVisibility {
   ValueNotifier<MatchUnit> unit;
@@ -52,32 +54,21 @@ class UnitQComponent extends PositionComponent with HasVisibility {
 
   Future<void> unitChanged() async {
     icon.sprite = Sprite(unit.value.character.profile);
-
+    icon.scale = Vector2(
+        (unit.value.ownerID == Constants.SECOND_PLAYER) ? 1.0 : -1.0, 1.0);
     badge.paint.color =
         MatchHelper.isLeftTeam(unit.value) ? Colors.blue : Colors.red;
-  }
-
-  @override
-  void update(double dt) {
-    super.update(dt);
-
-    final double startPos = index * 80 + 40;
-    final double goal = index * 80 - 40;
-    if (position.x < goal) {
-      position.x = startPos - dt * 26 * Constants.ANI_SPEED;
-    } else {
-      position.x = position.x - dt * 26 * Constants.ANI_SPEED;
-    }
   }
 }
 
 class BrawlQComponent extends PositionComponent {
   final ValueNotifier<List<MatchUnit>> animatedQ;
-  List<MatchUnit> currentQ = [];
+  List<MatchUnit> units = [];
   List<UnitQComponent> iconQ = [];
 
   BrawlQComponent(List<MatchUnit> aniQ, {ComponentKey? key})
       : animatedQ = ValueNotifier(aniQ),
+        units = aniQ,
         super(key: key) {
     add(main);
     add(RectangleComponent(
@@ -121,9 +112,10 @@ class BrawlQComponent extends PositionComponent {
     final List<MatchUnit> result = animatedQ.value
         .where((e) => MatchHelper.isFrontrow(e.position))
         .toList();
-
+    units.sort((a, b) => b.current.stats[StatType.execution]
+        .compareTo(a.current.stats[StatType.execution]));
     while (result.length < 7) {
-      result.addAll(animatedQ.value);
+      result.addAll(units);
     }
     return result;
   }
@@ -133,23 +125,20 @@ class BrawlQComponent extends PositionComponent {
   Future<void> onQueueChange() async {
     var renderedUnits = _getRenderedUnits;
     for (int i = 0; i < renderedUnits.length; i++) {
+      final double startPos = i * 80 + 40;
+      final double goal = i * 80 - 40;
+      final eff =
+          MoveEffect.to(Vector2(goal, 40.0), EffectController(duration: 1));
       if (i < iconQ.length) {
         iconQ[i].unit.value = renderedUnits[i];
+        iconQ[i].position = Vector2(startPos, iconQ[i].position.y);
+        iconQ[i].add(eff);
       } else {
         final newIconComp = UnitQComponent(i, renderedUnits[i]);
         iconQ.add(newIconComp);
         main.add(newIconComp);
+        newIconComp.add(eff);
       }
-    }
-
-    @override
-    void update(double dt) {
-      // TODO: implement update
-      super.update(dt);
-      // Type IconComponent
-      // Type QUnitComponent
-      // exchangable unit profile
-      // update list when animation complete
     }
   }
 }

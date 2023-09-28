@@ -44,7 +44,7 @@ class SkyGame2D extends FlameGame with KeyboardEvents {
   SkyGame2D({Camera? camera}) : super(oldCamera: camera);
 
   @override
-  bool get debugMode => true;
+  bool get debugMode => false;
 
   @override
   Future<void> onLoad() async {

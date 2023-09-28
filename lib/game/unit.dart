@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 import 'package:skygame_2d/game/trackers.dart';
-import 'package:skygame_2d/graphics/unit_animations.dart';
 import 'package:skygame_2d/utils.dart/enums.dart';
 import 'package:skygame_2d/models/match_unit/match_unit_data.dart';
 import 'package:skygame_2d/models/match_unit/unit.dart';

@@ -1,5 +1,4 @@
 import 'package:bloc/bloc.dart';
-import 'package:flame/components.dart';
 import 'package:skygame_2d/bloc/combat/events.dart';
 import 'package:skygame_2d/bloc/combat/state.dart';
 import 'package:skygame_2d/bloc/events.dart';
@@ -7,7 +6,6 @@ import 'package:skygame_2d/game/helper.dart';
 import 'package:skygame_2d/game/simulation.dart';
 import 'package:skygame_2d/game/unit.dart';
 import 'package:skygame_2d/graphics/animations.dart';
-import 'package:skygame_2d/scenes/combat.dart';
 import 'package:skygame_2d/utils.dart/enums.dart';
 
 class CombatBloc extends Bloc<BlocEvent, CombatBlocState> {
@@ -60,25 +58,25 @@ class CombatBloc extends Bloc<BlocEvent, CombatBlocState> {
       (event, emit) {
         state.attacker!.asset.animationListener.value = renderCombatAnimation(
             event.dt, state.combatEvent, state.attacker!, true);
-        state.attacker!.render(event.dt);
         state.defender!.asset.animationListener.value = renderCombatAnimation(
             event.dt, state.combatEvent, state.defender!, false);
-        state.defender!.render(event.dt);
 
         // Prepare Combat Assets
         AnimationsManager.prepareCombat(state.attacker!, state.defender!);
-        AnimationsManager.animateEventText(
-          event.dt,
-          state.combatEvent,
-          event.game.findByKeyName<TextComponent>(
-              CombatComponentKey.combatEvent.asKey())!,
-        );
+        AnimationsManager.animateEventText(event.dt, state.combatEvent);
         emit(state.copyWith());
       },
     );
 
+    on<CombatAnimationEndEvent>((event, emit) =>
+        add(UpdateExeQEvent(units: state.allUnits, oldQ: state.exeQ)));
+
     on<UpdateExeQEvent>((event, emit) {
-      emit(state.copyWith(cExeQ: event.exeQ));
+      int turn = state.turn;
+      if (event.oldQ.length == 1) {
+        turn += 1;
+      }
+      emit(state.copyWith(cExeQ: event.exeQ, cTurn: turn, cEvent: event));
     });
   }
 

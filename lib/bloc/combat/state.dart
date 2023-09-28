@@ -15,7 +15,6 @@ class CombatBlocState extends Equatable {
 // Combat
   final int turn;
   final List<MatchUnit> exeQ;
-  // final ValueNotifier<List<MatchUnit>> prevExeQ;
   final CombatEventResult combatEvent;
   // Management
   final Stage stage;
@@ -29,7 +28,6 @@ class CombatBlocState extends Equatable {
     required this.combatEvent,
     required this.turn,
     required this.exeQ,
-    // required this.prevExeQ,
     this.attacker,
     this.defender,
     required this.stage,
@@ -57,7 +55,6 @@ class CombatBlocState extends Equatable {
       combatEvent: cCombatEvent ?? combatEvent,
       turn: cTurn ?? turn,
       exeQ: cExeQ ?? exeQ,
-      // prevExeQ: prevExeQ,
       attacker: cAttacker ?? ((clearAttacker) ? null : attacker),
       defender: cDefender ?? ((clearDefender) ? null : defender),
       stage: stage,
@@ -73,7 +70,6 @@ class CombatBlocState extends Equatable {
         combatState,
         turn,
         exeQ,
-        // prevExeQ,
         attacker,
         defender,
         stage,
@@ -102,7 +98,6 @@ class InitialCombatBlocState extends CombatBlocState {
           combatState: CombatState.attack,
           combatEvent: CombatEventResult.none,
           exeQ: generateExeQ(players),
-          // prevExeQ: ValueNotifier([]),
           players: players,
           stage: stage,
           field: generateField(players, playerStates),

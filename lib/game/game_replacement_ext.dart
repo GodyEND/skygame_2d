@@ -2,9 +2,9 @@ import 'package:skygame_2d/game/game.dart';
 import 'package:skygame_2d/game/unit.dart';
 import 'package:skygame_2d/utils.dart/enums.dart';
 
-extension GameReplaceState on GameManager {
-  void replaceFrontrow(MatchUnit old, {MatchPosition? inReplacement}) {
-    final fieldPos = old.position;
+// extension GameReplaceState on GameManager {
+//   void replaceFrontrow(MatchUnit old, {MatchPosition? inReplacement}) {
+//     final fieldPos = old.position;
 
     // MatchPosition? replacementPos;
     // if (inReplacement != null) {
@@ -99,9 +99,9 @@ extension GameReplaceState on GameManager {
     //   // state = SceneState.replaceReserve;
     // }
     // _clearReplacementStatus(old.ownerID);
-  }
+  // }
 
-  void _clearReplacementStatus(int ownerID) {
+  // void _clearReplacementStatus(int ownerID) {
     // if (owner == Owner.p1) {
     //   player1.toBeReplaced = null;
     //   player1.confirmedReplacement = null;
@@ -111,9 +111,9 @@ extension GameReplaceState on GameManager {
     //   player2.confirmedReplacement = null;
     //   player2.state = PlayerState.ready;
     // }
-  }
+  // }
 
-  void setReplacement(ownerID) {
+  // void setReplacement(ownerID) {
     // if (state == SceneState.replaceWing) {
     //   final la = GameManager.field(ownerID)[MatchPosition.leftAce];
     //   final ra = GameManager.field(ownerID)[MatchPosition.rightAce];
@@ -137,5 +137,5 @@ extension GameReplaceState on GameManager {
     // } else if (state == SceneState.replaceReserve) {
     //   // TODO:
     // }
-  }
-}
+//   }
+// }

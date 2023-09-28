@@ -4,7 +4,6 @@ import 'package:skygame_2d/scenes/team_builder/bloc/bloc.dart';
 import 'package:skygame_2d/main.dart';
 import 'package:skygame_2d/models/match_unit/unit_team.dart';
 import 'package:skygame_2d/scenes/managed_scene.dart';
-import 'package:skygame_2d/scenes/player_collection.dart';
 import 'package:skygame_2d/scenes/team_builder/team_builder.dart';
 import 'package:skygame_2d/scenes/team_formation/bloc/bloc.dart';
 import 'package:skygame_2d/scenes/team_formation/team_formation_scene.dart';
@@ -18,16 +17,6 @@ extension SceneSetupExt on SkyGame2D {
         await child.clearScene();
         remove(child);
       }
-    }
-  }
-
-  Future<bool> setupPlayerCollection() async {
-    try {
-      await _clearScene();
-      await add(PlayerCollectionScene());
-      return true;
-    } catch (_) {
-      return false;
     }
   }
 

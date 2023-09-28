@@ -15,7 +15,6 @@ extension SkyGame2DBlocListenerExt on SkyGame2D {
         if (state.event is GameSceneChangeEvent) {
           switch (state.sceneState) {
             case SceneState.load:
-              await setupPlayerCollection();
               bloc.add(GameSceneChangeCompleteEvent(
                   nextScene: SceneState.teamBuilder));
               break;

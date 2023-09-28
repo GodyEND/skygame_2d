@@ -3,6 +3,7 @@ import 'package:flame/layout.dart';
 import 'package:flutter/material.dart';
 import 'package:skygame_2d/bloc/key_input/bloc.dart';
 import 'package:skygame_2d/bloc/key_input/listener.dart';
+import 'package:skygame_2d/main.dart';
 import 'package:skygame_2d/scenes/team_builder/bloc/bloc.dart';
 import 'package:skygame_2d/scenes/team_builder/bloc/listener.dart';
 import 'package:skygame_2d/scenes/team_builder/bloc/state.dart';
@@ -16,6 +17,7 @@ import 'package:skygame_2d/utils.dart/enums.dart';
 
 class SceneManager {
   static List<ManagedScene> scenes = [];
+  static SkyGame2D get game => scenes.firstWhere((e) => e.isMounted).game;
 }
 
 class VisibleWrapperComponent extends PositionComponent with HasVisibility {
