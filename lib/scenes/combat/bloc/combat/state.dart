@@ -6,6 +6,8 @@ import 'package:skygame_2d/game/stage.dart';
 import 'package:skygame_2d/game/trackers.dart';
 import 'package:skygame_2d/game/unit.dart';
 import 'package:skygame_2d/models/player.dart';
+import 'package:skygame_2d/scenes/combat/bloc/replace/bloc.dart';
+import 'package:skygame_2d/scenes/combat/bloc/replace/state.dart';
 import 'package:skygame_2d/utils.dart/enums.dart';
 
 class CombatBlocState extends Equatable {
@@ -18,7 +20,9 @@ class CombatBlocState extends Equatable {
   final CombatEventResult combatEvent;
   // Management
   final Stage stage;
+  final List<PlayerBlocState> playerStates;
   final List<Player> players;
+  final List<ReplaceBloc> replaceBlocs;
   final Map<int, Map<MatchPosition, MatchUnit?>> field;
   final List<FXNotation> fxTracker;
   final BlocEvent? event;
@@ -31,7 +35,9 @@ class CombatBlocState extends Equatable {
     this.attacker,
     this.defender,
     required this.stage,
+    required this.playerStates,
     required this.players,
+    required this.replaceBlocs,
     required this.field,
     required this.fxTracker,
     this.event,
@@ -46,8 +52,10 @@ class CombatBlocState extends Equatable {
     bool clearAttacker = false,
     bool clearDefender = false,
     Map<int, Map<MatchPosition, MatchUnit?>>? cField,
+    List<ReplaceBloc>? cReplaceBlocs,
     List<MatchUnit>? cExeQ,
     List<FXNotation>? cFXTracker,
+    List<PlayerBlocState>? cPlayerStates,
     BlocEvent? cEvent,
   }) {
     return CombatBlocState(
@@ -59,7 +67,9 @@ class CombatBlocState extends Equatable {
       defender: cDefender ?? ((clearDefender) ? null : defender),
       stage: stage,
       players: players,
+      playerStates: cPlayerStates ?? playerStates,
       field: cField ?? field,
+      replaceBlocs: cReplaceBlocs ?? replaceBlocs,
       fxTracker: cFXTracker ?? fxTracker,
       event: cEvent,
     );
@@ -74,7 +84,9 @@ class CombatBlocState extends Equatable {
         defender,
         stage,
         players,
+        playerStates,
         field,
+        replaceBlocs,
         fxTracker,
         event,
       ];
@@ -93,14 +105,24 @@ class InitialCombatBlocState extends CombatBlocState {
     required List<Player> players,
     required List<PlayerBlocState> playerStates,
     required Stage stage,
+    required Map<int, Map<MatchPosition, MatchUnit?>> field,
   }) : super(
           turn: 1,
           combatState: CombatState.attack,
           combatEvent: CombatEventResult.none,
           exeQ: generateExeQ(players),
           players: players,
+          playerStates: playerStates,
+          field: field,
+          replaceBlocs: [
+            ReplaceBloc(
+                initialState: InitiateReplacementBlocState(
+                    players[0].ownerID, field[players[0].ownerID]!, const [])),
+            ReplaceBloc(
+                initialState: InitiateReplacementBlocState(
+                    players[1].ownerID, field[players[1].ownerID]!, const [])),
+          ],
           stage: stage,
-          field: generateField(players, playerStates),
           fxTracker: const [],
         );
 }

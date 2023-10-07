@@ -24,6 +24,12 @@ class FireCombatAnimationEvent extends CombatBlocEvent {
 
 class CombatAnimationEndEvent extends CombatBlocEvent {}
 
+class UpdateScoreEvent extends CombatBlocEvent {
+  final int winningPlayerID;
+  final MatchPosition defeatedPos;
+  UpdateScoreEvent(this.winningPlayerID, this.defeatedPos);
+}
+
 class UpdateExeQEvent extends CombatBlocEvent {
   late List<MatchUnit> exeQ;
   final List<MatchUnit> units;

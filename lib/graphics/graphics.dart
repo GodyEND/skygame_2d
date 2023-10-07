@@ -85,8 +85,9 @@ class GraphicsManager {
     );
   }
 
-  static TextComponent createScoreHUDText() {
+  static TextComponent createScoreHUDText({ComponentKey? key}) {
     return TextComponent(
+      key: key,
       anchor: Anchor.center,
       priority: Constants.HUD_TEXT_PRIORITY,
       position: Vector2(Constants.SCREEN_CENTER.x, 100),

@@ -40,7 +40,8 @@ class MatchUnit extends Equatable {
     required this.position,
   })  : incomingDamage = 0,
         incomingCharge = 0,
-        current = MatchUnitData(character: character),
+        current = MatchUnitData(character: character)
+          ..stats.values[StatType.storage] = 0,
         initial = MatchUnitData(character: character),
         baseStats = character.stats,
         super();

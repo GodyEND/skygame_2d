@@ -1,5 +1,5 @@
 import 'package:skygame_2d/abilities/event.dart';
-import 'package:skygame_2d/bloc/combat/state.dart';
+import 'package:skygame_2d/scenes/combat/bloc/combat/state.dart';
 import 'package:skygame_2d/game/helper.dart';
 import 'package:skygame_2d/game/unit.dart';
 import 'package:skygame_2d/game/trackers.dart';

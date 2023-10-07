@@ -1,5 +1,5 @@
 import 'package:flame/components.dart';
-import 'package:skygame_2d/scenes/combat.dart';
+import 'package:skygame_2d/scenes/combat/combat.dart';
 import 'package:skygame_2d/scenes/team_builder/bloc/bloc.dart';
 import 'package:skygame_2d/main.dart';
 import 'package:skygame_2d/models/match_unit/unit_team.dart';

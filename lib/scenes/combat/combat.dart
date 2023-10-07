@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:flame/components.dart';
-import 'package:skygame_2d/bloc/combat/bloc.dart';
-import 'package:skygame_2d/bloc/combat/events.dart';
-import 'package:skygame_2d/bloc/combat/listener.dart';
-import 'package:skygame_2d/bloc/combat/state.dart';
+import 'package:skygame_2d/scenes/combat/bloc/combat/bloc.dart';
+import 'package:skygame_2d/scenes/combat/bloc/combat/events.dart';
+import 'package:skygame_2d/scenes/combat/bloc/combat/listener.dart';
+import 'package:skygame_2d/scenes/combat/bloc/combat/state.dart';
 import 'package:skygame_2d/bloc/key_input/listener.dart';
 import 'package:skygame_2d/bloc/player/state.dart';
 import 'package:skygame_2d/game/combat_ui/brawl_q.dart';
@@ -22,7 +22,9 @@ import 'package:skygame_2d/utils.dart/enums.dart';
 
 enum CombatComponentKey {
   queue,
+  score,
   stage,
+  replace,
   combatEvent;
 
   String asKey() {
@@ -40,11 +42,14 @@ class CombatScene extends ManagedScene {
     final stage = Stage('Arcanelle', Sprites.gMaps[0]);
     playerStates =
         game.playerBlocs.map<PlayerBlocState>((e) => e.state).toList();
+    final players =
+        game.playerBlocs.map<Player>((e) => e.state.player).toList();
     combatBloc = CombatBloc(
         initialState: InitialCombatBlocState(
-      players: game.playerBlocs.map<Player>((e) => e.state.player).toList(),
+      players: players,
       playerStates: playerStates,
       stage: stage,
+      field: generateField(players, playerStates),
     ));
     managedBloc = combatBloc;
     SceneManager.scenes.add(this);
@@ -52,7 +57,7 @@ class CombatScene extends ManagedScene {
       await addToScene(game.keyBlocListener(
           playerBloc.state.keyBloc, playerBloc, combatBloc));
     }
-    await addToScene(combatBlocListener(game.bloc, combatBloc));
+    await addToScene(combatBlocListener(this, combatBloc));
 
     // Stage
     await addToScene(GraphicsManager.createStage(stage.bg));
@@ -69,7 +74,8 @@ class CombatScene extends ManagedScene {
       }
     }
 
-    await addToScene(GraphicsManager.createScoreHUDText()
+    await addToScene(GraphicsManager.createScoreHUDText(
+        key: ComponentKey.named(CombatComponentKey.score.asKey()))
       ..text = '${playerStates[0].points} : ${playerStates[1].points}');
     await addToScene(BrawlQComponent(
       List<MatchUnit>.from(combatBloc.state.exeQ),

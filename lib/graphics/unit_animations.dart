@@ -3,12 +3,12 @@ import 'dart:math';
 import 'package:flame/effects.dart';
 import 'package:flame/game.dart';
 import 'package:flame/geometry.dart';
-import 'package:skygame_2d/bloc/combat/events.dart';
+import 'package:skygame_2d/scenes/combat/bloc/combat/events.dart';
 import 'package:skygame_2d/game/helper.dart';
 import 'package:skygame_2d/graphics/animations.dart';
 import 'package:skygame_2d/models/match_unit/unit_assets.dart';
 import 'package:skygame_2d/game/stage.dart';
-import 'package:skygame_2d/scenes/combat.dart';
+import 'package:skygame_2d/scenes/combat/combat.dart';
 import 'package:skygame_2d/scenes/team_builder/team_builder.dart';
 import 'package:skygame_2d/utils.dart/enums.dart';
 
@@ -364,8 +364,9 @@ extension UnitAssetsAnimationExt on MatchUnitAssets {
             offset: Vector2(MatchHelper.isLeftTeam(parent) ? -30 : 30, 0));
         break;
       case UnitAniState.dodgeStart:
-        _dodgeStart(dt, UnitAniState.dodgeEnd);
+        AnimationsManager.animateEventText(dt, CombatEventResult.dodge);
 
+        _dodgeStart(dt, UnitAniState.dodgeEnd);
         break;
       case UnitAniState.dodgeEnd:
         _dodgeEnd(dt);
@@ -392,6 +393,8 @@ extension UnitAssetsAnimationExt on MatchUnitAssets {
 
         break;
       case UnitAniState.block:
+        AnimationsManager.animateEventText(dt, CombatEventResult.block);
+
         _block(dt);
         break;
       case UnitAniState.exitChallenge:
@@ -416,6 +419,8 @@ extension UnitAssetsAnimationExt on MatchUnitAssets {
 
         break;
       case UnitAniState.hit:
+        AnimationsManager.animateEventText(dt, CombatEventResult.hit);
+
         _hit(dt);
         break;
       case UnitAniState.exitChallenge:
@@ -443,6 +448,8 @@ extension UnitAssetsAnimationExt on MatchUnitAssets {
         _critStart(dt);
         break;
       case UnitAniState.critEnd:
+        AnimationsManager.animateEventText(dt, CombatEventResult.crit);
+
         _critEnd(dt);
         break;
       case UnitAniState.exitChallenge:
@@ -490,12 +497,12 @@ extension UnitAssetsAnimationExt on MatchUnitAssets {
         break;
       case UnitAniState.challenge:
         _challenge(dt, UnitAniState.attack);
-
         break;
       case UnitAniState.attack:
         _missedAttack(dt);
         break;
       case UnitAniState.counteredAttack:
+        AnimationsManager.animateEventText(dt, CombatEventResult.counter);
         _counteredAttack(dt);
         break;
       case UnitAniState.exitChallenge:
@@ -526,6 +533,7 @@ extension UnitAssetsAnimationExt on MatchUnitAssets {
         _exitChallenge(dt);
         break;
       case UnitAniState.exitCombat:
+        AnimationsManager.animateEventText(dt, CombatEventResult.lethal);
         _exitCombat(parent.position);
         break;
       default:
@@ -544,6 +552,8 @@ extension UnitAssetsAnimationExt on MatchUnitAssets {
 
         break;
       case UnitAniState.staggeredAttack:
+        AnimationsManager.animateEventText(dt, CombatEventResult.stagger);
+
         _staggeredAttack(dt);
         break;
       case UnitAniState.exitChallenge:
@@ -568,6 +578,8 @@ extension UnitAssetsAnimationExt on MatchUnitAssets {
 
         break;
       case UnitAniState.knockback:
+        AnimationsManager.animateEventText(dt, CombatEventResult.overwhelm);
+
         _knockback(dt);
 
         break;

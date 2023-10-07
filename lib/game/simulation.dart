@@ -1,5 +1,5 @@
 import 'dart:math';
-import 'package:skygame_2d/bloc/combat/state.dart';
+import 'package:skygame_2d/scenes/combat/bloc/combat/state.dart';
 import 'package:skygame_2d/game/unit.dart';
 import 'package:skygame_2d/utils.dart/enums.dart';
 import 'package:skygame_2d/utils.dart/constants.dart';

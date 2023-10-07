@@ -1,4 +1,4 @@
-import 'package:skygame_2d/bloc/combat/state.dart';
+import 'package:skygame_2d/scenes/combat/bloc/combat/state.dart';
 import 'package:skygame_2d/game/unit.dart';
 import 'package:skygame_2d/utils.dart/constants.dart';
 import 'package:skygame_2d/utils.dart/enums.dart';
@@ -27,7 +27,8 @@ class MatchHelper {
       currentTarget = field[opponentID]?[newTargetPos];
       attacker.target = newTargetPos;
     }
-    return currentTarget!;
+
+    return currentTarget ?? field[opponentID]![MatchPosition.lead]!;
   }
 
   static List<MatchPosition> getLinkRef(MatchPosition position) {
@@ -57,6 +58,19 @@ class MatchHelper {
         type == MatchPosition.rightAce ||
         type == MatchPosition.leftLink ||
         type == MatchPosition.rightLink);
+  }
+
+  static bool hasReserve(Map<MatchPosition, MatchUnit?> map) {
+    bool hasReserve = false;
+    for (var unit in map.values.toList()) {
+      if (unit == null) continue;
+      if (!MatchHelper.isField(unit.position) &&
+          unit.position != MatchPosition.defeated) {
+        hasReserve = true;
+        break;
+      }
+    }
+    return hasReserve;
   }
 
   static int getOpponent(int ownerID) {

@@ -1,7 +1,6 @@
-import 'package:skygame_2d/bloc/combat/events.dart';
-import 'package:skygame_2d/game/combat_ui/brawl_q.dart';
-import 'package:skygame_2d/game/helper.dart';
-import 'package:skygame_2d/scenes/combat.dart';
+import 'package:skygame_2d/scenes/combat/bloc/combat/events.dart';
+import 'package:skygame_2d/scenes/combat/bloc/replace/state.dart';
+import 'package:skygame_2d/scenes/combat/combat.dart';
 import 'package:skygame_2d/utils.dart/enums.dart';
 
 extension GameCombatExt on CombatScene {
@@ -10,57 +9,27 @@ extension GameCombatExt on CombatScene {
       case CombatState.attack:
         if (combatBloc.state.event is SimulateCombatEvent) {
           combatBloc.add(FireCombatAnimationEvent(dt: dt, game: game));
-        } else if (combatBloc.state.event is UpdateExeQEvent) {
-          final queueComp = game
-              .findByKeyName<BrawlQComponent>(CombatComponentKey.queue.asKey());
-          queueComp?.units = combatBloc.state.allUnits
-              .where((e) => MatchHelper.isFrontrow(e.position))
-              .toList();
-          queueComp?.animatedQ.value = List.from(combatBloc.state.exeQ);
-          combatBloc.add(SetupAttackerEvent());
+        }
+        break;
+      case CombatState.replace:
+        // Validate return to combat
+        final p1ReplaceState = combatBloc.state.replaceBlocs[0].state;
+        final p2ReplaceState = combatBloc.state.replaceBlocs[1].state;
+        if (p1ReplaceState.event is ValidateReadyReplaceBlocState ||
+            p2ReplaceState.event is ValidateReadyReplaceBlocState) {
+          if (p1ReplaceState.viewState == PlayerState.ready &&
+              p2ReplaceState.viewState == PlayerState.ready) {
+            combatBloc.add(SetupAttackerEvent());
+          }
         }
         break;
       default:
         break;
 
-      // if (combatBloc.state.attacker == null && defender == null) {
-      //   combatBloc.state.attacker = combatBloc.state.active;
-      //   combatBloc.state.defender = MatchHelper.getTarget(game, combatBloc.state.attacker!);
-
       //   // Validate Wining Condition
       //   if (game.player1ValidateLoss || game.player2ValidateLoss) {
       //     return;
       //   }
-
-      //   AnimationsManager.animateEventText(dt, combatBloc.state.currentEvent);
-
-      //   // Fire Combat Animation
-      //   if (attacker!.position != MatchPosition.defeated &&
-      //       defender!.position != MatchPosition.defeated) {
-      //     attacker!.asset.animationListener.value =
-      //         renderCombatAnimation(dt, game.currentEvent, attacker!, true);
-      //     defender!.asset.animationListener.value =
-      //         renderCombatAnimation(dt, game.currentEvent, defender!, false);
-      //     // Prepare Combat Assets
-      //     AnimationsManager.prepareCombat(attacker!, defender!);
-      //   }
     }
-
-    // Render Stage
-    // for (var unit in game.units) {
-    //   unit.render(dt);
-    // }
-
-    // if ((attacker!.asset.animationState.value == UnitAniState.none ||
-    //         attacker!.asset.animationState.value == UnitAniState.idle) &&
-    //     (defender!.asset.animationState.value == UnitAniState.none ||
-    //         defender!.asset.animationState.value == UnitAniState.idle)) {
-    //   attacker = null;
-    //   defender = null;
-    //   game.updateField(dt);
-
-    //   game.updateActive;
-    //   game.cleanup(dt);
-    // }
   }
 }
