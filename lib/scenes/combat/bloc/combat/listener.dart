@@ -12,13 +12,13 @@ import 'package:skygame_2d/utils.dart/enums.dart';
 FlameBlocListener combatBlocListener(CombatScene scene, CombatBloc combatBloc) {
   return FlameBlocListener<CombatBloc, CombatBlocState>(
     onNewState: (state) {
-      final replaceScene = scene.game
-          .findByKeyName<ReplaceScene>(CombatComponentKey.replace.asKey())!;
-      replaceScene.isVisible = false;
+      // final replaceScene = scene.game
+      //     .findByKeyName<ReplaceScene>(CombatComponentKey.replace.asKey())!;
+      // replaceScene.isVisible = false;
 
       switch (state.combatState) {
         case CombatState.replace:
-          replaceScene.isVisible = true;
+          // replaceScene.isVisible = true;
           break;
         case CombatState.attack:
           if (state.event is UpdateExeQEvent) {
